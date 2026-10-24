@@ -4,6 +4,17 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.24.1
+
+### Changed
+
+- Simplified the README and Chinese guide to template selection, editing, and compilation, with a direct Codex request and two essential commands.
+- Moved detailed usage and troubleshooting to an optional reference; build behavior is unchanged.
+
+### Validation
+
+- Checked documentation links, date-version output, and the public-code export audit.
+
 ## 2026.10.24
 
 ### Added
