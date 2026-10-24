@@ -1,0 +1,96 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.55cm]{geometry}
+\usepackage{fontspec}
+<<FONT_SETUP>>
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{array}
+
+\definecolor{accent}{RGB}{35,73,108}
+\definecolor{rulegray}{RGB}{185,194,203}
+\definecolor{textgray}{RGB}{72,72,72}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  urlcolor=accent,
+  pdftitle={<<REPORT_TITLE>>},
+  pdfsubject={Academic peer-review report}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.18}
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{15pt}
+\fancyhead[L]{\small\textit{<<JOURNAL_SHORT>>}}
+\fancyhead[R]{\small\color{textgray}<<DOCUMENT_MARK>>}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.28pt}
+
+\newcommand{\reporttitle}[1]{%
+  {\sffamily\LARGE\bfseries #1}%
+}
+
+\newcommand{\metalabel}[1]{%
+  {\bfseries #1}%
+}
+
+\newcommand{\reportsection}[1]{%
+  \vspace{1.15em}%
+  \noindent{\sffamily\Large\bfseries\color{accent}#1}\par
+  \vspace{0.18em}{\color{rulegray}\hrule height 0.35pt}\vspace{0.55em}%
+}
+
+\newcommand{\reviewpointheading}[2]{%
+  \vspace{0.55em}%
+  \noindent{\bfseries #1. #2}\par
+}
+
+\newenvironment{reviewpointbody}{%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{1.8em}%
+    \setlength{\rightmargin}{0pt}%
+    \setlength{\topsep}{0.15em}%
+    \setlength{\partopsep}{0pt}%
+    \setlength{\itemsep}{0pt}%
+    \setlength{\parsep}{0.35em}%
+  }%
+  \item[]%
+}{\end{list}}
+
+\newcommand{\reviewplainpoint}[2]{%
+  \vspace{0.38em}%
+  \noindent{\bfseries #1.} #2\par
+}
+
+\newcolumntype{R}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+
+\begin{center}
+  \reporttitle{<<REPORT_TITLE>>}
+\end{center}
+
+\vspace{0.4em}
+\noindent\begin{tabularx}{\linewidth}{@{}p{0.24\linewidth}R@{}}
+\metalabel{Review ID} & <<REVIEW_ID>> \\
+\metalabel{Paper Title} & \textit{<<TITLE>>} \\
+\metalabel{Decision} & \textbf{\color{accent}<<DECISION>>} \\
+\metalabel{Date} & <<DATE>> \\
+\end{tabularx}
+
+\vspace{0.8em}
+{\color{rulegray}\hrule}
+
+<<BODY_SECTIONS>>
+
+\end{document}

@@ -1,0 +1,137 @@
+% Original Prism starter using the official Springer Nature class.
+% Initial draft; see Prism docs/guide.zh-CN.md for scope and final-file requirements.
+% The official class and bibliography style are imported during initialization.
+\documentclass[pdflatex,sn-nature]{sn-jnl}
+\usepackage{graphicx,amsmath,amssymb,amsfonts,booktabs,array,tabularx,siunitx}
+\sisetup{uncertainty-mode=separate}
+
+\begin{document}
+\title[Short manuscript title]{Manuscript title}
+\author*[1]{\fnm{First} \sur{Author}}\email{first.author@example.org}
+\author[1,2]{\fnm{Second} \sur{Author}}
+\affil*[1]{\orgdiv{Department},\orgname{First institution},
+  \orgaddress{\city{City},\country{Country}}}
+\affil[2]{\orgdiv{Department},\orgname{Second institution},
+  \orgaddress{\city{City},\country{Country}}}
+\abstract{Replace this paragraph with an unreferenced abstract describing
+the research problem, approach, verified findings and their implications.
+For a Nature Machine Intelligence Article, the current guidance allows up
+to 150 words. All examples in this starter demonstrate typesetting only;
+they are not scientific results.}
+\maketitle
+
+% NMI Articles begin with introductory text without an Introduction heading.
+Replace this introductory text with the context, unresolved question and
+specific contribution of the study. Explain the problem for readers outside
+the immediate field. The citation below tests bibliography mechanics only;
+retain it only if it is relevant to the manuscript\cite{wilkinson2016fair}.
+
+This is a working manuscript, using the official Nature reference style.
+It does not reproduce the published journal's final layout. Replace every
+instructional statement, synthetic number and graphic slot before submission.
+
+\section{Results}\label{sec:results}
+\subsection{Primary comparison}
+State the verified primary result and connect it to the evidence needed to
+assess it. Figure~\ref{fig:comparison} illustrates related panels under one
+legend; Table~\ref{tab:comparison} illustrates uncertainty alignment.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\raggedright\textbf{a}\par\smallskip
+\fbox{\parbox[c][35mm][c]{0.90\linewidth}{\centering
+Overview graphic\\[5pt]Replace with a PDF or PNG}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\raggedright\textbf{b}\par\smallskip
+\fbox{\parbox[c][35mm][c]{0.90\linewidth}{\centering
+Comparison graphic\\[5pt]Use matching label sizes}}
+\end{minipage}
+\caption{\textbf{Two related panels in a single figure.} \textbf{a}, Describe
+the overview. \textbf{b}, Describe the comparison. Define the actual sample
+sizes, units, symbols and error bars from the study. The boxes are synthetic
+layout slots; no scientific conclusion is represented.}
+\label{fig:comparison}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Synthetic numerical examples for table layout only.}
+\label{tab:comparison}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+  S[table-format=3.0] S[table-format=1.3(3)]@{}}
+\toprule
+Setting & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 120 & 0.385 +- 0.006\\
+Example B & 98 & 0.608 +- 0.051\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. State the actual meaning of the estimate and its
+uncertainty when replacing the cells. Do not infer a scientific claim from
+this formatting example.
+\end{table}
+
+\subsection{Additional analysis}
+Present secondary analyses and validation in the order needed to assess the
+main finding. Use topical subheadings. Keep main display items focused and
+move detailed supporting material to the independent supplementary document.
+
+\section{Discussion}\label{sec:discussion}
+Interpret the verified findings, their relation to prior work, limitations
+and implications. For NMI Articles, the Discussion does not use subheadings.
+Distinguish evidence from speculation and avoid repeating the Results.
+
+\section{Methods}\label{sec:methods}
+\subsection{Study design}
+Describe materials, data sources, inclusion rules, controls and versions.
+Include the relevant ethical or reporting details supplied by the authors.
+
+\subsection{Mathematical formulation}
+Define each variable and its units before use. Equations~\eqref{eq:objective}
+and~\eqref{eq:activation} illustrate grouped notation; replace them with the
+study's justified equations or remove them.
+\begin{subequations}\label{eq:model}
+\begin{align}
+  \mathcal{L}(\theta)&=\frac{1}{n}\sum_{i=1}^{n}
+    \ell\bigl(f_\theta(x_i),y_i\bigr)+\lambda\lVert\theta\rVert_2^2,
+    \label{eq:objective}\\
+  h(z)&=\begin{cases}z,&z\geq0,\\\alpha z,&z<0.\end{cases}
+    \label{eq:activation}
+\end{align}
+\end{subequations}
+These are notation examples, not assumptions or conclusions about a real
+study. Refer to a numbered expression using \verb|\eqref{eq:objective}|.
+
+\subsection{Validation and statistical analysis}
+Describe the unit of analysis, exact sample counts, independent repetitions,
+uncertainty measures and validation procedures. Report statistical tests and
+their assumptions only where they were actually used.
+
+\section*{Data availability}
+Replace with an accurate statement of where the study's data can be accessed,
+including stable identifiers and any access restrictions.
+
+\section*{Code availability}
+Replace with an accurate statement of code availability, versions and access
+conditions. Do not publish private code or credentials through this template.
+
+\section*{Acknowledgements}
+Replace with confirmed acknowledgements, or remove if not applicable.
+
+\section*{Author contributions}
+Replace with the actual contributions agreed by all authors.
+
+\section*{Funding}
+Replace with confirmed funding sources and grant identifiers, or the accurate
+statement appropriate to the work.
+
+\section*{Competing interests}
+Replace with the authors' confirmed competing-interest statement.
+
+% The sn-nature class option already selects \bibliographystyle{sn-nature}.
+\bibliography{references}
+\end{document}

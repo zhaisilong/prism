@@ -1,0 +1,92 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.45cm]{geometry}
+\usepackage{fontspec}
+<<FONT_SETUP>>
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\definecolor{noteaccent}{RGB}{38,78,112}
+\definecolor{noterule}{RGB}{190,198,207}
+\definecolor{notemuted}{RGB}{88,94,102}
+\definecolor{notecode}{RGB}{246,248,250}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=noteaccent,
+  urlcolor=noteaccent,
+  citecolor=noteaccent,
+  pdftitle={<<PDF_TITLE>>}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.18}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\codepath}[1]{\begingroup\normalfont #1\endgroup}
+\newcommand{\noteheadingfont}{\sffamily}
+\urlstyle{same}
+
+\renewenvironment{quote}{%
+  \list{}{\setlength{\leftmargin}{1.25em}\setlength{\rightmargin}{0.4em}}%
+  \item\relax\color{notemuted}\itshape
+}{\endlist}
+
+\pagestyle{plain}
+
+\providecommand{\autocite}[1]{\textsuperscript{[#1]}}
+\providecommand{\parencite}[1]{\textsuperscript{[#1]}}
+\providecommand{\textcite}[1]{#1}
+
+\newcommand{\notetitle}[1]{%
+  {\noteheadingfont\Large\bfseries #1}\par
+}
+
+\newcommand{\notemeta}[1]{%
+  {\small\color{notemuted}#1}\par
+}
+
+\newcommand{\noteruleline}{%
+  \vspace{0.4em}{\color{noterule}\hrule height 0.35pt}\vspace{0.7em}
+}
+
+\newcommand{\tightsection}[1]{%
+  \par\vspace{1.15em}
+  {\noteheadingfont\large\bfseries\color{noteaccent}#1}\par
+  \vspace{0.18em}{\color{noterule}\hrule height 0.28pt}\vspace{0.55em}
+}
+
+\newcommand{\tightsubsection}[1]{%
+  \par\vspace{0.9em}
+  {\noteheadingfont\normalsize\bfseries #1}\par
+  \vspace{0.08em}
+}
+
+\newcommand{\tightsubsubsection}[1]{%
+  \par\vspace{0.6em}
+  {\noteheadingfont\normalsize\bfseries\color{notemuted}#1}\par
+  \vspace{0.04em}
+}
+
+\begin{document}
+
+\begin{center}
+  \notetitle{<<TITLE>>}
+  \notemeta{<<META>>}
+\end{center}
+
+\noteruleline
+
+<<BODY>>
+
+\end{document}

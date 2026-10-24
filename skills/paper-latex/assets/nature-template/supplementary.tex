@@ -1,0 +1,124 @@
+% Independent supplement: --main supplementary.tex --no-build-script.
+\documentclass[pdflatex,sn-nature]{sn-jnl}
+\usepackage{graphicx,amsmath,amssymb,amsfonts,booktabs,array,tabularx,siunitx,longtable}
+\sisetup{uncertainty-mode=separate}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\begin{document}
+\title[Supplementary information]{Supplementary information: Manuscript title}
+\author*[1]{\fnm{First} \sur{Author}}\email{first.author@example.org}
+\author[1]{\fnm{Second} \sur{Author}}
+\affil*[1]{\orgdiv{Department},\orgname{Institution},
+  \orgaddress{\city{City},\country{Country}}}
+\abstract{Replace this instructional summary with an overview of the
+supplement, or remove it if the journal's current instructions require a
+different opening. This document is independent of the main manuscript.}
+\maketitle
+
+\section{Supplementary methods}
+Describe supporting details and derivations. All figures, tables and equations
+in this document have independent S numbering. The example expression
+in equation~\eqref{eq:si-residual} illustrates numbering only.
+\begin{equation}
+\begin{split}
+ r_i&=y_i-\widehat y_i,\\
+ E&=\frac{1}{n}\sum_{i=1}^{n}r_i^2.
+\end{split}\label{eq:si-residual}
+\end{equation}
+
+\section{Supplementary figures}
+Figure~\ref{fig:si-slot} demonstrates a separately cited supporting figure.
+Use a descriptive title and explain the actual symbols and uncertainties.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][55mm][c]{0.85\linewidth}{\centering
+Supplementary figure slot\\[8pt]
+Replace with an original PDF or PNG.}}
+\caption{\textbf{Supporting graphic.} Replace this legend with a description
+of the study's actual figure. The box is a layout example and represents no
+data. A supplementary figure and its legend should fit on a single page.}
+\label{fig:si-slot}
+\end{figure}
+\clearpage
+
+\section{Supplementary tables}
+Table~\ref{tab:si-numeric} demonstrates compact numerical columns.
+Table~\ref{tab:si-long} demonstrates repeated headings for a table too long
+for one page. Retain only the environments needed by the study.
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic entries used only to illustrate numerical alignment.}
+\label{tab:si-numeric}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+  S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Setting & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Replace them with verified study results and define
+the actual measure of uncertainty.
+\end{table}
+\clearpage
+
+\small
+\begin{longtable}{@{}p{0.15\linewidth}p{0.29\linewidth}p{0.46\linewidth}@{}}
+\caption{Synthetic supporting inventory to demonstrate continuation.}
+\label{tab:si-long}\\
+\toprule Item & Setting & Explanation\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Setting & Explanation\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+S01 & Identifier & Record the stable identifier of a supporting input.\\
+S02 & Version & Record the exact version used in the study.\\
+S03 & Origin & Describe the provenance of the supporting material.\\
+S04 & Units & Define the measurement units used by the source.\\
+S05 & Inclusion & Describe the rule used to select source records.\\
+S06 & Exclusion & Describe the rule used to exclude source records.\\
+S07 & Partition & Explain separation of development and evaluation material.\\
+S08 & Transform & Describe preprocessing without changing the original data.\\
+S09 & Scaling & Define any scaling or normalisation reference.\\
+S10 & Parameters & Record the numerical analysis settings.\\
+S11 & Seed & Record the random seed where one is relevant.\\
+S12 & Repetition & Define what counts as an independent repetition.\\
+S13 & Counts & Report the exact sample count for each analysis.\\
+S14 & Variability & Define the variability shown by the data.\\
+S15 & Uncertainty & Define the uncertainty measure and its calculation.\\
+S16 & Interval & State the interpretation of any reported interval.\\
+S17 & Comparison & Identify the reference condition for a comparison.\\
+S18 & Controls & Describe the controls supporting interpretation.\\
+S19 & Validation & Describe independent checks supplied by the study.\\
+S20 & Sensitivity & Explain a sensitivity analysis where it was performed.\\
+S21 & Software & Record software versions and relevant options.\\
+S22 & Environment & Describe relevant computational environment details.\\
+S23 & Precision & Preserve the justified source precision in displayed values.\\
+S24 & Rounding & Explain any rounding applied for presentation.\\
+S25 & Aggregation & Describe how observations were combined.\\
+S26 & Dependence & Identify repeated observations sharing a common source.\\
+S27 & Labels & Check labels at the intended final figure dimensions.\\
+S28 & Figure source & Retain plotting code and editable original graphics.\\
+S29 & Table source & Link displayed values to verified analysis outputs.\\
+S30 & Symbols & Define mathematical variables and dimensions.\\
+S31 & Assumptions & State assumptions needed to use a derivation.\\
+S32 & References & Check the supplementary bibliography independently.\\
+S33 & Availability & Describe an accurate access route and restrictions.\\
+S34 & Limitations & State limitations supported by the actual study design.\\
+\end{longtable}
+\normalsize
+
+\section{Supplementary references}
+The citation here tests this document's independent bibliography
+\cite{wilkinson2016fair}; it is not evidence for the synthetic examples.
+\bibliography{references}
+\end{document}

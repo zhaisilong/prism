@@ -1,0 +1,103 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{prism-paper}[2026/10/09 Prism manuscript typography]
+
+\RequirePackage{iftex}
+\RequirePackage{fontspec}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{unicode-math}
+\setmainfont{texgyretermes-regular.otf}[BoldFont=texgyretermes-bold.otf,ItalicFont=texgyretermes-italic.otf,BoldItalicFont=texgyretermes-bolditalic.otf]
+\setsansfont{texgyreheros-regular.otf}[BoldFont=texgyreheros-bold.otf,ItalicFont=texgyreheros-italic.otf,BoldItalicFont=texgyreheros-bolditalic.otf]
+\setmonofont{texgyrecursor-regular.otf}[BoldFont=texgyrecursor-bold.otf,ItalicFont=texgyrecursor-italic.otf,BoldItalicFont=texgyrecursor-bolditalic.otf,Scale=MatchLowercase]
+\setmathfont{texgyretermes-math.otf}
+\ifXeTeX
+  \RequirePackage{xeCJK}
+  \setCJKmainfont{FandolSong-Regular.otf}[BoldFont=FandolSong-Bold.otf]
+  \setCJKsansfont{FandolHei-Regular.otf}[BoldFont=FandolHei-Bold.otf]
+  \setCJKmonofont{FandolFang-Regular.otf}
+  \XeTeXlinebreaklocale "zh"
+  \XeTeXlinebreakskip=0pt plus 1pt
+\else\ifLuaTeX
+  \RequirePackage[match]{luatexja-fontspec}
+  \setmainjfont{FandolSong-Regular.otf}[BoldFont=FandolSong-Bold.otf]
+  \setsansjfont{FandolHei-Regular.otf}[BoldFont=FandolHei-Bold.otf]
+  \setmonojfont{FandolFang-Regular.otf}
+\fi\fi
+
+\RequirePackage{microtype}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage{array}
+\RequirePackage{tabularx}
+\RequirePackage{longtable}
+\RequirePackage{ragged2e}
+\RequirePackage{etoolbox}
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+\RequirePackage{siunitx}
+\RequirePackage{xurl}
+
+\definecolor{paperblue}{RGB}{34,74,110}
+\definecolor{paperrule}{RGB}{190,198,207}
+\linespread{1.10}
+\setlength{\emergencystretch}{2em}
+\clubpenalty=8000
+\widowpenalty=8000
+\displaywidowpenalty=8000
+
+% Caption leading is explicit: a draft's body linespread cannot inflate it.
+\DeclareCaptionFont{prismcaption}{\linespread{1}\fontsize{9.5}{12.5}\selectfont}
+\captionsetup{font={prismcaption,sf},labelfont=bf,labelsep=period,
+  justification=justified,singlelinecheck=false,skip=7pt}
+\captionsetup[table]{position=top}
+\captionsetup[figure]{position=bottom}
+\captionsetup[subfigure]{font={prismcaption,sf},labelfont=bf,
+  justification=raggedright,singlelinecheck=false,skip=4pt}
+
+% Text columns wrap; siunitx S columns align numeric values without scaling.
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\newcolumntype{P}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcommand{\paperTableStyle}{%
+  \linespread{1}\sffamily\fontsize{9.5}{12}\selectfont
+  \renewcommand{\arraystretch}{1.16}%
+  \setlength{\tabcolsep}{4.5pt}%
+}
+% Floats reset the font after the environment's begin hook; apply ours last.
+\AtBeginEnvironment{table}{\appto\@floatboxreset{\paperTableStyle}}
+\AtBeginEnvironment{table*}{\appto\@floatboxreset{\paperTableStyle}}
+\AtBeginEnvironment{longtable}{\paperTableStyle}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt plus 1fill}
+\sisetup{detect-all,group-separator={\,},group-minimum-digits=5,
+  table-number-alignment=center,table-text-alignment=center,
+  uncertainty-mode=separate}
+\newcommand{\paperTableHead}[1]{\textbf{#1}}
+\newcommand{\paperTableNote}[1]{%
+  \par\vspace{4pt}\begingroup
+  \linespread{1}\sffamily\fontsize{8.5}{11}\selectfont\RaggedRight #1\par\endgroup
+}
+\newcommand{\paperPanelTitle}[1]{%
+  \par\vspace{5pt}\noindent\textbf{#1}\par\vspace{3pt}
+}
+\newcommand{\paperFigurePlaceholder}[2][3cm]{%
+  \begingroup\setlength{\fboxsep}{8pt}\color{paperrule}%
+  \fbox{\parbox[c][#1][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+    \centering\color{black}\sffamily\small #2}}%
+  \endgroup
+}
+
+% Prefer top-aligned float pages instead of centering a figure in blank space.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\setlength{\textfloatsep}{14pt plus 3pt minus 3pt}
+\setlength{\floatsep}{12pt plus 3pt minus 3pt}
+\setlength{\intextsep}{12pt plus 3pt minus 3pt}
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{14pt plus 2fil}
+\setlength{\@fpbot}{0pt plus 1fil}

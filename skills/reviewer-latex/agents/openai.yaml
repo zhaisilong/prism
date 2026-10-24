@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reviewer LaTeX"
+  short_description: "Format existing peer-review drafts as clean PDFs"
+  default_prompt: "Use $reviewer-latex to format this existing review and separate any editor-only notes."

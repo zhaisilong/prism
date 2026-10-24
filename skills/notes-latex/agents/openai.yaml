@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notes LaTeX"
+  short_description: "Compile single-file research notes as clean PDFs"
+  default_prompt: "Use $notes-latex to compile this single-file note as a clean PDF."

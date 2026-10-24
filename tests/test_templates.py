@@ -1,0 +1,235 @@
+from __future__ import annotations
+
+import hashlib
+import io
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+import zipfile
+from pathlib import Path
+from unittest import mock
+
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts" / "lib"))
+from prism_latex import build_support, templates
+
+
+class VersionTests(unittest.TestCase):
+    def test_calendar_versions_and_same_day_revisions(self):
+        for version in ("2026.10.24", "2026.10.24.1", "2024.02.29.12"):
+            with self.subTest(version=version), mock.patch.object(Path, "read_text", return_value=version + "\n"):
+                self.assertEqual(build_support.project_version(), version)
+        for version in ("1.0.0", "2026.02.29", "2026.10.24.0", "2026.10.24.01", "2026.1.1", "2026.10.24\nextra"):
+            with self.subTest(version=version), mock.patch.object(Path, "read_text", return_value=version):
+                with self.assertRaises(SystemExit):
+                    build_support.project_version()
+
+    def test_all_clis_report_root_version_without_a_compiler(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            env = os.environ.copy()
+            env.update(PATH=temporary, PYTHONDONTWRITEBYTECODE="1")
+            env.pop("PRISM_PROJECT_DIR", None)
+            Path(temporary, "python3").symlink_to(sys.executable)
+            Path(temporary, "dirname").symlink_to(shutil.which("dirname"))
+            expected = f"Prism {ROOT.joinpath('VERSION').read_text().strip()}\n"
+            for wrapper in ("latex-note.sh", "latex-review.sh", "latex-paper.sh"):
+                with self.subTest(wrapper=wrapper):
+                    result = subprocess.run(["/bin/bash", str(ROOT / "scripts" / wrapper), "--version"], env=env, capture_output=True, text=True, check=False)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.stdout, expected)
+
+
+class TemplateTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name).resolve()
+        self.asset_dir = self.root / "assets"
+        for name in ("paper-template", "nature-template"):
+            asset = self.asset_dir / name
+            asset.mkdir(parents=True)
+            (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
+        (self.asset_dir / "paper-template" / "examples.tex").write_text("% shared standalone examples\n")
+        self.addCleanup(mock.patch.stopall)
+        mock.patch.object(templates, "ASSET_DIR", self.asset_dir).start()
+
+    def package(self, *, missing: str | None = None, symlink: str | None = None) -> bytes:
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            for member in templates.NATURE_MEMBERS:
+                if member == missing:
+                    continue
+                if member == symlink:
+                    info = zipfile.ZipInfo(member)
+                    info.create_system = 3
+                    info.external_attr = 0o120777 << 16
+                    archive.writestr(info, "elsewhere")
+                else:
+                    archive.writestr(member, f"official fixture {member}")
+            archive.writestr("../../not-extracted.txt", "unsafe path")
+            archive.writestr("sn-article-template/install.sh", "exit 1")
+        return buffer.getvalue()
+
+    def pinned_source(self, archive: bytes) -> Path:
+        source = self.root / "official package.zip"
+        source.write_bytes(archive)
+        mock.patch.object(templates, "NATURE_SIZE", len(archive)).start()
+        mock.patch.object(templates, "NATURE_SHA256", hashlib.sha256(archive).hexdigest()).start()
+        return source
+
+    def test_default_initialization_is_portable_and_preserves_assets(self):
+        destination = self.root / "论文 with spaces" / "new paper"
+        templates.initialize(destination, False)
+        self.assertEqual((destination / "main.tex").read_text(), "% paper-template\n")
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["template"], "prism")
+        self.assertEqual(metadata["prism_version"], build_support.project_version())
+        self.assertEqual(templates.template_for_project(destination), "prism")
+        self.assertEqual(list(destination.parent.glob(".*.prism-init-*")), [])
+
+    def test_offline_nature_keeps_original_zip_and_copies_only_named_members(self):
+        archive = self.package()
+        source = self.pinned_source(archive)
+        destination = self.root / "nature paper"
+        templates.initialize(destination, False, "nature", source)
+        self.assertEqual((destination / templates.NATURE_ARCHIVE).read_bytes(), archive)
+        self.assertTrue((destination / "sn-jnl.cls").is_file())
+        self.assertTrue((destination / "sn-nature.bst").is_file())
+        self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
+        self.assertFalse((destination / "install.sh").exists())
+        self.assertFalse((self.root / "not-extracted.txt").exists())
+        self.assertEqual(templates.template_for_project(destination), "nature")
+        self.assertEqual(templates.template_engine("nature", "auto"), "pdflatex")
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["upstream"]["sha256"], hashlib.sha256(archive).hexdigest())
+
+    def test_download_uses_the_same_pinned_archive_validation(self):
+        archive = self.package()
+        self.pinned_source(archive)
+        with mock.patch.object(templates.urllib.request, "urlopen", return_value=io.BytesIO(archive)) as fetch:
+            original, members = templates.nature_package(None)
+        self.assertEqual(original, archive)
+        self.assertEqual(set(members), {"sn-jnl.cls", "sn-nature.bst"})
+        self.assertEqual(fetch.call_args.args[0].full_url, templates.NATURE_URL)
+
+    def test_bad_hash_or_invalid_zip_leaves_force_target_and_backups_untouched(self):
+        destination = self.root / "existing"
+        destination.mkdir()
+        original = destination / "research.tex"
+        original.write_bytes(b"private research")
+        source = self.root / "wrong.zip"
+        source.write_bytes(b"untrusted bytes")
+        with self.assertRaisesRegex(SystemExit, "checksum mismatch"):
+            templates.initialize(destination, True, "nature", source)
+        self.assertEqual(original.read_bytes(), b"private research")
+        self.assertFalse(destination.with_name("existing.backup").exists())
+        for archive in (b"not a zip", self.package(missing=next(iter(templates.NATURE_MEMBERS))), self.package(symlink=next(iter(templates.NATURE_MEMBERS)))):
+            with self.subTest(archive=archive[:20]):
+                source = self.pinned_source(archive)
+                with self.assertRaisesRegex(SystemExit, "Invalid Nature template ZIP"):
+                    templates.initialize(destination, True, "nature", source)
+                self.assertEqual(original.read_bytes(), b"private research")
+                self.assertFalse(destination.with_name("existing.backup").exists())
+        self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
+
+    def test_nonempty_file_and_symlink_targets_are_protected(self):
+        destination = self.root / "existing"
+        destination.mkdir()
+        (destination / "original").write_text("keep")
+        with self.assertRaisesRegex(SystemExit, "not empty"):
+            templates.initialize(destination, False)
+        regular_file = self.root / "file"
+        regular_file.write_text("keep")
+        link = self.root / "link"
+        link.symlink_to(destination, target_is_directory=True)
+        for target in (regular_file, link):
+            with self.subTest(target=target), self.assertRaises(SystemExit):
+                templates.initialize(target, True)
+        self.assertEqual((destination / "original").read_text(), "keep")
+        self.assertEqual(regular_file.read_text(), "keep")
+        self.assertTrue(link.is_symlink())
+
+    def test_force_backup_preserves_files_links_and_existing_backup(self):
+        destination = self.root / "existing"
+        destination.mkdir()
+        (destination / "original").write_bytes(b"research")
+        (destination / "attachment").symlink_to("original")
+        destination.with_name("existing.backup").write_text("older backup")
+        templates.initialize(destination, True)
+        backup = destination.with_name("existing.backup-1")
+        self.assertEqual((backup / "original").read_bytes(), b"research")
+        self.assertEqual(os.readlink(backup / "attachment"), "original")
+        self.assertEqual(destination.with_name("existing.backup").read_text(), "older backup")
+        self.assertTrue((destination / "main.tex").is_file())
+
+    def test_staging_and_publication_failures_restore_existing_target(self):
+        destination = self.root / "existing"
+        destination.mkdir()
+        (destination / "original").write_text("keep")
+        for operation in ("copytree", "replace"):
+            module = templates.shutil if operation == "copytree" else templates.os
+            with self.subTest(operation=operation), mock.patch.object(module, operation, side_effect=OSError("deliberate failure")):
+                with self.assertRaisesRegex(SystemExit, "Could not initialize"):
+                    templates.initialize(destination, True)
+            self.assertEqual((destination / "original").read_text(), "keep")
+            self.assertFalse(destination.with_name("existing.backup").exists())
+            self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
+
+    def test_changed_target_is_not_backed_up_or_replaced(self):
+        destination = self.root / "existing"
+        destination.mkdir()
+        original = destination / "original"
+        original.write_text("before")
+        def changed_source(source):
+            original.write_text("changed while downloading")
+            return b"archive", {"sn-jnl.cls": b"class", "sn-nature.bst": b"bst"}
+        with mock.patch.object(templates, "nature_package", side_effect=changed_source):
+            with self.assertRaisesRegex(SystemExit, "changed during preparation"):
+                templates.initialize(destination, True, "nature")
+        self.assertEqual(original.read_text(), "changed while downloading")
+        self.assertFalse(destination.with_name("existing.backup").exists())
+
+    def test_template_metadata_rejects_unknown_or_broken_content(self):
+        self.assertIsNone(templates.template_for_project(self.root))
+        for content in ('{"template":"unknown"}', '{"template":[]}', "[]", "not json"):
+            with self.subTest(content=content):
+                (self.root / templates.METADATA_NAME).write_text(content)
+                with self.assertRaisesRegex(SystemExit, "Invalid Prism template metadata"):
+                    templates.template_for_project(self.root)
+
+    def test_pdflatex_dependencies_do_not_require_unicode_fonts_or_cjk(self):
+        def kpsewhich(command, **kwargs):
+            return subprocess.CompletedProcess(command, 0, f"/tex/{command[-1]}\n", "")
+        with mock.patch.object(build_support.shutil, "which", side_effect=lambda command: f"/bin/{command}"), mock.patch.object(build_support.subprocess, "run", side_effect=kpsewhich):
+            ok, rows = build_support.dependency_report("pdflatex", templates.NATURE_PACKAGES)
+        self.assertTrue(ok)
+        report = "\n".join(rows)
+        self.assertIn("engine: pdflatex", report)
+        for excluded in ("fontspec", "Fandol", "texgyre", "xeCJK", "luatexja"):
+            self.assertNotIn(excluded, report)
+        self.assertIn("-pdf", build_support.latexmk_command("pdflatex", "main.tex"))
+        with mock.patch.object(build_support.shutil, "which", side_effect=lambda command: "/bin/pdflatex" if command == "pdflatex" else None):
+            self.assertEqual(build_support.choose_engine("pdflatex"), "pdflatex")
+            with self.assertRaises(SystemExit):
+                build_support.choose_engine("auto")
+
+    def test_registered_profiles_reject_incompatible_engines(self):
+        self.assertEqual(templates.template_engine("prism", "auto"), "auto")
+        self.assertEqual(templates.template_engine("nature", "auto"), "pdflatex")
+        self.assertEqual(templates.template_engine("nature", "pdflatex"), "pdflatex")
+        self.assertEqual(templates.template_engine(None, "pdflatex"), "pdflatex")
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex")):
+            with self.subTest(template=template, engine=engine):
+                with self.assertRaisesRegex(SystemExit, "requires"):
+                    templates.template_engine(template, engine)
+                with self.assertRaisesRegex(SystemExit, "requires"):
+                    templates.template_packages(template, engine)
+
+
+if __name__ == "__main__":
+    unittest.main()

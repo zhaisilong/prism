@@ -1,0 +1,65 @@
+% Independent supplement. Compile with --main supplementary.tex --no-build-script.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{prism-paper}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=paperblue,citecolor=paperblue,urlcolor=paperblue}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\title{Supplementary information: Manuscript Title}
+\author{First Author and colleagues}
+\date{}
+\begin{document}
+\maketitle
+\noindent Replace the title, author list and all instructional examples. This
+document compiles independently: its figures, tables, equations and reference
+list do not depend on a previous build of the main manuscript.
+
+\section{Supplementary methods}
+Describe supporting procedures without repeating the main Methods. Define
+all additional symbols and link each method to the relevant analysis.
+\begin{equation}
+  r_i=y_i-\widehat y_i,\qquad
+  E=\frac{1}{n}\sum_{i=1}^{n}r_i^2.
+  \label{eq:supplement-example}
+\end{equation}
+Equation~\eqref{eq:supplement-example} illustrates independent numbering only.
+Replace it with a justified definition or derivation from the study.
+
+\section{Additional figures and tables}
+Figure~\ref{fig:supplement-example} and Table~\ref{tab:supplement-example}
+demonstrate independent references. The complete layout reference is in
+\texttt{examples.tex}, which includes multi-page and landscape tables.
+\begin{figure}[htbp]
+\centering
+\paperFigurePlaceholder[45mm]{Supplementary graphic slot\\Replace with the study's own PDF or PNG.}
+\caption{\textbf{Supplementary figure layout.} Describe each panel and define
+the actual units, sample sizes and uncertainty. This slot is not a result.}
+\label{fig:supplement-example}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Synthetic values used solely to illustrate a supplementary table.}
+\label{tab:supplement-example}
+\begin{tabularx}{\linewidth}{@{}Y S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+\paperTableHead{Setting} & {\paperTableHead{Count}} & {\paperTableHead{Estimate $\pm$ SD}}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\paperTableNote{All numbers are invented. Replace them with verified results
+and explain the study's actual uncertainty measure.}
+\end{table}
+
+\section{Supplementary references}
+This example citation only verifies the independent reference list
+\citep{wilkinson2016fair}. Remove it if it is not cited by the study.
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+\end{document}

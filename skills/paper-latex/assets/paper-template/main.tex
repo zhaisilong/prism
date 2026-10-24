@@ -1,0 +1,145 @@
+\documentclass[11pt,a4paper]{article}
+
+% Compile examples.tex separately for dense figure/table/equation recipes.
+% Compile supplementary.tex separately for an independent S-numbered supplement.
+
+\usepackage[margin=1in]{geometry}
+\usepackage{prism-paper}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage[numbers,sort&compress]{natbib}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+\newcommand{\codepath}[1]{\begingroup\Urlmuskip=0mu plus 1mu\path{#1}\endgroup}
+
+\newcommand{\papertitle}{Manuscript Title}
+\newcommand{\runningtitle}{Short Manuscript Title}
+\newcommand{\paperauthors}{%
+  First Author\textsuperscript{1,\ensuremath{\dagger}},
+  Second Author\textsuperscript{1,2,\ensuremath{\dagger}},
+  Third Author\textsuperscript{2},
+  Fourth Author\textsuperscript{3,*},
+  Fifth Author\textsuperscript{1,*}
+}
+\newcommand{\paperinstitutionone}{Department Name, First Institution, City, Postal Code, Country}
+\newcommand{\paperinstitutiontwo}{Department Name, Second Institution, City, Postal Code, Country}
+\newcommand{\paperinstitutionthree}{Department Name, Third Institution, City, Postal Code, Country}
+\newcommand{\equalcontribution}{Replace with the applicable equal-contribution statement.}
+\newcommand{\correspondence}{Correspondence: Fourth Author, \href{mailto:author.four@example.org}{author.four@example.org}; Fifth Author, \href{mailto:author.five@example.org}{author.five@example.org}}
+\newcommand{\paperkeywords}{keyword one; keyword two; keyword three}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=paperblue,
+  citecolor=paperblue,
+  urlcolor=paperblue,
+  pdftitle={\papertitle},
+  pdfkeywords={\paperkeywords}
+}
+\urlstyle{same}
+\setlist{itemsep=0.2em,topsep=0.4em}
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{14pt}
+\fancyhead[L]{\small\itshape\runningtitle}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.25pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\small\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\newcommand{\papermetadata}{%
+  \begingroup
+  \small
+  \setlength{\tabcolsep}{0pt}
+  \renewcommand{\arraystretch}{1.08}
+  \begin{tabularx}{\linewidth}{@{}r@{\hspace{0.3em}}Y@{}}
+    \textsuperscript{1} & \paperinstitutionone \\
+    \textsuperscript{2} & \paperinstitutiontwo \\
+    \textsuperscript{3} & \paperinstitutionthree \\
+    \addlinespace[0.55em]
+    \textsuperscript{\ensuremath{\dagger}} & \equalcontribution \\
+    \textsuperscript{*} & \correspondence \\
+  \end{tabularx}
+  \par\endgroup
+}
+
+\newcommand{\makepapertitle}{%
+  \begingroup
+  \raggedright
+    {\LARGE\bfseries \papertitle\par}
+    \vspace{0.7em}
+    {\large \paperauthors\par}
+    \vspace{0.35em}
+    \papermetadata
+  \par\endgroup
+  \vspace{0.55em}
+  {\color{paperrule}\hrule height 0.35pt}
+  \vspace{0.9em}
+}
+
+\newenvironment{paperabstract}{%
+  \par\vspace{0.2em}
+  {\large\bfseries Abstract\par}
+  \vspace{0.35em}
+  \begingroup
+  \normalsize
+  \setlength{\parindent}{0pt}
+  \setlength{\parskip}{6pt}
+}{%
+  \par\endgroup
+  \vspace{0.45em}
+}
+
+\begin{document}
+
+\thispagestyle{plain}
+\makepapertitle
+
+\begin{paperabstract}
+\input{sections/abstract}
+\end{paperabstract}
+
+\textbf{Keywords:} \paperkeywords
+
+\section{Introduction}
+\input{sections/introduction}
+
+\section{Materials and methods}
+\input{sections/methods}
+
+\section{Results}
+\input{sections/results}
+
+\section{Discussion}
+\input{sections/discussion}
+
+\section*{Data availability}
+Describe how readers can access the data, materials, and code supporting the study. Include stable identifiers, versions, and access conditions where applicable. State any restrictions and their reasons accurately.
+
+\section*{Acknowledgements}
+Describe non-author contributions and other assistance after confirming the wording with those acknowledged.
+
+\section*{Funding}
+Describe funding support and grant identifiers, or state the absence of specific funding after author confirmation.
+
+\section*{Conflict of interest statement}
+State the authors' competing interests, or their absence, after author confirmation.
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\IfFileExists{sections/appendix.tex}{%
+  \clearpage
+  \appendix
+  \section{Supplementary information}
+  \input{sections/appendix}
+}{}
+
+\end{document}

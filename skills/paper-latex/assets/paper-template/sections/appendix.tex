@@ -1,0 +1,22 @@
+Use appendices for supporting derivations, extended tables, validation details, or supplementary methods that are useful to readers but interrupt the main argument. Remove this file if the manuscript does not need an appendix.
+
+\begin{longtable}{@{}P{0.20\linewidth}P{0.24\linewidth}P{\dimexpr0.56\linewidth-4\tabcolsep\relax}@{}}
+\caption{Example of a table that can continue across pages. Replace instructional rows with supporting information.}\label{tab:extended-example}\\
+\toprule
+\paperTableHead{Item} & \paperTableHead{Setting} & \paperTableHead{Explanation} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{@{}l@{}}{\tablename~\thetable\ (continued)}\\[3pt]
+\toprule
+\paperTableHead{Item} & \paperTableHead{Setting} & \paperTableHead{Explanation} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Input & Specify version & Describe the materials or data and their provenance. \\
+Procedure & Specify settings & Provide enough detail for readers to repeat the analysis. \\
+Validation & Specify checks & Describe uncertainty, controls, and limitations. \\
+\end{longtable}

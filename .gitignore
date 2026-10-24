@@ -1,0 +1,38 @@
+.DS_Store
+
+# LaTeX build intermediates. Prism wrappers should keep these in temp dirs.
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# Local temporary/debug build folders.
+tmp/
+temp/
+build/
+out/
+dist/
+/archives/
+__pycache__/
+*.pyc
+
+# Local research working data. Keep the directory placeholder only.
+projects/**
+!projects/.gitkeep
+
+# Root bibliographies and legacy local template paths if restored.
+/*.bib
+/latex-templates/
+/Latex-tmplates-todo/

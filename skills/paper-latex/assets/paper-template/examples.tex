@@ -1,0 +1,262 @@
+% Standalone typesetting reference. All numbers and graphics are synthetic.
+% This file deliberately uses standard packages and also works with pdfLaTeX.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,array,tabularx,longtable}
+\usepackage{siunitx,caption,subcaption,pdflscape}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\sisetup{uncertainty-mode=separate,group-minimum-digits=5}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+\title{Prism figure, table and equation examples}
+\author{Typesetting examples only}
+\date{}
+
+\begin{document}
+\maketitle
+These examples demonstrate layout, cross-references and pagination. Every
+number, label and drawing is synthetic and carries no scientific claim.
+Copy only the relevant environment into a manuscript. Compile this reference
+independently with \texttt{--main examples.tex --no-build-script}.
+
+\section{Related figure panels}
+Figure~\ref{fig:grid} demonstrates a four-panel arrangement. Each panel is a
+separate reference target; for example, Fig.~\ref{fig:grid-b}. In a real paper,
+keep panel lettering and graphic scales consistent and explain the uncertainty
+in the main legend.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}[t]{0.47\linewidth}
+\centering
+\setlength{\unitlength}{1pt}
+\begin{picture}(165,100)
+\put(20,18){\vector(1,0){135}}\put(20,18){\vector(0,1){72}}
+\put(37,18){\line(0,1){20}}\put(64,18){\line(0,1){42}}
+\put(91,18){\line(0,1){48}}\put(118,18){\line(0,1){61}}
+\put(60,0){\makebox(60,12){\small Example setting}}
+\put(25,86){\makebox(110,12){\small Synthetic comparison}}
+\end{picture}
+\caption{A bar-like comparison.}\label{fig:grid-a}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.47\linewidth}
+\centering
+\setlength{\unitlength}{1pt}
+\begin{picture}(165,100)
+\put(20,18){\vector(1,0){135}}\put(20,18){\vector(0,1){72}}
+\qbezier(25,25)(75,85)(145,76)
+\put(35,38){\circle*{4}}\put(65,60){\circle*{4}}
+\put(95,74){\circle*{4}}\put(135,77){\circle*{4}}
+\put(60,0){\makebox(60,12){\small Example setting}}
+\put(25,86){\makebox(110,12){\small Synthetic trend}}
+\end{picture}
+\caption{A trend with markers.}\label{fig:grid-b}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}[t]{0.47\linewidth}
+\centering
+\fbox{\parbox[c][27mm][c]{0.91\linewidth}{\centering
+Input $\longrightarrow$ transformation\\[5pt]
+$\longrightarrow$ output}}
+\caption{A simple process.}\label{fig:grid-c}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.47\linewidth}
+\centering
+\fbox{\parbox[c][27mm][c]{0.91\linewidth}{\centering
+Replace this box with a PDF or PNG\\[5pt]
+\texttt{\string\includegraphics}\\[3pt]
+\texttt{[width=\string\linewidth]\{file\}}}}
+\caption{An external image slot.}\label{fig:grid-d}
+\end{subfigure}
+\caption{\textbf{A related set of panels.} (a) Bars demonstrate equal plotting
+areas. (b) Markers and a curve demonstrate distinct visual cues. (c) A diagram
+demonstrates a process panel. (d) An image slot demonstrates a panel with a
+different content type. The drawings are made entirely in TeX; replace them
+with the study's own editable graphics. No data were analysed.}
+\label{fig:grid}
+\end{figure}
+\clearpage
+
+\section{A tall figure and a long legend}
+Reserve space for both the graphic and its caption. Figure~\ref{fig:tall} uses
+a graphic area of half the text height. Replace the slot with an image
+bounded by \texttt{width=\string\linewidth},
+\texttt{height=0.50\string\textheight} and \texttt{keepaspectratio}.
+The bound should be checked against the actual legend and the final labels.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][0.50\textheight][c]{0.85\linewidth}{\centering
+\Large Tall composite figure\\[12pt]
+\normalsize Panel a: overview\\[26pt]
+Panel b: detailed view\\[26pt]
+Panel c: validation view\\[12pt]
+\small Synthetic layout slots only}}
+\caption{\textbf{A tall figure with a substantial legend.} The upper panel is
+reserved for an overview that introduces the structure of the figure. The
+middle panel is reserved for the detail needed to understand the main
+comparison. The lower panel is reserved for a related validation view. In a
+real manuscript, define all symbols and units, state what the markers and
+lines mean, and describe the sample size and uncertainty supplied by the
+study. Keep essential information in the caption so that the graphic can be
+understood with its legend. Explain methodological choices in the Methods
+section rather than repeating them here. This paragraph is deliberately long
+enough to demonstrate how the legend consumes page space below a tall image.
+It reports no experiment and must be replaced or removed before submission.}
+\label{fig:tall}
+\end{figure}
+\clearpage
+
+\section{Numerical values and uncertainty}
+Table~\ref{tab:uncertainty} aligns values and their uncertainties without
+scaling the table as an image. The missing value bypasses numerical parsing
+with \texttt{\string\multicolumn}; define that convention in the table note.
+
+\begin{table}[htbp]
+\centering
+\caption{Synthetic numerical examples, with no associated experiment.}
+\label{tab:uncertainty}
+\small
+\begin{tabularx}{\linewidth}{@{}Y S[table-format=3.0]
+  S[table-format=1.3(3)] S[table-format=-1.3]@{}}
+\toprule
+Setting & {Count} & {Estimate $\pm$ SD} & {Change}\\
+\midrule
+Reference setting & 120 & 0.385 +- 0.006 & -0.015\\
+Alternative setting & 98 & 0.608 +- 0.051 & 0.208\\
+Sensitivity setting & 36 & 0.517 +- 0.012 & -0.004\\
+Unavailable setting & 0 & \multicolumn{1}{c}{---} & 0.000\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+Notes. SD denotes the illustrative standard deviation. Counts, estimates and
+changes are invented for layout only. The dash denotes an unavailable value,
+not zero. Preserve the precision of the real source data when replacing cells.
+\end{table}
+
+\section{Equations that stay readable}
+Use \texttt{align} for related equalities. Equation~\eqref{eq:example-gradient}
+shows a reference to a specific line, and equation~\eqref{eq:example-split}
+has one number for a multi-line expression.
+\begin{align}
+  \mathcal{L}(\theta) &= \frac{1}{n}\sum_{i=1}^{n}
+    \ell\bigl(f_\theta(x_i),y_i\bigr)+\lambda\lVert\theta\rVert_2^2,
+    \label{eq:example-loss}\\
+  \nabla_\theta\mathcal{L}(\theta) &= \frac{1}{n}\sum_{i=1}^{n}
+    \nabla_\theta\ell\bigl(f_\theta(x_i),y_i\bigr)+2\lambda\theta.
+    \label{eq:example-gradient}
+\end{align}
+\begin{equation}
+\begin{split}
+  \Delta_t &= \mathcal{L}(\theta_{t+1})-\mathcal{L}(\theta_t)\\
+  &\leq \langle\nabla\mathcal{L}(\theta_t),\theta_{t+1}-\theta_t\rangle
+    +\frac{L}{2}\lVert\theta_{t+1}-\theta_t\rVert_2^2.
+\end{split}\label{eq:example-split}
+\end{equation}
+These expressions demonstrate notation only. They are not a proof of a
+property of a study. Define assumptions before adopting any mathematical claim.
+\begin{subequations}\label{eq:example-system}
+\begin{align}
+ h(z)&=\begin{cases}z,&z\geq0,\\\alpha z,&z<0,\end{cases}
+   \label{eq:example-cases}\\
+ \mathbf{z}_{t+1}&=\begin{bmatrix}1&\eta\\0&1\end{bmatrix}\mathbf{z}_t
+   +\begin{bmatrix}0\\u_t\end{bmatrix}.
+   \label{eq:example-matrix}
+\end{align}
+\end{subequations}
+The complete group is equation~\eqref{eq:example-system}; its two parts are
+equations~\eqref{eq:example-cases} and~\eqref{eq:example-matrix}.
+\clearpage
+
+\section{A table that genuinely spans pages}
+Table~\ref{tab:long-example} repeats its column headings and continuation
+notice on each page. Do not wrap a \texttt{longtable} in a table float. Rows
+below are invented layout checks rather than reported validation results.
+\small
+\begin{longtable}{@{}p{0.12\linewidth}p{0.25\linewidth}p{0.54\linewidth}@{}}
+\caption{Synthetic inventory used to exercise page continuation.}
+\label{tab:long-example}\\
+\toprule Item & Setting & Explanation\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Setting & Explanation\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+C01 & Input identifier & Record a stable identifier and describe where the input originated.\\
+C02 & Input version & Record the exact version rather than relying on a mutable label.\\
+C03 & Units & Define the units for each numerical measurement in the source.\\
+C04 & Missing values & Document which entries are unavailable and how they are represented.\\
+C05 & Inclusion rule & State the rule used to select the material before analysis.\\
+C06 & Exclusion rule & State the rule used to exclude material before analysis.\\
+C07 & Partition & Describe the separation of training and evaluation material.\\
+C08 & Identifier mapping & Preserve the mapping between source records and derived results.\\
+C09 & Transformation & Describe any preprocessing that changes the scale of a variable.\\
+C10 & Normalisation & State the reference quantities used for any normalisation.\\
+C11 & Parameters & Record numerical settings together with the reason for their choice.\\
+C12 & Initialisation & Record the initial condition or random seed where appropriate.\\
+C13 & Repetition & Describe the unit of repetition without treating dependent samples as independent.\\
+C14 & Sample count & State the exact number of observations relevant to each comparison.\\
+C15 & Uncertainty & Define the uncertainty measure and the way it was calculated.\\
+C16 & Interval & Identify whether intervals describe variability or estimation uncertainty.\\
+C17 & Comparison & Define the reference condition for every reported difference.\\
+C18 & Control & Describe the role of the control in the planned analysis.\\
+C19 & Sensitivity & Describe how sensitive settings would be varied in a real study.\\
+C20 & Validation & Describe an independent validation design where one is available.\\
+C21 & Software & Identify the software and relevant version for each analysis stage.\\
+C22 & Environment & Describe the computing environment when it affects reproducibility.\\
+C23 & Hardware & Record hardware details when numerical performance depends on them.\\
+C24 & Precision & Preserve the precision justified by the original measurements.\\
+C25 & Rounding & Apply a documented display rounding rule without changing source values.\\
+C26 & Aggregation & Describe the quantities being combined and the weighting used.\\
+C27 & Dependence & Identify measurements sharing the same subject or source.\\
+C28 & Error bars & Explain whether bars denote standard deviation, error or an interval.\\
+C29 & Figure labels & Check that labels remain readable at their intended final dimensions.\\
+C30 & Figure provenance & Retain the plotting source and the data used to create each figure.\\
+C31 & Table provenance & Link table cells to the corresponding verified source results.\\
+C32 & Equation symbols & Define variables, operators and dimensions before using them.\\
+C33 & Assumptions & State the conditions under which a mathematical statement is used.\\
+C34 & Cross-references & Check that figure, table and equation references resolve correctly.\\
+C35 & Availability & Describe an access route and any actual restrictions accurately.\\
+C36 & Limitations & Record limitations supported by the design and evidence of the study.\\
+\end{longtable}
+\normalsize
+
+\begin{landscape}
+\section{A wide table on a landscape page}
+Use a dedicated page when many columns remain necessary after simplifying
+headers. Table~\ref{tab:wide-example} keeps text upright on the rotated PDF
+page and uses consistent cell sizes rather than shrinking the whole table.
+\begin{table}[htbp]
+\centering\small
+\caption{A synthetic comparison with several explicitly labelled settings.}
+\label{tab:wide-example}
+\begin{tabularx}{\linewidth}{@{}Y *{8}{S[table-format=1.2]}@{}}
+\toprule
+Setting & {Metric A} & {Metric B} & {Metric C} & {Metric D}
+  & {Metric E} & {Metric F} & {Metric G} & {Metric H}\\
+\midrule
+Reference configuration & 0.12 & 0.23 & 0.34 & 0.45 & 0.56 & 0.67 & 0.78 & 0.89\\
+Alternative configuration & 0.21 & 0.32 & 0.43 & 0.54 & 0.65 & 0.76 & 0.87 & 0.98\\
+Sensitivity configuration & 0.11 & 0.22 & 0.33 & 0.44 & 0.55 & 0.66 & 0.77 & 0.88\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Define each real metric, its unit and its direction
+of interpretation in the accompanying manuscript.
+\end{table}
+\end{landscape}
+
+\section{Bibliography mechanics}
+The citation here demonstrates bibliography resolution only
+\citep{wilkinson2016fair}; it is not evidence for any synthetic number above.
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+\end{document}
