@@ -50,7 +50,7 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template"):
+        for name in ("paper-template", "nature-template", "bib-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
@@ -58,10 +58,11 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(mock.patch.stopall)
         mock.patch.object(templates, "ASSET_DIR", self.asset_dir).start()
 
-    def package(self, *, missing: str | None = None, symlink: str | None = None) -> bytes:
+    def package(self, *, template: str = "nature", missing: str | None = None, symlink: str | None = None) -> bytes:
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w") as archive:
-            for member in templates.NATURE_MEMBERS:
+            required = templates.NATURE_MEMBERS if template == "nature" else templates.BIB_MEMBERS
+            for member in required:
                 if member == missing:
                     continue
                 if member == symlink:
@@ -75,11 +76,11 @@ class TemplateTests(unittest.TestCase):
             archive.writestr("sn-article-template/install.sh", "exit 1")
         return buffer.getvalue()
 
-    def pinned_source(self, archive: bytes) -> Path:
+    def pinned_source(self, archive: bytes, template: str = "nature") -> Path:
         source = self.root / "official package.zip"
         source.write_bytes(archive)
-        mock.patch.object(templates, "NATURE_SIZE", len(archive)).start()
-        mock.patch.object(templates, "NATURE_SHA256", hashlib.sha256(archive).hexdigest()).start()
+        mock.patch.object(templates, f"{template.upper()}_SIZE", len(archive)).start()
+        mock.patch.object(templates, f"{template.upper()}_SHA256", hashlib.sha256(archive).hexdigest()).start()
         return source
 
     def test_default_initialization_is_portable_and_preserves_assets(self):
@@ -116,6 +117,64 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(original, archive)
         self.assertEqual(set(members), {"sn-jnl.cls", "sn-nature.bst"})
         self.assertEqual(fetch.call_args.args[0].full_url, templates.NATURE_URL)
+
+    def test_offline_bib_keeps_official_archive_and_only_required_resources(self):
+        archive = self.package(template="bib")
+        source = self.pinned_source(archive, "bib")
+        destination = self.root / "论文 with spaces" / "BIB manuscript"
+        templates.initialize(destination, False, "bib", source)
+        self.assertEqual((destination / templates.BIB_ARCHIVE).read_bytes(), archive)
+        self.assertEqual((destination / "main.tex").read_text(), "% bib-template\n")
+        for member, filename in templates.BIB_MEMBERS.items():
+            self.assertEqual((destination / filename).read_text(), f"official fixture {member}")
+        self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
+        self.assertFalse((destination / "install.sh").exists())
+        self.assertFalse((self.root / "not-extracted.txt").exists())
+        self.assertEqual(templates.template_for_project(destination), "bib")
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["engine"], "pdflatex")
+        self.assertEqual(metadata["upstream"], {
+            "url": templates.BIB_URL,
+            "sha256": hashlib.sha256(archive).hexdigest(),
+            "archive": templates.BIB_ARCHIVE,
+        })
+        self.assertEqual(list(destination.parent.glob(".*.prism-init-*")), [])
+
+    def test_bib_download_uses_the_same_pinned_validation_as_offline_import(self):
+        archive = self.package(template="bib")
+        self.pinned_source(archive, "bib")
+        with mock.patch.object(templates.urllib.request, "urlopen", return_value=io.BytesIO(archive)) as fetch:
+            original, members = templates.bib_package(None)
+        self.assertEqual(original, archive)
+        self.assertEqual(set(members), set(templates.BIB_MEMBERS.values()))
+        self.assertEqual(fetch.call_args.args[0].full_url, templates.BIB_URL)
+
+    def test_bad_bib_archives_preserve_existing_project_before_force_backup(self):
+        destination = self.root / "existing BIB paper"
+        destination.mkdir()
+        original = destination / "research.tex"
+        original.write_bytes(b"private research")
+        source = self.root / "wrong.zip"
+        source.write_bytes(b"untrusted bytes")
+        with self.assertRaisesRegex(SystemExit, "checksum mismatch"):
+            templates.initialize(destination, True, "bib", source)
+        member = next(iter(templates.BIB_MEMBERS))
+        for archive in (b"not a zip", self.package(template="bib", missing=member), self.package(template="bib", symlink=member)):
+            with self.subTest(archive=archive[:20]):
+                source = self.pinned_source(archive, "bib")
+                with self.assertRaisesRegex(SystemExit, "Invalid BIB template ZIP"):
+                    templates.initialize(destination, True, "bib", source)
+                self.assertEqual(original.read_bytes(), b"private research")
+                self.assertFalse(destination.with_name("existing BIB paper.backup").exists())
+        self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
+
+    def test_invalid_bib_package_does_not_create_target_parent(self):
+        source = self.root / "wrong.zip"
+        source.write_bytes(b"untrusted bytes")
+        destination = self.root / "new parent" / "new paper"
+        with self.assertRaisesRegex(SystemExit, "checksum mismatch"):
+            templates.initialize(destination, False, "bib", source)
+        self.assertFalse(destination.parent.exists())
 
     def test_bad_hash_or_invalid_zip_leaves_force_target_and_backups_untouched(self):
         destination = self.root / "existing"
@@ -222,13 +281,23 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_engine("prism", "auto"), "auto")
         self.assertEqual(templates.template_engine("nature", "auto"), "pdflatex")
         self.assertEqual(templates.template_engine("nature", "pdflatex"), "pdflatex")
+        self.assertEqual(templates.template_engine("bib", "auto"), "pdflatex")
+        self.assertEqual(templates.template_engine("bib", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine(None, "pdflatex"), "pdflatex")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 with self.assertRaisesRegex(SystemExit, "requires"):
                     templates.template_engine(template, engine)
                 with self.assertRaisesRegex(SystemExit, "requires"):
                     templates.template_packages(template, engine)
+
+    def test_bib_dependency_profile_has_oup_packages_and_local_resources(self):
+        packages = templates.template_packages("bib", "auto")
+        for package in ("flushend.sty", "totcount.sty", "algorithm.sty", "tikz.sty", "subcaption.sty", "unsrt.bst"):
+            self.assertIn(package, packages)
+        for excluded in ("fontspec.sty", "unicode-math.sty", "xeCJK.sty"):
+            self.assertNotIn(excluded, packages)
+        self.assertEqual(templates.template_resources("bib"), ("oup-authoring-template.cls", "oup-plain.bst"))
 
 
 if __name__ == "__main__":

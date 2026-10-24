@@ -48,7 +48,18 @@ Nature starter 使用单文件 `main.tex`、`sn-nature` 数字参考文献和 pd
 
 NMI 初稿接受编译后的 PDF，通常无需模仿成刊版面。接收后的 TeX 要求另外整理单一源文件、字体和内嵌参考文献；本版本没有自动完成最终投稿导出。不同文章类型的字数和图表数以当前官方要求为准，额外实验与大表可组织到补充材料。参见 [NMI 初稿要求](https://www.nature.com/natmachintell/submission-guidelines/initial-formatting)、[内容类型](https://www.nature.com/natmachintell/content)及[最终格式要求](https://www.nature.com/natmachintell/submission-guidelines/aip-and-formatting)。核查日期：2026-10-24。
 
-## 3. 图片、表格与公式较多时
+## 3. Briefings in Bioinformatics（BIB）
+
+```bash
+scripts/latex-paper.sh --init projects/Papers/bib-paper --template bib
+scripts/latex-paper.sh projects/Papers/bib-paper --strict
+```
+
+正文使用官方 OUP 双栏配置；宽图与宽表使用 `figure*`、`table*`，跨页长表放入单栏的 `supplementary.tex`。正文、参考文献和补充材料分别修改 `main.tex`、`references.bib`、`supplementary.tex`。
+
+离线时提供原始 OUP 模板 ZIP：`--template-source path/to/oup-authoring-template.zip`。补充材料用 `--main supplementary.tex --no-build-script` 单独编译。来源与配置见[模板选型](templates.md)。
+
+## 4. 图片、表格与公式较多时
 
 - 图片优先用矢量 PDF；照片等位图保持合适分辨率。用 `width=\linewidth,keepaspectratio` 控制尺寸，给长图注留出页面空间。论文字体设置不能改变图片内部的轴标签字体。
 - 多面板图使用统一字号和清晰的 a/b/c 标签；在正文按首次出现顺序引用。图注说明已有的单位、误差和样本量，排版过程不补造科研信息。
@@ -58,7 +69,7 @@ NMI 初稿接受编译后的 PDF，通常无需模仿成刊版面。接收后的
 
 可复制的完整演示见模板中的 `examples.tex`；详细排版建议见 [layout guidance](../skills/paper-latex/references/layout.md)。示例数据明确为合成内容，正式交付前全部替换。
 
-## 4. 笔记和已有 review
+## 5. 笔记和已有 review
 
 ```bash
 scripts/latex-note.sh projects/Notes/note.md --strict
@@ -69,7 +80,7 @@ scripts/latex-review.sh projects/Reviews/Others/draft.md \
 
 review 的编辑备注只出现在独立的 `_editor_notes.pdf` 中。交付前分别核对作者版和编辑版。`--outdir` 选择输出目录，`--out` 优先指定作者版路径。仅导出 TeX 可使用 `--no-compile`，无需 LaTeX 编译器；DOCX 输入可选依赖 `python-docx`，文本型 PDF 可用 `pypdf` 或 `pdftotext`。
 
-## 5. 重建、排错和在 Codex 中使用
+## 6. 重建、排错和在 Codex 中使用
 
 主文成功构建后：
 

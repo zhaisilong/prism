@@ -11,13 +11,14 @@
 | 模板 | 适合 |
 | --- | --- |
 | `nature` | Nature / NMI 英文初稿 |
+| `bib` | Briefings in Bioinformatics 英文稿 |
 | `prism` | 通用论文、中英混排 |
 
 ```bash
 scripts/latex-paper.sh --init projects/Papers/my-paper --template nature
 ```
 
-想用通用模板，把 `nature` 换成 `prism`。Nature 模板首次创建需要联网。
+更换模板时，把 `nature` 换成 `bib` 或 `prism`。期刊模板首次创建需要联网。
 
 ## 2. 写内容
 

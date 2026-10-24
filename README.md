@@ -20,6 +20,7 @@ scripts/latex-paper.sh projects/Papers/my-paper
 修改 `main.tex` 和 `references.bib`，再次运行第二条命令更新 PDF。
 
 - `nature`：Nature / NMI 英文初稿；首次创建需要联网。
+- `bib`：Briefings in Bioinformatics 英文稿；将命令中的 `nature` 换成 `bib` 即可。
 - `prism`：通用科研草稿，支持中英混排。
 
 需要 Python 3.9+、TeX Live 和 `latexmk`。模板会自动选择编译引擎。

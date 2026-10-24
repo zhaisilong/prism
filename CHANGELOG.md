@@ -4,6 +4,24 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.24.2
+
+### Added
+
+- Added a Briefings in Bioinformatics (`bib`) manuscript starter using the official OUP template, with supplementary material, figures, tables, equations, and numeric BibTeX citations.
+- Reused verified official-package import, offline initialization, and project-specific dependency checks for the new journal starter.
+
+### Changed
+
+- Matched the current OUP class's default numeric citation mode and used plain draft page headers, keeping the downloaded class unchanged.
+- Kept long supporting tables in an independent single-column supplement and retained the short three-step guide.
+
+### Validation
+
+- Passed all 58 regression tests, paper skill validation, and wrapper help/version checks.
+- Strictly compiled BIB main, supplementary, and shared examples PDFs, checked representative pages, and verified actual numeric citation labels and first-appearance order.
+- Confirmed source-directory cleanliness, main rebuild-script preservation, the existing Nature template's real strict build, and the public-code export audit.
+
 ## 2026.10.24.1
 
 ### Changed

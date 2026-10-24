@@ -227,6 +227,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("prism:", result.stdout)
         self.assertIn("nature:", result.stdout)
+        self.assertIn("bib: Briefings in Bioinformatics", result.stdout)
         for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
             with self.subTest(arguments=arguments):
                 result = self.run_cli("paper-latex", arguments)
@@ -250,6 +251,24 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("nature template requires pdfLaTeX", result.stderr)
         self.assertEqual(len(self.compiler_calls()), 1)
+
+    def test_marked_bib_project_uses_pdflatex_and_preserves_source_on_failure(self):
+        self.install_compiler()
+        (self.bin / "pdflatex").write_text(f"#!{sys.executable}\n")
+        (self.bin / "pdflatex").chmod(0o755)
+        cli_input, source, destination = self.make_source("paper-latex")
+        original_source = source.read_bytes()
+        (cli_input / "prism-template.json").write_text(json.dumps({"template": "bib", "engine": "pdflatex"}))
+        result = self.run_cli("paper-latex", [str(cli_input), "--strict", "--no-build-script"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("-pdf", self.compiler_calls()[0]["arguments"])
+        self.assertEqual(destination.read_bytes(), b"new PDF from stub")
+        result = self.run_cli("paper-latex", [str(cli_input), "--no-build-script"], mode="failure")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(destination.read_bytes(), b"new PDF from stub")
+        self.assertEqual(source.read_bytes(), original_source)
+        self.assertEqual(list(self.work.iterdir()), [])
+        self.assert_no_intermediates(cli_input)
 
     def test_paper_output_rejects_source_suffixes_and_symlink_aliases_before_compilation(self):
         self.install_compiler()
@@ -294,7 +313,7 @@ class WorkflowTests(unittest.TestCase):
         self.install_compiler()
         cli_input, _, destination = self.make_source("paper-latex")
         destination.write_bytes(b"previous PDF")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 (cli_input / "prism-template.json").write_text(json.dumps({"template": template}))
                 result = self.run_cli("paper-latex", [str(cli_input), "--engine", engine])
@@ -329,6 +348,26 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("sn-jnl.cls: MISSING", result.stdout)
         self.assertIn("sn-nature.bst: MISSING", result.stdout)
 
+    def test_bib_dependency_profile_checks_oup_packages_and_local_resources(self):
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "bib"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("pdflatex: MISSING", result.stdout)
+        self.assertIn("totcount.sty: MISSING", result.stdout)
+        self.assertIn("tikz.sty: MISSING", result.stdout)
+        self.assertIn("unsrt.bst: MISSING", result.stdout)
+        self.assertNotIn("fontspec", result.stdout)
+        cli_input, _, _ = self.make_source("paper-latex")
+        (cli_input / "prism-template.json").write_text('{"template":"bib"}')
+        result = self.run_cli("paper-latex", [str(cli_input), "--check-deps"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        for resource in ("oup-authoring-template.cls", "oup-plain.bst"):
+            self.assertIn(f"{resource}: MISSING", result.stdout)
+            (cli_input / resource).write_text("local upstream resource")
+        result = self.run_cli("paper-latex", [str(cli_input), "--check-deps"])
+        for resource in ("oup-authoring-template.cls", "oup-plain.bst"):
+            self.assertIn(f"{resource}: {cli_input / resource}", result.stdout)
+            self.assertNotIn(f"{resource}: MISSING", result.stdout)
+
     def test_paper_dependencies_require_bibtex_even_when_other_tools_are_available(self):
         self.install_compiler()
         (self.bin / "python3").symlink_to(sys.executable)
@@ -336,7 +375,7 @@ class WorkflowTests(unittest.TestCase):
             executable = self.bin / command
             executable.write_text(f"#!{sys.executable}\nprint('/tex/resource')\n")
             executable.chmod(0o755)
-        for template in ("prism", "nature"):
+        for template in ("prism", "nature", "bib"):
             with self.subTest(template=template):
                 result = self.run_cli("paper-latex", ["--check-deps", "--template", template])
                 self.assertEqual(result.returncode, 1, result.stderr)
