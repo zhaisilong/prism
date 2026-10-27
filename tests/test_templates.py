@@ -50,7 +50,7 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template"):
+        for name in ("paper-template", "nature-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
@@ -397,6 +397,98 @@ class TemplateTests(unittest.TestCase):
                 (self.root / templates.METADATA_NAME).write_text(content)
                 with self.assertRaisesRegex(SystemExit, "Invalid Prism template metadata"):
                     templates.template_for_project(self.root)
+
+    def test_canonical_ids_resolve_to_existing_aliases(self):
+        names = {
+            "generic/prism": "prism", "family/nature-nmi": "nature",
+            "journal/nature-communications": "nature-communications",
+            "journal/science-advances": "science-advances",
+            "journal/briefings-in-bioinformatics": "bib",
+            "journal/drug-discovery-today": "ddt", "journal/jcim": "jcim",
+            "journal/jacs": "jacs", "journal/bioinformatics": "bioinformatics",
+        }
+        for canonical, alias in names.items():
+            with self.subTest(canonical=canonical):
+                self.assertEqual(templates.resolve_template(canonical), alias)
+                self.assertEqual(templates.resolve_template(alias), alias)
+                self.assertEqual(templates.template_engine(canonical, "auto"),
+                                 templates.template_engine(alias, "auto"))
+        for unsupported in ("journal/unknown", "conference/icml/2026", "journal/plos"):
+            with self.subTest(unsupported=unsupported), self.assertRaises(ValueError):
+                templates.resolve_template(unsupported)
+
+    def test_registry_rejects_alias_and_canonical_collisions(self):
+        with mock.patch.dict(templates.TEMPLATES, {"duplicate": dict(templates.TEMPLATES["jcim"])}):
+            with self.assertRaisesRegex(ValueError, "Duplicate"):
+                templates.template_choices()
+        with mock.patch.dict(templates.TEMPLATES, {"journal/jcim": dict(templates.TEMPLATES["jacs"])}):
+            with self.assertRaisesRegex(ValueError, "Duplicate"):
+                templates.template_choices()
+
+    def test_legacy_and_versioned_metadata_resolve_without_rewriting(self):
+        path = self.root / templates.METADATA_NAME
+        cases = [
+            ({"template": "jcim", "engine": "pdflatex"}, "jcim"),
+            ({"template": "bib", "prism_version": "2026.10.24"}, "bib"),
+            ({"schema_version": 1, "template": "jcim", "template_id": "journal/jcim"}, "jcim"),
+            ({"schema_version": 1, "template": "nature", "template_id": "family/nature-nmi"}, "nature"),
+            ({"schema_version": 1, "template": "bioinformatics", "template_id": "journal/bioinformatics"}, "bioinformatics"),
+        ]
+        for metadata, expected in cases:
+            with self.subTest(metadata=metadata):
+                original = json.dumps(metadata).encode()
+                path.write_bytes(original)
+                self.assertEqual(templates.template_for_project(self.root), expected)
+                self.assertEqual(path.read_bytes(), original)
+        for metadata in (
+            {"schema_version": 1, "template": "jcim", "template_id": "journal/jacs"},
+            {"schema_version": 1, "template": "jcim", "template_id": "journal/unknown"},
+            {"schema_version": 99, "template": "jcim", "template_id": "journal/jcim"},
+            {"schema_version": True, "template": "jcim", "template_id": "journal/jcim"},
+            {"template": "jcim", "template_id": "journal/jcim"},
+            {"schema_version": 1, "template": "jcim"},
+        ):
+            with self.subTest(metadata=metadata):
+                original = json.dumps(metadata).encode()
+                path.write_bytes(original)
+                with self.assertRaisesRegex(SystemExit, "Invalid Prism template metadata"):
+                    templates.template_for_project(self.root)
+                self.assertEqual(path.read_bytes(), original)
+
+    def test_new_jacs_metadata_contains_canonical_and_compatible_alias(self):
+        destination = self.root / "论文 with spaces" / "JACS"
+        templates.initialize(destination, False, "journal/jacs")
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["schema_version"], 1)
+        self.assertEqual(metadata["template"], "jacs")
+        self.assertEqual(metadata["template_id"], "journal/jacs")
+        self.assertEqual(templates.template_for_project(destination), "jacs")
+        self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
+
+    def test_bioinformatics_canonical_zip_import_preserves_user_target_on_failure(self):
+        archive = self.package(template="bib")
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(io.BytesIO(archive)) as existing, zipfile.ZipFile(buffer, "w") as updated:
+            for info in existing.infolist():
+                updated.writestr(info, existing.read(info))
+            updated.writestr("oup-authoring-template/oup-abbrvnat.bst", "author-year fixture")
+        source = self.pinned_source(buffer.getvalue(), "bib")
+        destination = self.root / "论文 with spaces" / "Bioinformatics"
+        templates.initialize(destination, False, "journal/bioinformatics", source)
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["template"], "bioinformatics")
+        self.assertEqual(metadata["template_id"], "journal/bioinformatics")
+        self.assertEqual((destination / "oup-abbrvnat.bst").read_text(), "author-year fixture")
+        self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
+        self.assertEqual(templates.template_for_project(destination), "bioinformatics")
+        self.assertIn("oup-abbrvnat.bst", templates.template_resources("bioinformatics"))
+        bad_source = self.root / "incorrect.zip"
+        bad_source.write_bytes(b"wrong version")
+        before = {p: p.read_bytes() for p in destination.rglob("*") if p.is_file()}
+        with self.assertRaises(SystemExit):
+            templates.initialize(destination, True, "journal/bioinformatics", bad_source)
+        self.assertEqual({p: p.read_bytes() for p in destination.rglob("*") if p.is_file()}, before)
+        self.assertFalse(destination.with_name(destination.name + ".backup").exists())
 
     def test_pdflatex_dependencies_do_not_require_unicode_fonts_or_cjk(self):
         def kpsewhich(command, **kwargs):

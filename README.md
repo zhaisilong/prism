@@ -24,10 +24,14 @@ scripts/latex-paper.sh projects/Papers/my-paper
 - `bib`：Briefings in Bioinformatics 英文稿；将命令中的 `nature` 换成 `bib` 即可。
 - `ddt`：Drug Discovery Today 单栏综述；将 `nature` 换成 `ddt` 即可，可离线创建。
 - `jcim`：Journal of Chemical Information and Modeling 研究论文，可离线创建。
+- `jacs`：Journal of the American Chemical Society 研究论文，可离线创建。
+- `bioinformatics`：Bioinformatics 研究论文；首次创建需要联网。
 - `science-advances`：Science Advances 研究论文；创建时提供官方模板目录或 ZIP。
 - `prism`：通用科研草稿，支持中英混排。
 
 需要 Python 3.9+、TeX Live 和 `latexmk`。模板会自动选择编译引擎。
+
+使用 `scripts/latex-paper.sh --list-templates` 查看按类型分类的完整名称；例如 `journal/jacs` 与 `jacs` 等价。现有短名称继续可用。
 
 [简明使用指南](docs/guide.zh-CN.md) · [模板来源](docs/templates.md) · [高级用法](docs/reference.zh-CN.md)
 

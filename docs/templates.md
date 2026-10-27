@@ -12,9 +12,15 @@
 | `bib` | Briefings in Bioinformatics 英文稿、双栏图表与公式 | pdfLaTeX / BibTeX | Prism 原创启动文件 + 官方 OUP 1.5 class |
 | `ddt` | Drug Discovery Today 单栏叙述性综述草稿 | pdfLaTeX / BibTeX，数字上标 | Prism 原创启动文件 + TeX Live 安装的 Elsevier `elsarticle` |
 | `jcim` | Journal of Chemical Information and Modeling 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
+| `jacs` | Journal of the American Chemical Society 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
+| `bioinformatics` | Bioinformatics 原始论文草稿 | pdfLaTeX / BibTeX，作者—年份 | Prism 原创启动文件 + 官方 OUP 1.5 class 和样式 |
 | `science-advances` | Science Advances 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + 本地导入 Science-family v1.0 样式 |
 
 `prism` 的 `main.tex` 分节写作；期刊模板主文是单一 TeX，不加载 Prism 字体样式。各模板均附 `examples.tex`；Science Advances 在 `main.tex` 中合并补充材料，其余模板有独立 `supplementary.tex`。所有演示均为格式示例。
+
+以上为简短别名。运行 `scripts/latex-paper.sh --list-templates` 可查看以 `journal/`、`family/` 或 `generic/` 开头的完整名称和分类；旧命令及已有项目无需改动。
+
+模板注册字段和未来会议扩展方式见[维护说明](template-registry.md)。
 
 已在临时目录严格编译各模板的主文、补充材料和示例，检查代表页面；Prism 另通过 LuaLaTeX 构建。独立补充材料与示例使用 `--no-build-script` 保留主文重建入口。
 
@@ -29,6 +35,10 @@ BIB 使用 [OUP 作者模板](https://ctan.org/pkg/oup-authoring-template) 1.5�
 DDT 使用发行版中的 [Elsevier 官方 `elsarticle` 类](https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/latex-instructions)与 `elsarticle-num.bst`，不下载或复制第三方源码。`review` 模式为单栏、1.5 倍行距；数字上标及按引用顺序列参考文献作为草稿样式，参考 [DDT 已发表综述](https://www.sciencedirect.com/science/article/pii/S1359644625000546)。`highlights.txt`、`teaser.txt` 为可选占位。2026-10-27 核查时，[DDT 作者指南](https://www.sciencedirect.com/journal/drug-discovery-today/publish/guide-for-authors)无法访问，投稿前应确认当前要求；此模板不承诺最终出版格式。
 
 JCIM 使用 [ACS 官方示例](https://www.overleaf.com/latex/templates/latex-template-for-american-chemical-society-acs-journal-submissions/swszwgfqsshj)支持的 `article` + `achemso` / BibTeX 组合（官方示例默认使用 `biblatex` / Biber）；只依赖已安装的 TeX Live 宏包，不复制第三方代码。请替换目录图占位，并依照 [JCIM 作者指南](https://researcher-resources.acs.org/publish/author_guidelines?coden=jcisd8)核对投稿要求；本模板用于初稿，不自动整理最终投稿文件。
+
+JACS 复用相同 ACS 构建，提供 Research Article 草稿、目录图占位和独立补充材料；提交前请查阅 [JACS 作者指南](https://researcher-resources.acs.org/publish/author_guidelines?coden=jacsat)。
+
+Bioinformatics 原始论文草稿从与 BIB 相同的固定 OUP 1.5 ZIP 导入 class 和 `oup-abbrvnat.bst`，使用 `namedate` 作者—年份引用，并提供结构化摘要。`contemporary,large` 实测单栏约 89.5 mm，[期刊指南](https://academic.oup.com/bioinformatics/pages/author-guidelines)列出 86 mm；初稿不承诺满足最终列宽或投稿格式。上游 class 可能报告 `Unused global option(s)`，但实测双栏和作者—年份引用生效。离线可用 `--template-source` 指定相同官方 ZIP。
 
 Science Advances 使用 [AAAS Science-family 官方模板](https://www.overleaf.com/latex/templates/latex-template-for-science-family-journals/kjytmmfyxthd) v1.0（2024-07）的 `scicite.sty` 和 `sciencemag.bst`。初始化从用户提供的本地目录或 ZIP 校验并复制原样式及版权说明；公开代码不附带这些文件。正文与补充材料使用一份连续编号的文献表。文件哈希用于版本一致性检查，不单独证明包的来源；修订稿要求以期刊最新说明为准，本模板不自动嵌入 `.bbl`。
 

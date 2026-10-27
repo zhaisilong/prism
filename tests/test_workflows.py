@@ -236,12 +236,60 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("ddt: Drug Discovery Today", result.stdout)
         self.assertIn("jcim:", result.stdout)
         self.assertIn("science-advances:", result.stdout)
+        for name in ("journal/jacs", "journal/bioinformatics", "journal/jcim", "family/nature-nmi"):
+            self.assertIn(name, result.stdout)
+        self.assertNotIn("conference/icml", result.stdout)
+        self.assertNotIn("journal/plos", result.stdout)
         for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "ddt", "--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "jcim", "--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
             with self.subTest(arguments=arguments):
                 result = self.run_cli("paper-latex", arguments)
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
         self.assertFalse((self.root / "new").exists())
+
+    def test_canonical_jacs_initialization_and_unknown_venue_without_tex(self):
+        target = self.root / "论文 with spaces" / "JACS"
+        result = self.run_cli("paper-latex", ["--init", str(target), "--template", "journal/jacs"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        metadata = json.loads((target / "prism-template.json").read_text())
+        self.assertEqual(metadata["template"], "jacs")
+        self.assertEqual(metadata["template_id"], "journal/jacs")
+        self.assertTrue((target / "supplementary.tex").is_file())
+        unknown = self.root / "unknown conference"
+        result = self.run_cli("paper-latex", ["--init", str(unknown), "--template", "conference/icml/2026"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(unknown.exists())
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_legacy_metadata_and_generated_rebuild_remain_usable(self):
+        self.install_compiler()
+        (self.bin / "pdflatex").write_text(f"#!{sys.executable}\n")
+        (self.bin / "pdflatex").chmod(0o755)
+        for name, executable in (("python3", sys.executable), ("bash", "/bin/bash"), ("dirname", shutil.which("dirname"))):
+            (self.bin / name).symlink_to(executable)
+        project, _, destination = self.make_source("paper-latex")
+        metadata = project / "prism-template.json"
+        original = b'{"template":"jcim","prism_version":"2026.10.24","engine":"pdflatex"}\n'
+        metadata.write_bytes(original)
+        result = self.run_cli("paper-latex", [str(project), "--strict"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        script = project / "prism-build.sh"
+        self.assertTrue(script.is_file())
+        env = self.env.copy()
+        env["PRISM_PROJECT_DIR"] = str(ROOT)
+        rebuilt = subprocess.run([str(script)], capture_output=True, text=True, check=False, env=env, timeout=20)
+        self.assertEqual(rebuilt.returncode, 0, rebuilt.stdout + rebuilt.stderr)
+        self.assertEqual(metadata.read_bytes(), original)
+        self.assertEqual(destination.read_bytes(), b"new PDF from stub")
+        self.assertEqual(len(self.compiler_calls()), 2)
+
+    def test_explicit_check_deps_override_keeps_existing_behavior(self):
+        project, _, _ = self.make_source("paper-latex")
+        (project / "prism-template.json").write_text('{"template":"unrecognized"}')
+        result = self.run_cli("paper-latex", [str(project), "--check-deps", "--template", "journal/jacs"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("achemso.sty: MISSING", result.stdout)
+        self.assertNotIn("Invalid Prism template metadata", result.stderr)
 
     def test_science_init_requires_source_before_creating_target(self):
         target = self.root / "new science parent" / "paper"
@@ -388,6 +436,49 @@ class WorkflowTests(unittest.TestCase):
         self.assert_no_intermediates(project)
         self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
 
+    def test_real_bioinformatics_author_year_and_independent_supplement(self):
+        source_name = os.environ.get("PRISM_OUP_SOURCE")
+        if not source_name or not Path(source_name).is_file():
+            self.skipTest("Real Bioinformatics build needs PRISM_OUP_SOURCE official ZIP")
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real Bioinformatics build needs {command}")
+        project = self.root / "论文 with spaces" / "Bioinformatics"
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        wrapper = str(ROOT / "scripts" / "latex-paper.sh")
+        init = subprocess.run([wrapper, "--init", str(project), "--template", "journal/bioinformatics",
+                               "--template-source", source_name], capture_output=True, text=True,
+                              check=False, env=env, timeout=120)
+        self.assertEqual(init.returncode, 0, init.stdout + init.stderr)
+        before = {p: p.read_bytes() for p in project.rglob("*") if p.is_file()}
+        main = subprocess.run([wrapper, str(project), "--strict"], capture_output=True, text=True,
+                              check=False, env=env, timeout=120)
+        self.assertEqual(main.returncode, 0, main.stdout + main.stderr)
+        rebuild = project / "prism-build.sh"
+        original_script = rebuild.read_bytes()
+        for filename in ("supplementary.tex", "examples.tex"):
+            with self.subTest(filename=filename):
+                result = subprocess.run([wrapper, str(project), "--main", filename, "--no-build-script", "--strict"],
+                                        capture_output=True, text=True, check=False, env=env, timeout=120)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(rebuild.read_bytes(), original_script)
+        extracted = subprocess.run(["pdftotext", "-raw", str(project / "main.pdf"), "-"],
+                                   capture_output=True, text=True, check=True).stdout
+        self.assertRegex(extracted, re.compile(r"Wilkinson\s+et\s+al\.?,?\s*\(?2016\)?", re.I))
+        for heading in ("Motivation", "Results", "Availability", "Contact"):
+            self.assertIn(heading, extracted)
+        supplement = subprocess.run(["pdftotext", "-raw", str(project / "supplementary.pdf"), "-"],
+                                    capture_output=True, text=True, check=True).stdout
+        self.assertIn("Figure S1", supplement)
+        self.assertIn("Table S1", supplement)
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
     def test_marked_bib_project_uses_pdflatex_and_preserves_source_on_failure(self):
         self.install_compiler()
         (self.bin / "pdflatex").write_text(f"#!{sys.executable}\n")
@@ -468,7 +559,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
         self.assert_no_intermediates(project)
 
-    def test_real_jcim_isolates_acs_control_bib_from_same_named_source(self):
+    def _assert_real_acs_isolates_control_bib_from_same_named_source(self, profile):
         for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
             if not shutil.which(command):
                 self.skipTest(f"Real JCIM build needs {command}")
@@ -505,7 +596,10 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             "@article{sentinel,author={Sentinel, Stella},title={Source-only sentinel},journal={Example},year={2025}}\n",
             encoding="utf-8",
         )
-        (project / "prism-template.json").write_text('{"template":"jcim","engine":"pdflatex"}', encoding="utf-8")
+        metadata = {"template": profile, "engine": "pdflatex"}
+        if profile == "jacs":
+            metadata.update(schema_version=1, template_id="journal/jacs")
+        (project / "prism-template.json").write_text(json.dumps(metadata), encoding="utf-8")
         # One-pixel RGB PNG, created without nonstandard Python dependencies.
         def chunk(name, data):
             return struct.pack(">I", len(data)) + name + data + struct.pack(">I", zlib.crc32(name + data) & 0xFFFFFFFF)
@@ -542,6 +636,55 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.assertRegex(result.stdout + result.stderr, r"(?i)(?:undefined|didn't find a database entry)")
         self.assertEqual(pdf.read_bytes(), previous_pdf)
         self.assertEqual(sentinel.read_bytes(), before[sentinel])
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
+    def test_real_jcim_isolates_acs_control_bib_from_same_named_source(self):
+        self._assert_real_acs_isolates_control_bib_from_same_named_source("jcim")
+
+    def test_real_jacs_isolates_acs_control_bib_from_same_named_source(self):
+        self._assert_real_acs_isolates_control_bib_from_same_named_source("jacs")
+
+    def test_real_jacs_template_main_and_supplement(self):
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real JACS build needs {command}")
+        for resource in ("achemso.sty", "achemso.bst", "natmove.sty", "siunitx.sty"):
+            result = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
+            if result.returncode != 0 or not result.stdout.strip():
+                self.skipTest(f"Real JACS build needs {resource}")
+        project = self.root / "论文 with spaces" / "JACS"
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        wrapper = str(ROOT / "scripts" / "latex-paper.sh")
+        init = subprocess.run([wrapper, "--init", str(project), "--template", "journal/jacs"],
+                              capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(init.returncode, 0, init.stdout + init.stderr)
+        before = {p: p.read_bytes() for p in project.rglob("*") if p.is_file()}
+        main = subprocess.run([wrapper, str(project), "--strict"], capture_output=True, text=True,
+                              check=False, env=env, timeout=120)
+        self.assertEqual(main.returncode, 0, main.stdout + main.stderr)
+        rebuild = project / "prism-build.sh"
+        script_before = rebuild.read_bytes()
+        for filename in ("supplementary.tex", "examples.tex"):
+            with self.subTest(filename=filename):
+                result = subprocess.run([wrapper, str(project), "--main", filename, "--no-build-script", "--strict"],
+                                        capture_output=True, text=True, check=False, env=env, timeout=120)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(rebuild.read_bytes(), script_before)
+        extracted = subprocess.run(["pdftotext", "-raw", str(project / "main.pdf"), "-"],
+                                   capture_output=True, text=True, check=True).stdout
+        self.assertIn("For Table of Contents Use Only", extracted)
+        self.assertIn("TOC graphic placeholder", extracted)
+        self.assertIn("Wilkinson", extracted)
+        supplement = subprocess.run(["pdftotext", "-raw", str(project / "supplementary.pdf"), "-"],
+                                    capture_output=True, text=True, check=True).stdout
+        self.assertIn("Figure S1", supplement)
+        self.assertIn("Table S1", supplement)
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
         self.assert_no_intermediates(project)
         self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
 

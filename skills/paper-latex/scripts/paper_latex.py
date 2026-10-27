@@ -24,9 +24,13 @@ from build_script import write_build_script
 from prism_latex.templates import (
     TEMPLATES,
     initialize,
+    resolve_template,
+    template_choices,
     template_engine,
     template_for_project,
+    template_isolated_build,
     template_packages,
+    template_profile,
     template_resources,
 )
 
@@ -37,8 +41,8 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("paper_dir", nargs="?", type=Path, help="Directory containing the manuscript")
     result.add_argument("--init", metavar="TARGET_DIR", type=Path, help="Create a new manuscript project")
     result.add_argument("--list-templates", action="store_true", help="List available manuscript templates")
-    result.add_argument("--template", choices=tuple(TEMPLATES), help="Template for --init or --check-deps (default: prism)")
-    result.add_argument("--template-source", metavar="PATH", type=Path, help="Official ZIP for nature or bib; official folder or ZIP required for science-advances")
+    result.add_argument("--template", choices=template_choices(), help="Template alias or stable ID for --init or --check-deps (default: prism)")
+    result.add_argument("--template-source", metavar="PATH", type=Path, help="Official template package or folder for supported templates")
     result.add_argument("--main", default="main.tex", help="Main TeX path relative to PAPER_DIR")
     result.add_argument("--out", type=Path, help="Output PDF path")
     result.add_argument("--engine", choices=("auto", "xelatex", "lualatex", "pdflatex"), default="auto")
@@ -70,23 +74,25 @@ def main(argv: list[str] | None = None) -> int:
         if args.paper_dir or args.init or args.check_deps or args.template or args.template_source or args.force:
             argument_parser.error("--list-templates must be used without a project, initialization, or dependency options.")
         for name, details in TEMPLATES.items():
-            print(f"{name}: {details['description']}")
+            publisher = details["publisher"] or "Prism"
+            print(f"{name}: {details['description']} [ID: {details['id']}; type: {details['kind']}; publisher: {publisher}]")
         return 0
     if args.init and (args.paper_dir or args.check_deps):
         argument_parser.error("Use --init TARGET_DIR without PAPER_DIR or --check-deps.")
     if args.template and not (args.init or args.check_deps):
         argument_parser.error("--template is only supported with --init or --check-deps.")
-    if args.template_source and not (args.init and args.template in ("nature", "bib", "science-advances")):
-        argument_parser.error("--template-source requires --init TARGET_DIR --template nature, bib, or science-advances.")
+    selected_template = resolve_template(args.template) if args.template else None
+    if args.template_source and not (args.init and selected_template and template_profile(selected_template)["source"]):
+        argument_parser.error("--template-source requires --init and a template that accepts an official source package.")
     if args.force and not args.init:
         argument_parser.error("--force requires --init TARGET_DIR.")
     if args.init:
-        return initialize(args.init, args.force, args.template or "prism", args.template_source)
+        return initialize(args.init, args.force, selected_template or "prism", args.template_source)
 
     paper_dir = args.paper_dir.expanduser().resolve() if args.paper_dir else None
     if paper_dir is not None and not paper_dir.is_dir():
         raise SystemExit(f"Paper directory not found: {paper_dir}")
-    template = args.template or (template_for_project(paper_dir) if paper_dir else None)
+    template = selected_template or (template_for_project(paper_dir) if paper_dir else None)
     requested_engine = template_engine(template, args.engine)
     if args.check_deps:
         ok, rows = dependency_report(
@@ -124,8 +130,9 @@ def main(argv: list[str] | None = None) -> int:
     # its working directory before BIBINPUTS, so running from the source
     # directory can silently select a user's unrelated, same-named file.
     # Keep the normal working-directory behavior for other templates.
-    build_cwd = workdir if template == "jcim" else paper_dir
-    build_input = str(main_path) if template == "jcim" else relative_main
+    isolate_cwd = template_isolated_build(template)
+    build_cwd = workdir if isolate_cwd else paper_dir
+    build_input = str(main_path) if isolate_cwd else relative_main
     try:
         result = subprocess.run(
             latexmk_command(engine, build_input, workdir),

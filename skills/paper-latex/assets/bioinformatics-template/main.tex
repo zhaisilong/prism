@@ -1,0 +1,155 @@
+% Original Prism research-paper starter for Bioinformatics.
+% The official OUP class is imported, unchanged, during initialization.
+% This initial-submission draft uses OUP Contemporary Large. Its column width
+% is approximately 89.5 mm; check the journal's current final requirements.
+\documentclass[unnumsec,webpdf,contemporary,large,namedate]{oup-authoring-template}
+\usepackage{booktabs,tabularx,siunitx}
+\newcommand{\societylogo}{}
+\sisetup{uncertainty-mode=separate}
+
+\begin{document}
+\journaltitle{Bioinformatics}
+\DOI{}
+\copyrightyear{}
+\pubyear{}
+\access{Draft manuscript}
+\appnotes{Original Paper}
+\firstpage{1}
+
+\title[Short manuscript title]{Manuscript title}
+\author[1,$\ast$]{First Author}
+\author[1,2]{Second Author}
+\address[1]{\orgdiv{Department}, \orgname{First institution},
+  \orgaddress{\state{City}, \country{Country}}}
+\address[2]{\orgdiv{Department}, \orgname{Second institution},
+  \orgaddress{\state{City}, \country{Country}}}
+\corresp[$\ast$]{Corresponding author.
+  \href{mailto:first.author@example.org}{first.author@example.org}}
+
+\abstract{\textbf{Motivation:} State the scientific question and context.
+\textbf{Results:} Summarize verified findings and their significance.
+\textbf{Availability and Implementation:} State the actual access and
+implementation details, if applicable.
+\textbf{Contact:} Provide the corresponding author's verified contact.
+\textbf{Supplementary Information:} Describe any supporting material.
+This is a formatting example and reports no research result.}
+\keywords{keyword one, keyword two, keyword three}
+\maketitle
+% Ordinary draft numbering avoids the OUP 1.5 production banner's 4 mm overflow.
+\thispagestyle{plain}
+% Keep unassigned publication volume/issue placeholders out of draft headers.
+\pagestyle{plain}
+
+\section{Introduction}\label{sec:introduction}
+Introduce the biological problem, the relevant previous work and the
+unresolved question. State the manuscript's contribution and intended
+readership. The public citation here tests bibliography mechanics only;
+retain it only if relevant to the work~\citep{wilkinson2016fair}.
+
+Replace every instructional statement, synthetic value and graphic slot
+before submission. Use headings appropriate to the research reported.
+
+\section{System and methods}\label{sec:methods}
+\subsection{Study design and data}
+Describe the actual data sources, inclusion criteria, processing, software
+versions and evaluation design. State how related observations are grouped
+and how development and evaluation data are separated. Include the ethical
+and reporting details applicable to the study.
+
+\subsection{Mathematical formulation}
+Define each variable before use. Equations~\eqref{eq:objective}
+and~\eqref{eq:residual} demonstrate aligned expressions and cross-references;
+replace them with equations justified by the study, or remove them.
+\begin{align}
+ \mathcal{L}(\theta)&=\frac{1}{n}\sum_{i=1}^{n}
+  \ell\bigl(f_\theta(x_i),y_i\bigr)
+  +\lambda\lVert\theta\rVert_2^2,\label{eq:objective}\\
+ r_i&=y_i-\widehat y_i.\label{eq:residual}
+\end{align}
+These expressions illustrate notation and carry no biological claim.
+
+\subsection{Evaluation and statistical analysis}
+Specify actual sample counts, independent repetitions, evaluation metrics,
+uncertainty measures and any statistical tests that were performed. Provide
+enough detail to reproduce the analysis without exposing restricted data.
+
+\section{Algorithm}\label{sec:algorithm}
+Describe the algorithm actually used, including its inputs, outputs and
+assumptions. The examples below convey formatting only.
+
+\section{Implementation}\label{sec:implementation}
+Present the verified findings in the order needed to assess the question.
+Figure~\ref{fig:comparison} demonstrates two related panels in one display.
+Use \texttt{figure*} or \texttt{table*} for an item spanning both columns.
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[t]{0.47\textwidth}
+\raggedright\textbf{a}\par\smallskip
+\fbox{\parbox[c][34mm][c]{0.90\linewidth}{\centering
+Workflow graphic\\[5pt]Replace with an original PDF or PNG}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\textwidth}
+\raggedright\textbf{b}\par\smallskip
+\fbox{\parbox[c][34mm][c]{0.90\linewidth}{\centering
+Evaluation graphic\\[5pt]Keep labels readable at the final size}}
+\end{minipage}
+\caption{\textbf{Related panels in a full-width figure.} \textbf{a}, Describe
+the workflow. \textbf{b}, Describe the evaluation. Explain the actual units,
+symbols, sample sizes and error bars. Both boxes are synthetic layout slots
+and represent no observations or scientific conclusions.}
+\label{fig:comparison}
+\end{figure*}
+
+Table~\ref{tab:comparison} illustrates numerical values with uncertainty
+aligned inside one column. Keep extensive supporting results in the
+independent supplementary document.
+\begin{table}[t]
+\centering
+\caption{Synthetic numerical values for layout only.}
+\label{tab:comparison}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=3.0] S[table-format=1.3(3)]@{}}
+\toprule
+Setting & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 120 & 0.385 +- 0.006\\
+Example B & 98 & 0.608 +- 0.051\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Define the actual uncertainty measure when replacing
+the cells. No experiment is represented by this formatting example.
+\end{table}
+
+\section{Discussion}\label{sec:discussion}
+Interpret the evidence, relation to previous work, biological implications
+and limitations. Distinguish verified findings from speculation. Adapt the
+section structure to the manuscript's article type.
+
+\section*{Supplementary data}
+Describe and cite the separate supplementary material supplied with the
+manuscript. The included \texttt{supplementary.tex} has independent S numbering.
+
+\section*{Author contributions}
+Replace with the actual contributions agreed by all authors.
+
+\section*{Funding}
+Replace with confirmed funding sources and grant identifiers, or an accurate
+statement appropriate to the work.
+
+\section*{Acknowledgements}
+Replace with confirmed acknowledgements, or remove if not applicable.
+
+\section*{Conflict of interest}
+Replace with the authors' confirmed competing-interest statement.
+
+\section*{Data availability}
+Replace with an accurate statement of data and code availability, including
+stable identifiers, software versions and any access restrictions.
+
+% OUP's author-year bibliography. Replace the demonstration citation.
+\bibliographystyle{oup-abbrvnat}
+\bibliography{references}
+\end{document}

@@ -4,6 +4,22 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.27.4
+
+### Added
+
+- Added JACS research and Bioinformatics original-paper starters using shared ACS and OUP build profiles.
+
+### Changed
+
+- Reorganized manuscript templates under stable venue-based identifiers while retaining legacy aliases and project metadata compatibility.
+
+### Validation
+
+- Passed all 90 regression tests, including legacy project rebuilds, metadata validation, official package checks and ACS citation-control isolation.
+- Strictly compiled JACS and Bioinformatics manuscripts, supplements and shared examples; visually checked representative pages and bibliography styles.
+- Audited the public code export; upstream templates, research data and the original local Git history remain outside the snapshot.
+
 ## 2026.10.27.3
 
 ### Added

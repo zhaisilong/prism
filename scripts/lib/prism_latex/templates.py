@@ -13,6 +13,7 @@ import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
+from typing import TypedDict
 
 from .build_support import project_version
 
@@ -36,6 +37,10 @@ BIB_MEMBERS = {
     "oup-authoring-template/oup-authoring-template.cls": "oup-authoring-template.cls",
     "oup-authoring-template/oup-plain.bst": "oup-plain.bst",
 }
+BIOINFORMATICS_MEMBERS = {
+    "oup-authoring-template/oup-authoring-template.cls": "oup-authoring-template.cls",
+    "oup-authoring-template/oup-abbrvnat.bst": "oup-abbrvnat.bst",
+}
 # Science-family v1.0 (July 2024), verified against the user-supplied
 # publisher package. Individual hashes also permit a ZIP to be repacked.
 SCIENCE_SHA256 = {
@@ -48,41 +53,88 @@ SCIENCE_MEMBERS = {
     "sciencemag.bst": "sciencemag.bst",
     "readme.txt": "science-template-readme.txt",
 }
-TEMPLATES = {
+class TemplateRecord(TypedDict, total=False):
+    """Catalog data; conference identity and rendering stages stay separate."""
+
+    id: str
+    kind: str
+    venue: str
+    publisher: str | None
+    article_type: str
+    backend: str
+    directory: str
+    engine: str
+    description: str
+    # Reserved for concrete, verified conference profiles. These never imply
+    # a blind-review policy or a rendering mode for another edition or track.
+    edition: int
+    track: str
+    stage: str
+
+
+# The short keys remain compatibility aliases. IDs name a venue, while the
+# backend describes reusable build and import behavior.
+TEMPLATES: dict[str, TemplateRecord] = {
     "prism": {
+        "id": "generic/prism", "kind": "generic", "venue": "Prism",
+        "publisher": None, "article_type": "manuscript", "backend": "prism",
         "directory": "paper-template",
         "engine": "auto",
         "description": "Prism manuscript; English / Chinese; XeLaTeX or LuaLaTeX (default)",
     },
     "nature": {
+        "id": "family/nature-nmi", "kind": "family", "venue": "Nature / NMI draft",
+        "publisher": "Springer Nature", "article_type": "research", "backend": "nature",
         "directory": "nature-template",
         "engine": "pdflatex",
         "description": "Nature / NMI manuscript and supplementary information; English; pdfLaTeX",
     },
     "nature-communications": {
+        "id": "journal/nature-communications", "kind": "journal", "venue": "Nature Communications",
+        "publisher": "Springer Nature", "article_type": "research", "backend": "nature-communications",
         "directory": "nature-communications-template",
         "engine": "pdflatex",
         "description": "Nature Communications research article and supplementary information; English; pdfLaTeX",
     },
     "science-advances": {
+        "id": "journal/science-advances", "kind": "journal", "venue": "Science Advances",
+        "publisher": "AAAS", "article_type": "research", "backend": "science",
         "directory": "science-advances-template",
         "engine": "pdflatex",
         "description": "Science Advances research article and combined supplementary material; English; pdfLaTeX",
     },
     "bib": {
+        "id": "journal/briefings-in-bioinformatics", "kind": "journal", "venue": "Briefings in Bioinformatics",
+        "publisher": "Oxford University Press", "article_type": "manuscript", "backend": "oup-numeric",
         "directory": "bib-template",
         "engine": "pdflatex",
         "description": "Briefings in Bioinformatics (OUP); English; pdfLaTeX",
     },
     "ddt": {
+        "id": "journal/drug-discovery-today", "kind": "journal", "venue": "Drug Discovery Today",
+        "publisher": "Elsevier", "article_type": "review", "backend": "ddt",
         "directory": "ddt-template",
         "engine": "pdflatex",
         "description": "Drug Discovery Today narrative review (Elsevier); English; pdfLaTeX",
     },
     "jcim": {
+        "id": "journal/jcim", "kind": "journal", "venue": "Journal of Chemical Information and Modeling",
+        "publisher": "ACS", "article_type": "research", "backend": "acs",
         "directory": "jcim-template",
         "engine": "pdflatex",
         "description": "Journal of Chemical Information and Modeling research article (ACS); English; pdfLaTeX",
+    },
+    "jacs": {
+        "id": "journal/jacs", "kind": "journal", "venue": "Journal of the American Chemical Society",
+        "publisher": "ACS", "article_type": "research", "backend": "acs",
+        "directory": "jacs-template", "engine": "pdflatex",
+        "description": "Journal of the American Chemical Society research article (ACS); English; pdfLaTeX",
+    },
+    "bioinformatics": {
+        "id": "journal/bioinformatics", "kind": "journal", "venue": "Bioinformatics",
+        "publisher": "Oxford University Press", "article_type": "original", "backend": "oup-authoryear",
+        "directory": "bioinformatics-template", "engine": "pdflatex",
+        "description": "Bioinformatics original paper (OUP); English; pdfLaTeX",
     },
 }
 PRISM_PACKAGES = (
@@ -134,44 +186,86 @@ JCIM_PACKAGES = (
 )
 
 
+BUILD_PROFILES = {
+    "prism": {"packages": PRISM_PACKAGES, "source": None, "examples": False},
+    "nature": {"packages": NATURE_PACKAGES, "source": "nature", "examples": True},
+    "nature-communications": {"packages": NATURE_COMMUNICATIONS_PACKAGES, "source": None, "examples": True},
+    "science": {"packages": SCIENCE_PACKAGES, "source": "science", "examples": True},
+    "oup-numeric": {"packages": BIB_PACKAGES, "source": "oup-numeric", "examples": True},
+    "oup-authoryear": {"packages": BIB_PACKAGES + ("unsrtnat.bst",), "source": "oup-authoryear", "examples": True},
+    "ddt": {"packages": DDT_PACKAGES, "source": None, "examples": True},
+    # achemso writes a job-specific control .bib; BibTeX must run away from
+    # source files so that an unrelated same-named file cannot override it.
+    "acs": {"packages": JCIM_PACKAGES, "source": None, "examples": True, "isolate_cwd": True},
+}
+
+
+def template_choices() -> tuple[str, ...]:
+    """Expose aliases and stable IDs, rejecting an ambiguous registration."""
+    names: list[str] = []
+    for alias, details in TEMPLATES.items():
+        canonical = details["id"]
+        kind = details["kind"]
+        if kind not in ("generic", "family", "journal", "conference") or not canonical.startswith(f"{kind}/"):
+            raise ValueError(f"Invalid Prism template ID or kind: {alias} / {canonical}")
+        if alias in names or canonical in names or alias == canonical:
+            raise ValueError(f"Duplicate Prism template name: {alias} / {canonical}")
+        if details["backend"] not in BUILD_PROFILES:
+            raise ValueError(f"Unknown build profile for {alias}: {details['backend']}")
+        names.extend((alias, canonical))
+    return tuple(names)
+
+
+def resolve_template(name: str) -> str:
+    """Resolve a stable ID or legacy alias to its compatibility alias."""
+    template_choices()
+    for alias, details in TEMPLATES.items():
+        if name == alias or name == details["id"]:
+            return alias
+    raise ValueError(f"unknown template: {name}")
+
+
+def template_profile(template: str) -> dict:
+    alias = resolve_template(template)
+    return BUILD_PROFILES[TEMPLATES[alias]["backend"]]
+
+
+def template_isolated_build(template: str | None) -> bool:
+    return bool(template and template_profile(template).get("isolate_cwd", False))
+
+
 def template_for_project(project: Path) -> str | None:
     path = project / METADATA_NAME
     if not path.exists():
         return None
     try:
         metadata = json.loads(path.read_text(encoding="utf-8"))
-        template = metadata["template"]
-        if template not in TEMPLATES:
-            raise ValueError("unknown template")
+        template = resolve_template(metadata["template"])
+        if "schema_version" in metadata or "template_id" in metadata:
+            if type(metadata.get("schema_version")) is not int or metadata["schema_version"] != 1:
+                raise ValueError("unsupported template metadata schema version")
+            if metadata.get("template_id") != TEMPLATES[template]["id"]:
+                raise ValueError("template and template_id do not match")
     except (OSError, ValueError, TypeError, KeyError) as exc:
         raise SystemExit(f"Invalid Prism template metadata: {path}: {exc}") from exc
     return template
 
 
 def template_engine(template: str | None, requested: str) -> str:
-    if template == "prism" and requested == "pdflatex":
+    alias = resolve_template(template) if template else None
+    if alias and TEMPLATES[alias]["backend"] == "prism" and requested == "pdflatex":
         raise SystemExit("The prism template requires XeLaTeX or LuaLaTeX; use --engine auto, xelatex, or lualatex.")
-    if template in ("nature", "nature-communications", "science-advances", "bib", "ddt", "jcim"):
+    if alias and TEMPLATES[alias]["engine"] == "pdflatex":
         if requested not in ("auto", "pdflatex"):
-            raise SystemExit(f"The {template} template requires pdfLaTeX; use --engine auto or pdflatex.")
+            raise SystemExit(f"The {alias} template requires pdfLaTeX; use --engine auto or pdflatex.")
         return "pdflatex"
     return requested
 
 
 def template_packages(template: str | None, engine: str) -> tuple[str, ...]:
     engine = template_engine(template, engine)
-    if template == "nature":
-        return NATURE_PACKAGES
-    if template == "nature-communications":
-        return NATURE_COMMUNICATIONS_PACKAGES
-    if template == "science-advances":
-        return SCIENCE_PACKAGES
-    if template == "bib":
-        return BIB_PACKAGES
-    if template == "ddt":
-        return DDT_PACKAGES
-    if template == "jcim":
-        return JCIM_PACKAGES
+    if template:
+        return template_profile(template)["packages"]
     # Existing, unmarked projects can explicitly request pdfLaTeX too.
     if engine == "pdflatex":
         return ("graphicx.sty", "amsmath.sty", "amssymb.sty", "natbib.sty")
@@ -224,6 +318,13 @@ def bib_package(source: Path | None) -> tuple[bytes, dict[str, bytes]]:
     return _pinned_package(
         source, label="BIB", url=BIB_URL, size=BIB_SIZE,
         sha256=BIB_SHA256, required=BIB_MEMBERS,
+    )
+
+
+def bioinformatics_package(source: Path | None) -> tuple[bytes, dict[str, bytes]]:
+    return _pinned_package(
+        source, label="Bioinformatics", url=BIB_URL, size=BIB_SIZE,
+        sha256=BIB_SHA256, required=BIOINFORMATICS_MEMBERS,
     )
 
 
@@ -292,13 +393,12 @@ def science_package(source: Path | None) -> dict[str, bytes]:
 
 def template_resources(template: str | None) -> tuple[str, ...]:
     """Project-local upstream resources required by an initialized template."""
-    if template == "nature":
-        return tuple(NATURE_MEMBERS.values())
-    if template == "bib":
-        return tuple(BIB_MEMBERS.values())
-    if template == "science-advances":
-        return tuple(SCIENCE_MEMBERS.values())
-    return ()
+    sources = {
+        "nature": NATURE_MEMBERS, "oup-numeric": BIB_MEMBERS,
+        "oup-authoryear": BIOINFORMATICS_MEMBERS, "science": SCIENCE_MEMBERS,
+    }
+    source = template_profile(template)["source"] if template else None
+    return tuple(sources[source].values()) if source else ()
 
 
 def _snapshot(target: Path) -> tuple | None:
@@ -326,6 +426,12 @@ def _snapshot(target: Path) -> tuple | None:
 
 
 def initialize(target: Path, force: bool, template: str = "prism", source: Path | None = None) -> int:
+    try:
+        template = resolve_template(template)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    profile = template_profile(template)
+    upstream_type = profile["source"]
     # Do not resolve the final component: doing so would follow a target symlink.
     requested = Path(os.path.abspath(target.expanduser()))
     destination = requested.parent.resolve() / requested.name
@@ -336,14 +442,16 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     if not (asset / "main.tex").is_file():
         raise SystemExit(f"Template assets are missing: {asset}")
     examples = ASSET_DIR / "paper-template" / "examples.tex"
-    if template in ("nature", "nature-communications", "science-advances", "bib", "ddt", "jcim") and not examples.is_file():
+    if profile["examples"] and not examples.is_file():
         raise SystemExit(f"Shared typesetting examples are missing: {examples}")
     archive, members = (None, {})
-    if template == "nature":
+    if upstream_type == "nature":
         archive, members = nature_package(source)
-    elif template == "bib":
+    elif upstream_type == "oup-numeric":
         archive, members = bib_package(source)
-    elif template == "science-advances":
+    elif upstream_type == "oup-authoryear":
+        archive, members = bioinformatics_package(source)
+    elif upstream_type == "science":
         if source is not None:
             source_path = source.expanduser().resolve()
             # Do not move the source when replacing a target, or write the
@@ -357,23 +465,25 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     backup = None
     try:
         shutil.copytree(asset, stage, dirs_exist_ok=True)
-        if template in ("nature", "nature-communications", "science-advances", "bib", "ddt", "jcim"):
+        if profile["examples"]:
             shutil.copy2(examples, stage / "examples.tex")
         for name, content in members.items():
             (stage / name).write_bytes(content)
         metadata = {
+            "schema_version": 1,
             "template": template,
+            "template_id": TEMPLATES[template]["id"],
             "prism_version": project_version(),
             "engine": TEMPLATES[template]["engine"],
         }
         if archive is not None:
-            if template == "nature":
+            if upstream_type == "nature":
                 upstream = {"url": NATURE_URL, "sha256": NATURE_SHA256, "archive": NATURE_ARCHIVE}
             else:
                 upstream = {"url": BIB_URL, "sha256": BIB_SHA256, "archive": BIB_ARCHIVE}
             (stage / upstream["archive"]).write_bytes(archive)
             metadata["upstream"] = upstream
-        elif template == "science-advances":
+        elif upstream_type == "science":
             metadata["upstream"] = {
                 "template": "Science-family v1.0 (July 2024)",
                 "files_sha256": dict(SCIENCE_SHA256),
