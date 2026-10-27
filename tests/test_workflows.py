@@ -4,10 +4,12 @@ import json
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 
@@ -230,7 +232,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("nature:", result.stdout)
         self.assertIn("bib: Briefings in Bioinformatics", result.stdout)
         self.assertIn("ddt: Drug Discovery Today", result.stdout)
-        for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "ddt", "--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
+        self.assertIn("jcim:", result.stdout)
+        for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "ddt", "--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "jcim", "--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
             with self.subTest(arguments=arguments):
                 result = self.run_cli("paper-latex", arguments)
                 self.assertEqual(result.returncode, 2, result.stderr)
@@ -334,6 +337,83 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
         self.assert_no_intermediates(project)
 
+    def test_real_jcim_isolates_acs_control_bib_from_same_named_source(self):
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real JCIM build needs {command}")
+        for resource in ("achemso.sty", "achemso.bst", "xkeyval.sty", "natbib.sty", "natmove.sty"):
+            check = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
+            if check.returncode != 0 or not check.stdout.strip():
+                self.skipTest(f"Real JCIM build needs {resource}")
+        project = self.root / "JCIM citation test"
+        (project / "sections").mkdir(parents=True)
+        (project / "figures").mkdir()
+        (project / "main.tex").write_text(
+            r"""\documentclass[letterpaper]{article}
+\usepackage[articletitle=true]{achemso}
+\usepackage{graphicx}
+\begin{document}
+\input{sections/introduction}
+\includegraphics[width=1cm]{figures/example.png}
+\bibliography{references}
+\end{document}
+""", encoding="utf-8",
+        )
+        section = project / "sections" / "introduction.tex"
+        section.write_text(r"First citation\cite{zulu2025}; second citation\cite{alpha2025}." + "\n", encoding="utf-8")
+        (project / "references.bib").write_text(
+            "@article{zulu2025,author={Zulu, Zoe},title={Synthetic Zulu reference},journal={Example Journal},year={2025}}\n"
+            "@article{alpha2025,author={Alpha, Aaron},title={Synthetic Alpha reference},journal={Example Journal},year={2025}}\n",
+            encoding="utf-8",
+        )
+        # Deliberately conflicting with the automatic package-generated file.
+        # Preserving its bytes alone is not enough: BibTeX must not read it.
+        sentinel = project / "acs-main.bib"
+        sentinel.write_text(
+            "@Control{achemso-control,ctrl-article-title={no}}\n"
+            "@article{sentinel,author={Sentinel, Stella},title={Source-only sentinel},journal={Example},year={2025}}\n",
+            encoding="utf-8",
+        )
+        (project / "prism-template.json").write_text('{"template":"jcim","engine":"pdflatex"}', encoding="utf-8")
+        # One-pixel RGB PNG, created without nonstandard Python dependencies.
+        def chunk(name, data):
+            return struct.pack(">I", len(data)) + name + data + struct.pack(">I", zlib.crc32(name + data) & 0xFFFFFFFF)
+        png = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
+               + chunk(b"IDAT", zlib.compress(b"\0\xff\xff\xff")) + chunk(b"IEND", b""))
+        (project / "figures" / "example.png").write_bytes(png)
+        before = {path: path.read_bytes() for path in project.rglob("*") if path.is_file()}
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        command = [str(ROOT / "scripts" / "latex-paper.sh"), str(project), "--strict", "--no-build-script"]
+        result = subprocess.run(command, capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        pdf = project / "main.pdf"
+        extracted = subprocess.run(["pdftotext", "-raw", str(pdf), "-"], capture_output=True, text=True, check=True).stdout
+        # ACS natmove puts punctuation before the superscript citation.
+        self.assertRegex(extracted, re.compile(r"First citation;\s*(?:1|\[1\])", re.S))
+        self.assertRegex(extracted, re.compile(r"second citation\.\s*(?:2|\[2\])", re.S))
+        self.assertLess(extracted.index("Zulu"), extracted.index("Alpha"))
+        self.assertIn("Synthetic Zulu reference", extracted)
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
+        # A source-only entry must remain unresolved and strict mode must retain
+        # the previously published PDF, even when the conflicting file exists.
+        previous_pdf = pdf.read_bytes()
+        section.write_text(section.read_text(encoding="utf-8") + r"Unexpected \cite{sentinel}." + "\n", encoding="utf-8")
+        result = subprocess.run(command, capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("sentinel", result.stdout + result.stderr)
+        self.assertRegex(result.stdout + result.stderr, r"(?i)(?:undefined|didn't find a database entry)")
+        self.assertEqual(pdf.read_bytes(), previous_pdf)
+        self.assertEqual(sentinel.read_bytes(), before[sentinel])
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
     def test_paper_output_rejects_source_suffixes_and_symlink_aliases_before_compilation(self):
         self.install_compiler()
         cli_input, source, _ = self.make_source("paper-latex")
@@ -377,7 +457,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.install_compiler()
         cli_input, _, destination = self.make_source("paper-latex")
         destination.write_bytes(b"previous PDF")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 (cli_input / "prism-template.json").write_text(json.dumps({"template": template}))
                 result = self.run_cli("paper-latex", [str(cli_input), "--engine", engine])
@@ -439,6 +519,13 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             self.assertIn(f"{resource}: MISSING", result.stdout)
         self.assertNotIn("fontspec", result.stdout)
 
+    def test_jcim_dependency_profile_reports_missing_acs_resources(self):
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "jcim"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        for resource in ("pdflatex", "achemso.sty", "achemso.bst", "natbib.sty", "natmove.sty", "xkeyval.sty"):
+            self.assertIn(f"{resource}: MISSING", result.stdout)
+        self.assertNotIn("fontspec", result.stdout)
+
     def test_paper_dependencies_require_bibtex_even_when_other_tools_are_available(self):
         self.install_compiler()
         (self.bin / "python3").symlink_to(sys.executable)
@@ -446,7 +533,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             executable = self.bin / command
             executable.write_text(f"#!{sys.executable}\nprint('/tex/resource')\n")
             executable.chmod(0o755)
-        for template in ("prism", "nature", "bib", "ddt"):
+        for template in ("prism", "nature", "bib", "ddt", "jcim"):
             with self.subTest(template=template):
                 result = self.run_cli("paper-latex", ["--check-deps", "--template", template])
                 self.assertEqual(result.returncode, 1, result.stderr)

@@ -57,6 +57,11 @@ TEMPLATES = {
         "engine": "pdflatex",
         "description": "Drug Discovery Today narrative review (Elsevier); English; pdfLaTeX",
     },
+    "jcim": {
+        "directory": "jcim-template",
+        "engine": "pdflatex",
+        "description": "Journal of Chemical Information and Modeling research article (ACS); English; pdfLaTeX",
+    },
 }
 PRISM_PACKAGES = (
     "iftex.sty", "bookmark.sty", "graphicx.sty", "caption.sty",
@@ -88,6 +93,12 @@ DDT_PACKAGES = (
     "siunitx.sty", "longtable.sty", "caption.sty", "subcaption.sty",
     "pdflscape.sty",
 )
+JCIM_PACKAGES = (
+    "article.cls", "achemso.sty", "achemso.bst", "xkeyval.sty", "natbib.sty",
+    "natmove.sty", "graphicx.sty", "amsmath.sty", "amssymb.sty",
+    "booktabs.sty", "tabularx.sty", "siunitx.sty", "longtable.sty",
+    "caption.sty", "subcaption.sty", "pdflscape.sty",
+)
 
 
 def template_for_project(project: Path) -> str | None:
@@ -107,7 +118,7 @@ def template_for_project(project: Path) -> str | None:
 def template_engine(template: str | None, requested: str) -> str:
     if template == "prism" and requested == "pdflatex":
         raise SystemExit("The prism template requires XeLaTeX or LuaLaTeX; use --engine auto, xelatex, or lualatex.")
-    if template in ("nature", "bib", "ddt"):
+    if template in ("nature", "bib", "ddt", "jcim"):
         if requested not in ("auto", "pdflatex"):
             raise SystemExit(f"The {template} template requires pdfLaTeX; use --engine auto or pdflatex.")
         return "pdflatex"
@@ -122,6 +133,8 @@ def template_packages(template: str | None, engine: str) -> tuple[str, ...]:
         return BIB_PACKAGES
     if template == "ddt":
         return DDT_PACKAGES
+    if template == "jcim":
+        return JCIM_PACKAGES
     # Existing, unmarked projects can explicitly request pdfLaTeX too.
     if engine == "pdflatex":
         return ("graphicx.sty", "amsmath.sty", "amssymb.sty", "natbib.sty")
@@ -221,7 +234,7 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     if not (asset / "main.tex").is_file():
         raise SystemExit(f"Template assets are missing: {asset}")
     examples = ASSET_DIR / "paper-template" / "examples.tex"
-    if template in ("nature", "bib", "ddt") and not examples.is_file():
+    if template in ("nature", "bib", "ddt", "jcim") and not examples.is_file():
         raise SystemExit(f"Shared typesetting examples are missing: {examples}")
     archive, members = (None, {})
     if template == "nature":
@@ -233,7 +246,7 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     backup = None
     try:
         shutil.copytree(asset, stage, dirs_exist_ok=True)
-        if template in ("nature", "bib", "ddt"):
+        if template in ("nature", "bib", "ddt", "jcim"):
             shutil.copy2(examples, stage / "examples.tex")
         for name, content in members.items():
             (stage / name).write_bytes(content)

@@ -1,0 +1,119 @@
+% Original Prism research-paper starter for Journal of Chemical Information
+% and Modeling. This is a manuscript draft, not a final typeset journal issue.
+% The local TeX distribution provides the ACS bibliography package and style.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx}
+% achemso loads natbib and selects its own BibTeX style; do not load it twice.
+\usepackage[articletitle=true]{achemso}
+\usepackage[hidelinks]{hyperref}
+\sisetup{uncertainty-mode=separate}
+
+\title{Research manuscript title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Replace this paragraph with the manuscript's question, approach, verified
+results and conclusions. This starter contains synthetic layout examples
+only; it reports no research result. Follow the journal's current instructions
+for the chosen article type.
+\end{abstract}
+
+\noindent\textbf{Keywords:} replace with the manuscript's own terms
+
+\section{Introduction}\label{sec:introduction}
+Introduce the research question, relevant prior work and the contribution of
+the study. This public reference demonstrates bibliography mechanics only;
+retain it only if relevant to the manuscript\cite{wilkinson2016fair}. Replace
+all instructional text, numerical examples and graphics before submission.
+
+\section{Methods}\label{sec:methods}
+Describe the actual data, procedures, software versions and evaluation design.
+State the assumptions, controls and uncertainty measures needed to interpret
+and reproduce the study. Equations~\eqref{eq:score} and~\eqref{eq:difference}
+illustrate aligned expressions and cross-references only.
+\begin{align}
+ s &= \sum_{i=1}^{n} w_i x_i,\label{eq:score}\\
+ \Delta s &= s_{\mathrm{A}}-s_{\mathrm{B}}.\label{eq:difference}
+\end{align}
+Define the actual variables in the manuscript; these equations do not describe
+a study or claim a result.
+
+\section{Results}\label{sec:results}
+Present verified findings and relate each display to the text.
+Figure~\ref{fig:overview} shows an editable two-panel placeholder.
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][32mm][c]{0.90\linewidth}{\centering
+Overview graphic\\[5pt]Replace with an original PDF or PNG}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][32mm][c]{0.90\linewidth}{\centering
+Comparison graphic\\[5pt]Keep labels readable at final size}}
+\end{minipage}
+\caption{\textbf{Two-panel layout example.} (a) Overview slot. (b) Comparison
+slot. Describe the actual figure, units, symbols and uncertainty as needed.
+These boxes represent no data.}
+\label{fig:overview}
+\end{figure}
+
+Table~\ref{tab:comparison} illustrates numerical alignment with uncertainty.
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic values demonstrating table layout only.}
+\label{tab:comparison}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=3.0] S[table-format=1.3(3)] S[table-format=1.3]@{}}
+\toprule
+Example & {Count} & {Estimate $\pm$ SD} & {Score}\\
+\midrule
+Example A & 120 & 0.385 +- 0.006 & 0.759\\
+Example B & 98 & 0.608 +- 0.051 & 0.206\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Define the actual units and uncertainty when
+replacing the table.
+\end{table}
+
+\section{Discussion}\label{sec:discussion}
+Interpret the verified findings in relation to prior work and explain their
+limits. Separate supported conclusions from hypotheses or speculation.
+
+\section{Conclusion}\label{sec:conclusion}
+Summarize the conclusion justified by the evidence and identify relevant
+limitations or remaining questions.
+
+\section*{Supporting Information}
+Describe the files supplied with the manuscript. The included
+\texttt{supplementary.tex} compiles independently and numbers figures, tables
+and equations with an S prefix.
+
+\section*{Data and Code Availability}
+Replace with the authors' accurate availability statement and any restrictions.
+\section*{Acknowledgments}
+Replace with confirmed funding and acknowledgments, or remove if not applicable.
+\section*{Conflict of Interest}
+Replace with the authors' confirmed statement.
+
+% achemso supplies the bibliography style. Replace the example reference.
+\bibliography{references}
+
+\clearpage
+\section*{For Table of Contents Use Only}
+% Replace this box with the authors' original TOC graphic. Check the current
+% journal instructions for the graphic's dimensions and submission details.
+\begin{center}
+\fbox{\parbox[c][42mm][c]{0.70\linewidth}{\centering
+TOC graphic placeholder\\[8pt]
+Replace with the authors' original graphic before submission}}
+\end{center}
+\end{document}

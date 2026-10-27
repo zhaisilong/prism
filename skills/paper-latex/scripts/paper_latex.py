@@ -120,10 +120,16 @@ def main(argv: list[str] | None = None) -> int:
     env["TEXINPUTS"] = search + env.get("TEXINPUTS", "")
     env["BIBINPUTS"] = search + env.get("BIBINPUTS", "")
     env["BSTINPUTS"] = search + env.get("BSTINPUTS", "")
+    # achemso writes an acs-<jobname>.bib control file. BibTeX searches
+    # its working directory before BIBINPUTS, so running from the source
+    # directory can silently select a user's unrelated, same-named file.
+    # Keep the normal working-directory behavior for other templates.
+    build_cwd = workdir if template == "jcim" else paper_dir
+    build_input = str(main_path) if template == "jcim" else relative_main
     try:
         result = subprocess.run(
-            latexmk_command(engine, relative_main, workdir),
-            cwd=paper_dir,
+            latexmk_command(engine, build_input, workdir),
+            cwd=build_cwd,
             env=env,
             text=True,
             stdout=subprocess.PIPE,

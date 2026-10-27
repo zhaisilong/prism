@@ -4,6 +4,22 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.27.1
+
+### Added
+
+- Added a JCIM research-paper starter with independent supplementary material, a TOC graphic placeholder, and ACS BibTeX support.
+
+### Changed
+
+- Isolated JCIM builds from same-named source bibliography control files and documented the offline workflow.
+
+### Validation
+
+- Passed all 67 tests, the three wrapper help checks, the paper skill validator, and the JCIM dependency check.
+- Strictly compiled and visually checked the JCIM manuscript, supplementary material, and shared examples; verified citation order, conflicting control-file isolation, and failure preservation.
+- Audited the public code export; research data, archives, and original local Git history remain outside the snapshot.
+
 ## 2026.10.27
 
 ### Added

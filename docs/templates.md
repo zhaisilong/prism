@@ -10,6 +10,7 @@
 | `nature` | Nature Portfolio / NMI 初稿写作 | pdfLaTeX / BibTeX，`sn-nature` | Prism 原创启动文件 + 本地获取的官方 Springer Nature 3.1 文件 |
 | `bib` | Briefings in Bioinformatics 英文稿、双栏图表与公式 | pdfLaTeX / BibTeX | Prism 原创启动文件 + 官方 OUP 1.5 class |
 | `ddt` | Drug Discovery Today 单栏叙述性综述草稿 | pdfLaTeX / BibTeX，数字上标 | Prism 原创启动文件 + TeX Live 安装的 Elsevier `elsarticle` |
+| `jcim` | Journal of Chemical Information and Modeling 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
 
 `prism` 的 `main.tex` 分节写作；期刊模板主文是单一 TeX，不加载 Prism 字体样式。各模板均附 `examples.tex` 和独立 `supplementary.tex`；所有演示均为格式示例。
 
@@ -22,6 +23,8 @@ NMI 提供[初稿要求](https://www.nature.com/natmachintell/submission-guideli
 BIB 使用 [OUP 作者模板](https://ctan.org/pkg/oup-authoring-template) 1.5（2026-07-14），采用 `unnumsec,webpdf,contemporary,large`，使用该版本默认的数字引用；旧期刊配置表中的 `numbered` 在新版 class 中会干扰编号，因此省略。首次初始化校验官方 ZIP 后将所需文件存入本地项目，离线可用 `--template-source`。主文为官方双栏，独立补充材料使用标准 `article` 单栏；参考文献使用 `unsrt` 按首次引用顺序编号。最终格式以 [BIB 作者指南](https://academic.oup.com/bib/pages/author-guidelines)和 [OUP 模板说明](https://academic.oup.com/pages/for-authors/journals/preparing-and-submitting-your-manuscript)为准。上游文件保留 LPPL 许可，公开仓库只保存原创启动稿与导入代码。
 
 DDT 使用发行版中的 [Elsevier 官方 `elsarticle` 类](https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/latex-instructions)与 `elsarticle-num.bst`，不下载或复制第三方源码。`review` 模式为单栏、1.5 倍行距；数字上标及按引用顺序列参考文献作为草稿样式，参考 [DDT 已发表综述](https://www.sciencedirect.com/science/article/pii/S1359644625000546)。`highlights.txt`、`teaser.txt` 为可选占位。2026-10-27 核查时，[DDT 作者指南](https://www.sciencedirect.com/journal/drug-discovery-today/publish/guide-for-authors)无法访问，投稿前应确认当前要求；此模板不承诺最终出版格式。
+
+JCIM 使用 [ACS 官方示例](https://www.overleaf.com/latex/templates/latex-template-for-american-chemical-society-acs-journal-submissions/swszwgfqsshj)支持的 `article` + `achemso` / BibTeX 组合（官方示例默认使用 `biblatex` / Biber）；只依赖已安装的 TeX Live 宏包，不复制第三方代码。请替换目录图占位，并依照 [JCIM 作者指南](https://researcher-resources.acs.org/publish/author_guidelines?coden=jcisd8)核对投稿要求；本模板用于初稿，不自动整理最终投稿文件。
 
 ## 其他高质量官方模板
 
