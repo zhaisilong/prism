@@ -15,13 +15,18 @@
 | `bib` | Briefings in Bioinformatics 英文稿 |
 | `ddt` | Drug Discovery Today 单栏综述 |
 | `jcim` | Journal of Chemical Information and Modeling 研究论文 |
+| `science-advances` | Science Advances 研究论文 |
 | `prism` | 通用论文、中英混排 |
 
 ```bash
 scripts/latex-paper.sh --init projects/Papers/my-paper --template nature
 ```
 
-更换模板时，把 `nature` 换成表格中的标识。Nature 和 BIB 模板首次创建需要联网；其余模板使用已安装的 TeX Live 宏包。
+更换模板时，把 `nature` 换成表格中的标识。Nature 和 BIB 模板首次创建需要联网；Science Advances 创建时还需提供[官方模板](https://www.overleaf.com/latex/templates/latex-template-for-science-family-journals/kjytmmfyxthd)目录或 ZIP：
+
+```bash
+scripts/latex-paper.sh --init projects/Papers/my-paper --template science-advances --template-source path/to/science-template
+```
 
 ## 2. 写内容
 
@@ -29,7 +34,7 @@ scripts/latex-paper.sh --init projects/Papers/my-paper --template nature
 
 - `main.tex`：标题、作者和正文；Prism 模板的正文在 `sections/`。
 - `references.bib`：参考文献。
-- `supplementary.tex`：补充材料，需要时再写。
+- `supplementary.tex`：补充材料，需要时再写；Science Advances 的补充材料在 `main.tex` 中。
 
 图表公式可参考 `examples.tex`。模板里的示例文字和数据在正式使用前替换。
 

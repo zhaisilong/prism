@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 import zlib
 from pathlib import Path
 
@@ -234,12 +235,91 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("bib: Briefings in Bioinformatics", result.stdout)
         self.assertIn("ddt: Drug Discovery Today", result.stdout)
         self.assertIn("jcim:", result.stdout)
+        self.assertIn("science-advances:", result.stdout)
         for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "ddt", "--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "jcim", "--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
             with self.subTest(arguments=arguments):
                 result = self.run_cli("paper-latex", arguments)
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
         self.assertFalse((self.root / "new").exists())
+
+    def test_science_init_requires_source_before_creating_target(self):
+        target = self.root / "new science parent" / "paper"
+        result = self.run_cli("paper-latex", ["--init", str(target), "--template", "science-advances"])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("--template-source", result.stderr)
+        self.assertFalse(target.parent.exists())
+
+    def test_real_science_unifies_main_and_supplement_references(self):
+        # The upstream source is intentionally not vendored. CI can opt in by
+        # setting PRISM_SCIENCE_SOURCE to its own verified official directory.
+        source = Path(os.environ.get("PRISM_SCIENCE_SOURCE", ROOT / "tmp" / "LaTeX_Template_for_Science_family_journals"))
+        if not source.is_dir():
+            self.skipTest("Real Science build needs PRISM_SCIENCE_SOURCE official directory")
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real Science build needs {command}")
+        for resource in ("newtxtext.sty", "newtxmath.sty"):
+            check = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
+            if check.returncode != 0 or not check.stdout.strip():
+                self.skipTest(f"Real Science build needs {resource}")
+        source_before = {name: (source / name).read_bytes() for name in ("scicite.sty", "sciencemag.bst", "readme.txt")}
+        target = self.root / "论文 with spaces" / "Science Advances"
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        wrapper = str(ROOT / "scripts" / "latex-paper.sh")
+        initialized = subprocess.run([wrapper, "--init", str(target), "--template", "science-advances", "--template-source", str(source)], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(initialized.returncode, 0, initialized.stdout + initialized.stderr)
+        before = {path: path.read_bytes() for path in target.rglob("*") if path.is_file()}
+        built = subprocess.run([wrapper, str(target), "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+        pdf = target / "main.pdf"
+        rebuild = target / "prism-build.sh"
+        self.assertTrue(rebuild.is_file())
+        extracted = subprocess.run(["pdftotext", "-raw", str(pdf), "-"], capture_output=True, text=True, check=True).stdout
+        self.assertEqual(extracted.count("References and Notes"), 1)
+        before_supplement, supplement = extracted.split("Supplementary Materials", 1)
+        self.assertIn("Peng", before_supplement)
+        self.assertIn("Sandve", before_supplement)
+        self.assertLess(before_supplement.index("Peng"), before_supplement.index("Sandve"))
+        self.assertRegex(supplement, re.compile(r"supplement-only example\s+citation\s*\(2\)", re.I))
+        self.assertIn("Figure S1", extracted)
+        self.assertIn("Table S1", extracted)
+        self.assertIn("Equation S1", extracted)
+        original_rebuild = rebuild.read_bytes()
+        examples = subprocess.run([wrapper, str(target), "--main", "examples.tex", "--no-build-script", "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(examples.returncode, 0, examples.stdout + examples.stderr)
+        self.assertTrue((target / "examples.pdf").is_file())
+        self.assertEqual(rebuild.read_bytes(), original_rebuild)
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+        for name, content in source_before.items():
+            self.assertEqual((source / name).read_bytes(), content)
+        self.assert_no_intermediates(target)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
+        archive_path = self.root / "official package.zip"
+        with zipfile.ZipFile(archive_path, "w") as archive:
+            for path in source.iterdir():
+                if path.is_file() and not path.is_symlink():
+                    archive.write(path, f"science-family/{path.name}")
+        zipped_target = self.root / "zip import"
+        zipped = subprocess.run([wrapper, "--init", str(zipped_target), "--template", "science-advances", "--template-source", str(archive_path)], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(zipped.returncode, 0, zipped.stdout + zipped.stderr)
+        self.assertEqual((zipped_target / "scicite.sty").read_bytes(), source_before["scicite.sty"])
+        self.assertEqual((zipped_target / "sciencemag.bst").read_bytes(), source_before["sciencemag.bst"])
+
+        previous_pdf, previous_script = pdf.read_bytes(), rebuild.read_bytes()
+        main_tex = target / "main.tex"
+        main_tex.write_text(main_tex.read_text(encoding="utf-8").replace(r"\end{document}", r"Broken citation\cite{missing_fixture}." + "\n" + r"\end{document}"), encoding="utf-8")
+        failed = subprocess.run([wrapper, str(target), "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertNotEqual(failed.returncode, 0, failed.stdout + failed.stderr)
+        self.assertIn("missing_fixture", failed.stdout + failed.stderr)
+        self.assertEqual(pdf.read_bytes(), previous_pdf)
+        self.assertEqual(rebuild.read_bytes(), previous_script)
+        self.assert_no_intermediates(target)
 
     def test_marked_nature_project_auto_builds_with_pdflatex_and_preserves_cleanliness(self):
         self.install_compiler()
@@ -508,7 +588,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.install_compiler()
         cli_input, _, destination = self.make_source("paper-latex")
         destination.write_bytes(b"previous PDF")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex"), ("science-advances", "xelatex"), ("science-advances", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 (cli_input / "prism-template.json").write_text(json.dumps({"template": template}))
                 result = self.run_cli("paper-latex", [str(cli_input), "--engine", engine])
@@ -584,6 +664,19 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             self.assertIn(f"{resource}: MISSING", result.stdout)
         self.assertNotIn("fontspec", result.stdout)
 
+    def test_science_dependency_profile_checks_local_styles(self):
+        cli_input, _, _ = self.make_source("paper-latex")
+        (cli_input / "prism-template.json").write_text('{"template":"science-advances"}')
+        result = self.run_cli("paper-latex", [str(cli_input), "--check-deps"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        for resource in ("scicite.sty", "sciencemag.bst"):
+            self.assertIn(f"{resource}: MISSING", result.stdout)
+            (cli_input / resource).write_text("local synthetic resource")
+        result = self.run_cli("paper-latex", [str(cli_input), "--check-deps"])
+        for resource in ("scicite.sty", "sciencemag.bst"):
+            self.assertIn(f"{resource}: {cli_input / resource}", result.stdout)
+            self.assertNotIn(f"{resource}: MISSING", result.stdout)
+
     def test_paper_dependencies_require_bibtex_even_when_other_tools_are_available(self):
         self.install_compiler()
         (self.bin / "python3").symlink_to(sys.executable)
@@ -591,7 +684,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             executable = self.bin / command
             executable.write_text(f"#!{sys.executable}\nprint('/tex/resource')\n")
             executable.chmod(0o755)
-        for template in ("prism", "nature", "nature-communications", "bib", "ddt", "jcim"):
+        for template in ("prism", "nature", "nature-communications", "bib", "ddt", "jcim", "science-advances"):
             with self.subTest(template=template):
                 result = self.run_cli("paper-latex", ["--check-deps", "--template", template])
                 self.assertEqual(result.returncode, 1, result.stderr)

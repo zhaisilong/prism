@@ -38,7 +38,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--init", metavar="TARGET_DIR", type=Path, help="Create a new manuscript project")
     result.add_argument("--list-templates", action="store_true", help="List available manuscript templates")
     result.add_argument("--template", choices=tuple(TEMPLATES), help="Template for --init or --check-deps (default: prism)")
-    result.add_argument("--template-source", metavar="PACKAGE.zip", type=Path, help="Pinned official ZIP for offline --init --template nature or bib")
+    result.add_argument("--template-source", metavar="PATH", type=Path, help="Official ZIP for nature or bib; official folder or ZIP required for science-advances")
     result.add_argument("--main", default="main.tex", help="Main TeX path relative to PAPER_DIR")
     result.add_argument("--out", type=Path, help="Output PDF path")
     result.add_argument("--engine", choices=("auto", "xelatex", "lualatex", "pdflatex"), default="auto")
@@ -76,8 +76,8 @@ def main(argv: list[str] | None = None) -> int:
         argument_parser.error("Use --init TARGET_DIR without PAPER_DIR or --check-deps.")
     if args.template and not (args.init or args.check_deps):
         argument_parser.error("--template is only supported with --init or --check-deps.")
-    if args.template_source and not (args.init and args.template in ("nature", "bib")):
-        argument_parser.error("--template-source requires --init TARGET_DIR --template nature or bib.")
+    if args.template_source and not (args.init and args.template in ("nature", "bib", "science-advances")):
+        argument_parser.error("--template-source requires --init TARGET_DIR --template nature, bib, or science-advances.")
     if args.force and not args.init:
         argument_parser.error("--force requires --init TARGET_DIR.")
     if args.init:

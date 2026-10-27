@@ -4,6 +4,22 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.27.3
+
+### Added
+
+- Added a Science Advances research-paper starter with one bibliography for the main text and supplementary material.
+
+### Changed
+
+- Added verified local import of Science-family v1.0 style files and copyright notice from a directory or ZIP.
+
+### Validation
+
+- Passed all 79 regression tests, wrapper help checks, the paper skill validator, and the Science Advances dependency check.
+- Strictly compiled and visually checked the Science Advances manuscript and shared examples; verified continuous citations, supplementary numbering, source cleanliness, and failure preservation.
+- Audited the public code export; upstream style files, research data, and original local Git history remain outside the snapshot.
+
 ## 2026.10.27.2
 
 ### Added

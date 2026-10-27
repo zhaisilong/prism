@@ -36,6 +36,18 @@ BIB_MEMBERS = {
     "oup-authoring-template/oup-authoring-template.cls": "oup-authoring-template.cls",
     "oup-authoring-template/oup-plain.bst": "oup-plain.bst",
 }
+# Science-family v1.0 (July 2024), verified against the user-supplied
+# publisher package. Individual hashes also permit a ZIP to be repacked.
+SCIENCE_SHA256 = {
+    "scicite.sty": "8030d7867d4094da12e59f3f0a6bc1d646d9c8454518872086d34bf25bbf2a99",
+    "sciencemag.bst": "2ce0f9f1dad69ab331fbf1a8d0210d757f85043025f777ba01e53533c3b659c3",
+    "readme.txt": "a8ede7d50779a9f5e82f332780efeba5b6dba4b9cc04c87b1d0fd2464cc1cd9d",
+}
+SCIENCE_MEMBERS = {
+    "scicite.sty": "scicite.sty",
+    "sciencemag.bst": "sciencemag.bst",
+    "readme.txt": "science-template-readme.txt",
+}
 TEMPLATES = {
     "prism": {
         "directory": "paper-template",
@@ -51,6 +63,11 @@ TEMPLATES = {
         "directory": "nature-communications-template",
         "engine": "pdflatex",
         "description": "Nature Communications research article and supplementary information; English; pdfLaTeX",
+    },
+    "science-advances": {
+        "directory": "science-advances-template",
+        "engine": "pdflatex",
+        "description": "Science Advances research article and combined supplementary material; English; pdfLaTeX",
     },
     "bib": {
         "directory": "bib-template",
@@ -86,6 +103,12 @@ NATURE_COMMUNICATIONS_PACKAGES = (
     "article.cls", "graphicx.sty", "amsmath.sty", "amssymb.sty",
     "booktabs.sty", "tabularx.sty", "siunitx.sty", "longtable.sty",
     "caption.sty", "subcaption.sty", "pdflscape.sty", "natbib.sty", "unsrt.bst",
+)
+SCIENCE_PACKAGES = (
+    "article.cls", "graphicx.sty", "newtxtext.sty", "newtxmath.sty",
+    "url.sty", "amsmath.sty", "amssymb.sty", "booktabs.sty",
+    "tabularx.sty", "siunitx.sty", "longtable.sty", "caption.sty",
+    "subcaption.sty", "pdflscape.sty", "natbib.sty", "unsrtnat.bst",
 )
 BIB_PACKAGES = (
     "crop.sty", "graphicx.sty", "caption.sty", "amsmath.sty", "array.sty",
@@ -128,7 +151,7 @@ def template_for_project(project: Path) -> str | None:
 def template_engine(template: str | None, requested: str) -> str:
     if template == "prism" and requested == "pdflatex":
         raise SystemExit("The prism template requires XeLaTeX or LuaLaTeX; use --engine auto, xelatex, or lualatex.")
-    if template in ("nature", "nature-communications", "bib", "ddt", "jcim"):
+    if template in ("nature", "nature-communications", "science-advances", "bib", "ddt", "jcim"):
         if requested not in ("auto", "pdflatex"):
             raise SystemExit(f"The {template} template requires pdfLaTeX; use --engine auto or pdflatex.")
         return "pdflatex"
@@ -141,6 +164,8 @@ def template_packages(template: str | None, engine: str) -> tuple[str, ...]:
         return NATURE_PACKAGES
     if template == "nature-communications":
         return NATURE_COMMUNICATIONS_PACKAGES
+    if template == "science-advances":
+        return SCIENCE_PACKAGES
     if template == "bib":
         return BIB_PACKAGES
     if template == "ddt":
@@ -202,12 +227,77 @@ def bib_package(source: Path | None) -> tuple[bytes, dict[str, bytes]]:
     )
 
 
+def _read_science_file(path: Path, limit: int) -> bytes:
+    """Read one bounded regular file without following a final symlink."""
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
+    with os.fdopen(descriptor, "rb") as handle:
+        before = os.fstat(handle.fileno())
+        if not stat.S_ISREG(before.st_mode) or before.st_size > limit:
+            raise ValueError(f"not a regular file or too large: {path.name}")
+        content = handle.read(limit + 1)
+        after = os.fstat(handle.fileno())
+        if len(content) > limit or (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+            raise ValueError(f"file changed during reading or exceeds size limit: {path.name}")
+        return content
+
+
+def science_package(source: Path | None) -> dict[str, bytes]:
+    """Read the pinned Science v1.0 files from a user-supplied folder or ZIP.
+
+    Hashes establish reproducibility against this recorded version; they do not
+    independently authenticate a user-supplied package's provenance.
+    """
+    if source is None:
+        raise SystemExit("Science Advances initialization requires --template-source with the official Science-family folder or ZIP. The initialization target was not changed.")
+    source = source.expanduser()
+    try:
+        if source.is_symlink():
+            raise ValueError("template source must not be a symbolic link")
+        if source.is_dir():
+            contents = {name: _read_science_file(source / name, 2_000_000) for name in SCIENCE_MEMBERS}
+        else:
+            archive = _read_science_file(source, 10_000_000)
+            contents = {}
+            with zipfile.ZipFile(io.BytesIO(archive)) as package:
+                entries = package.infolist()
+                if len(entries) > 256 or sum(info.file_size for info in entries) > 20_000_000:
+                    raise ValueError("ZIP exceeds entry or uncompressed-size limit")
+                seen_names = set()
+                for info in entries:
+                    name = info.filename
+                    parts = name.rstrip("/").split("/")
+                    if (not name or name.startswith("/") or "\\" in name
+                            or any(part in ("", ".", "..") or ":" in part for part in parts)):
+                        raise ValueError("ZIP contains an unsafe path")
+                    file_type = stat.S_IFMT(info.external_attr >> 16)
+                    if file_type not in (0, stat.S_IFREG, stat.S_IFDIR) or info.file_size > 2_000_000:
+                        raise ValueError("ZIP contains a link, special file, or oversized member")
+                    basename = parts[-1]
+                    canonical = next((key for key in SCIENCE_MEMBERS if key.casefold() == basename.casefold()), None)
+                    if canonical is None:
+                        continue
+                    if canonical in seen_names or basename != canonical or info.is_dir():
+                        raise ValueError(f"required member is duplicated or has incorrect name: {canonical}")
+                    seen_names.add(canonical)
+                    contents[canonical] = package.read(info)
+            if set(contents) != set(SCIENCE_MEMBERS):
+                raise ValueError("ZIP does not contain each required Science style and readme exactly once")
+        for name, content in contents.items():
+            if hashlib.sha256(content).hexdigest() != SCIENCE_SHA256[name]:
+                raise ValueError(f"checksum mismatch for {name}; expected Science-family v1.0")
+        return {SCIENCE_MEMBERS[name]: content for name, content in contents.items()}
+    except (OSError, ValueError, KeyError, zipfile.BadZipFile, RuntimeError, NotImplementedError) as exc:
+        raise SystemExit(f"Invalid Science-family template source: {exc}. The initialization target was not changed.") from exc
+
+
 def template_resources(template: str | None) -> tuple[str, ...]:
     """Project-local upstream resources required by an initialized template."""
     if template == "nature":
         return tuple(NATURE_MEMBERS.values())
     if template == "bib":
         return tuple(BIB_MEMBERS.values())
+    if template == "science-advances":
+        return tuple(SCIENCE_MEMBERS.values())
     return ()
 
 
@@ -246,19 +336,28 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     if not (asset / "main.tex").is_file():
         raise SystemExit(f"Template assets are missing: {asset}")
     examples = ASSET_DIR / "paper-template" / "examples.tex"
-    if template in ("nature", "nature-communications", "bib", "ddt", "jcim") and not examples.is_file():
+    if template in ("nature", "nature-communications", "science-advances", "bib", "ddt", "jcim") and not examples.is_file():
         raise SystemExit(f"Shared typesetting examples are missing: {examples}")
     archive, members = (None, {})
     if template == "nature":
         archive, members = nature_package(source)
     elif template == "bib":
         archive, members = bib_package(source)
+    elif template == "science-advances":
+        if source is not None:
+            source_path = source.expanduser().resolve()
+            # Do not move the source when replacing a target, or write the
+            # generated project into the user's supplied template directory.
+            if (source_path == destination or destination in source_path.parents
+                    or (source_path.is_dir() and source_path in destination.parents)):
+                raise SystemExit("Science template source and initialization target must not overlap. The initialization target was not changed.")
+        members = science_package(source)
     destination.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=f".{destination.name}.prism-init-", dir=destination.parent))
     backup = None
     try:
         shutil.copytree(asset, stage, dirs_exist_ok=True)
-        if template in ("nature", "nature-communications", "bib", "ddt", "jcim"):
+        if template in ("nature", "nature-communications", "science-advances", "bib", "ddt", "jcim"):
             shutil.copy2(examples, stage / "examples.tex")
         for name, content in members.items():
             (stage / name).write_bytes(content)
@@ -274,6 +373,11 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
                 upstream = {"url": BIB_URL, "sha256": BIB_SHA256, "archive": BIB_ARCHIVE}
             (stage / upstream["archive"]).write_bytes(archive)
             metadata["upstream"] = upstream
+        elif template == "science-advances":
+            metadata["upstream"] = {
+                "template": "Science-family v1.0 (July 2024)",
+                "files_sha256": dict(SCIENCE_SHA256),
+            }
         (stage / METADATA_NAME).write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
         if _snapshot(destination) != before:
             raise SystemExit("Initialization target changed during preparation; no existing files were moved.")

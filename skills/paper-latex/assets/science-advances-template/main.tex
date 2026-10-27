@@ -1,0 +1,156 @@
+% Original Prism Science Advances research manuscript draft.
+% The official Science-family bibliography files are imported at initialization.
+% Replace all demonstration content before submission.
+\documentclass[12pt]{article}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{newtxtext,newtxmath}
+\usepackage{graphicx}
+\usepackage{scicite}
+\usepackage{url}
+\linespread{1.5}
+\frenchspacing
+\renewcommand\refname{References and Notes}
+
+\title{Research manuscript title}
+\author{First Author$^{1,*}$ and Second Author$^{1}$\\
+  \small $^{1}$Department, Institution, City, Country\\
+  \small $^{*}$Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Replace this paragraph with the research question, approach, verified results
+and implications. The numbers, equations and graphics below demonstrate
+typesetting only; they report no research findings.
+\end{abstract}
+
+\section*{Introduction}
+Explain the motivation, relevant prior work and study objective. This example
+citation tests the bibliography only and should be retained only when
+appropriate to the manuscript\cite{peng2011reproducible}. Replace all example
+text, values and graphics before submitting the work.
+
+\section*{Results}
+Present the verified results and relate them to the displays.
+Figure~\ref{fig:overview} contains two example panels; Table~\ref{tab:main}
+contains invented numerical values.
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{A}\par\smallskip
+\fbox{\parbox[c][32mm][c]{0.88\linewidth}{\centering
+Overview graphic\\[5pt]Replace with an original figure}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{B}\par\smallskip
+\fbox{\parbox[c][32mm][c]{0.88\linewidth}{\centering
+Comparison graphic\\[5pt]Use legible panel labels}}
+\end{minipage}
+\caption{\textbf{Synthetic two-panel layout.} (\textbf{A}) Overview slot.
+(\textbf{B}) Comparison slot. Replace the legend with actual units, symbols,
+sample sizes and uncertainty where applicable. These boxes represent no data.}
+\label{fig:overview}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Synthetic table layout.} Replace invented values with
+verified measurements and describe the meaning of uncertainty.}
+\label{tab:main}
+\begin{tabular}{lrr}
+\hline
+Example & Count & Estimate $\pm$ SD\\
+\hline
+Example A & 120 & $0.385 \pm 0.006$\\
+Example B & 98 & $0.608 \pm 0.051$\\
+\hline
+\end{tabular}
+\end{table}
+
+\section*{Discussion}
+Discuss the verified findings, limitations and relationship to prior work.
+Distinguish the evidence from hypotheses and avoid inferring results from the
+example material.
+
+\section*{Materials and Methods}
+Describe the actual data, procedures, software, controls and analysis.
+Equation~\ref{eq:score} is a notation example; define the variables and units
+for the real study or replace the expression.
+\begin{equation}
+s=\sum_{i=1}^{n} w_i x_i.
+\label{eq:score}
+\end{equation}
+
+% BibTeX collects citations from the entire document, including the supplement.
+% For the final submission consult current journal instructions on embedding .bbl.
+\clearpage
+\bibliographystyle{sciencemag}
+\bibliography{references}
+
+\section*{Acknowledgments}
+Replace these placeholders with confirmed information or remove as appropriate.
+\paragraph{Funding:} State verified sources of support.
+\paragraph{Author contributions:} State agreed individual contributions.
+\paragraph{Competing interests:} State the authors' confirmed interests.
+\paragraph{Data and materials availability:} Describe actual access conditions
+for the data, code and materials.
+
+\section*{Supplementary materials}
+List the included supporting material and any separate files.
+
+% The supplement belongs to this document and shares the reference list above.
+\clearpage
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+\setcounter{page}{1}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thepage}{S\arabic{page}}
+
+\begin{center}
+\Large\textbf{Supplementary Materials}\\[0.5em]
+\normalsize Research manuscript title\\
+First Author and Second Author
+\end{center}
+
+\section*{Supplementary text}
+Describe supporting information that corresponds to the main text. This
+supplement-only example citation\cite{sandve2013ten} tests that a
+reference first mentioned here appears in the same main reference list.
+Figure~\ref{fig:supplement}, Table~\ref{tab:supplement} and
+Equation~\ref{eq:supplement} demonstrate independent S numbering.
+
+\begin{equation}
+\Delta s=s_{\mathrm{A}}-s_{\mathrm{B}}.
+\label{eq:supplement}
+\end{equation}
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][45mm][c]{0.75\linewidth}{\centering
+Supporting figure placeholder\\[8pt]Replace with an original graphic}}
+\caption{\textbf{Supporting figure layout.} Replace the slot and caption with
+the study's actual supporting figure and explanatory information.}
+\label{fig:supplement}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Supporting table layout.} Invented values demonstrate
+S-numbered table formatting and do not describe an actual study.}
+\label{tab:supplement}
+\begin{tabular}{lrr}
+\hline
+Example & Count & Score\\
+\hline
+Example C & 24 & 0.320\\
+Example D & 36 & 0.415\\
+\hline
+\end{tabular}
+\end{table}
+
+% Do not add a second bibliography: all references are listed in the main text.
+\end{document}

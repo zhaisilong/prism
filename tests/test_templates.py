@@ -50,7 +50,7 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template"):
+        for name in ("paper-template", "nature-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
@@ -131,6 +131,104 @@ class TemplateTests(unittest.TestCase):
         self.assertNotIn("upstream", metadata)
         self.assertEqual(templates.template_for_project(destination), "jcim")
         self.assertFalse(list(destination.glob("*.zip")))
+
+    def science_fixture(self):
+        """Use synthetic bytes so tests never redistribute the AAAS files."""
+        files = {name: f"synthetic upstream {name}\n".encode() for name in templates.SCIENCE_MEMBERS}
+        mock.patch.object(templates, "SCIENCE_SHA256", {name: hashlib.sha256(content).hexdigest() for name, content in files.items()}).start()
+        source = self.root / "官方 template source"
+        source.mkdir()
+        for name, content in files.items():
+            (source / name).write_bytes(content)
+        return source, files
+
+    def test_science_initialization_accepts_directory_and_zip_with_local_metadata(self):
+        source, files = self.science_fixture()
+        archive_path = self.root / "science package.zip"
+        with zipfile.ZipFile(archive_path, "w") as archive:
+            for name, content in files.items():
+                archive.writestr(f"official/{name}", content)
+        for label, origin in (("directory", source), ("zip", archive_path)):
+            with self.subTest(source=label):
+                target = self.root / "论文 with spaces" / label
+                templates.initialize(target, False, "science-advances", origin)
+                self.assertEqual((target / "main.tex").read_text(), "% science-advances-template\n")
+                self.assertEqual((target / "examples.tex").read_text(), "% shared standalone examples\n")
+                for source_name, destination_name in templates.SCIENCE_MEMBERS.items():
+                    self.assertEqual((target / destination_name).read_bytes(), files[source_name])
+                metadata = json.loads((target / templates.METADATA_NAME).read_text())
+                self.assertEqual(metadata["template"], "science-advances")
+                self.assertEqual(metadata["engine"], "pdflatex")
+                self.assertNotIn(str(self.root), json.dumps(metadata))
+                self.assertEqual(templates.template_for_project(target), "science-advances")
+
+    def test_science_bad_sources_do_not_modify_target_or_create_backup(self):
+        source, files = self.science_fixture()
+        target = self.root / "existing science manuscript"
+        target.mkdir()
+        original = target / "research.tex"
+        original.write_bytes(b"private research")
+        def check_rejected(origin):
+            with self.assertRaises(SystemExit):
+                templates.initialize(target, True, "science-advances", origin)
+            self.assertEqual(original.read_bytes(), b"private research")
+            self.assertFalse(target.with_name(target.name + ".backup").exists())
+            self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
+        check_rejected(None)
+        (source / "scicite.sty").write_bytes(b"wrong file")
+        check_rejected(source)
+        (source / "scicite.sty").write_bytes(files["scicite.sty"])
+        (source / "sciencemag.bst").unlink()
+        check_rejected(source)
+        (source / "sciencemag.bst").symlink_to(source / "scicite.sty")
+        check_rejected(source)
+
+        bad_zip = self.root / "bad science.zip"
+        for unsafe in ("duplicate", "traversal", "symlink", "checksum", "missing"):
+            with self.subTest(unsafe=unsafe), zipfile.ZipFile(bad_zip, "w") as archive:
+                for name, content in files.items():
+                    if unsafe == "missing" and name == "sciencemag.bst":
+                        continue
+                    if unsafe == "symlink" and name == "scicite.sty":
+                        info = zipfile.ZipInfo(name)
+                        info.create_system = 3
+                        info.external_attr = 0o120777 << 16
+                        archive.writestr(info, "somewhere")
+                    elif unsafe == "checksum" and name == "scicite.sty":
+                        archive.writestr(f"folder/{name}", b"tampered")
+                    else:
+                        archive.writestr(f"folder/{name}", content)
+                if unsafe == "duplicate":
+                    archive.writestr("other/scicite.sty", files["scicite.sty"])
+                elif unsafe == "traversal":
+                    archive.writestr("../escape.txt", "bad")
+            check_rejected(bad_zip)
+        self.assertFalse((self.root / "escape.txt").exists())
+        missing_parent = self.root / "new parent" / "paper"
+        with self.assertRaises(SystemExit):
+            templates.initialize(missing_parent, False, "science-advances", None)
+        self.assertFalse(missing_parent.parent.exists())
+
+    def test_science_force_backs_up_existing_project_only_after_validation(self):
+        source, files = self.science_fixture()
+        target = self.root / "existing science project"
+        target.mkdir()
+        (target / "research.tex").write_bytes(b"private research")
+        templates.initialize(target, True, "science-advances", source)
+        self.assertEqual((target.with_name(target.name + ".backup") / "research.tex").read_bytes(), b"private research")
+        self.assertEqual((target / "scicite.sty").read_bytes(), files["scicite.sty"])
+        for name, content in files.items():
+            self.assertEqual((source / name).read_bytes(), content)
+
+    def test_science_refuses_source_and_target_overlap(self):
+        source, files = self.science_fixture()
+        for target in (source, source / "new project", source.parent):
+            with self.subTest(target=target), self.assertRaises(SystemExit):
+                templates.initialize(target, True, "science-advances", source)
+            for name, content in files.items():
+                self.assertEqual((source / name).read_bytes(), content)
+            self.assertFalse(source.with_name(source.name + ".backup").exists())
+            self.assertFalse((source / "new project").exists())
 
     def test_offline_nature_keeps_original_zip_and_copies_only_named_members(self):
         archive = self.package()
@@ -328,8 +426,10 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_engine("ddt", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine("jcim", "auto"), "pdflatex")
         self.assertEqual(templates.template_engine("jcim", "pdflatex"), "pdflatex")
+        self.assertEqual(templates.template_engine("science-advances", "auto"), "pdflatex")
+        self.assertEqual(templates.template_engine("science-advances", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine(None, "pdflatex"), "pdflatex")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex"), ("science-advances", "xelatex"), ("science-advances", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 with self.assertRaisesRegex(SystemExit, "requires"):
                     templates.template_engine(template, engine)
@@ -367,6 +467,15 @@ class TemplateTests(unittest.TestCase):
         for excluded in ("fontspec.sty", "unicode-math.sty", "xeCJK.sty", "mciteplus.sty"):
             self.assertNotIn(excluded, packages)
         self.assertEqual(templates.template_resources("jcim"), ())
+
+    def test_science_dependencies_use_local_upstream_resources(self):
+        packages = templates.template_packages("science-advances", "auto")
+        self.assertIn("article.cls", packages)
+        self.assertNotIn("fontspec.sty", packages)
+        self.assertNotIn("scicite.sty", packages)
+        self.assertNotIn("sciencemag.bst", packages)
+        self.assertIn("scicite.sty", templates.template_resources("science-advances"))
+        self.assertIn("sciencemag.bst", templates.template_resources("science-advances"))
 
 
 if __name__ == "__main__":
