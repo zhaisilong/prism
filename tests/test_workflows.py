@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -12,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ("notes-latex", "reviewer-latex", "paper-latex")
-INTERMEDIATES = {".aux", ".log", ".fls", ".fdb_latexmk", ".out", ".bbl", ".blg", ".toc"}
+INTERMEDIATES = {".aux", ".log", ".fls", ".fdb_latexmk", ".out", ".bbl", ".blg", ".toc", ".spl"}
 
 
 class WorkflowTests(unittest.TestCase):
@@ -228,7 +229,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("prism:", result.stdout)
         self.assertIn("nature:", result.stdout)
         self.assertIn("bib: Briefings in Bioinformatics", result.stdout)
-        for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
+        self.assertIn("ddt: Drug Discovery Today", result.stdout)
+        for arguments in (["--template", "nature"], ["--template-source", "offline.zip"], ["--init", str(self.root / "new"), "--template", "ddt", "--template-source", "offline.zip"], ["--force"], ["--list-templates", "--init", str(self.root / "new")], ["--init", str(self.root / "new"), "--check-deps"]):
             with self.subTest(arguments=arguments):
                 result = self.run_cli("paper-latex", arguments)
                 self.assertEqual(result.returncode, 2, result.stderr)
@@ -269,6 +271,68 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(source.read_bytes(), original_source)
         self.assertEqual(list(self.work.iterdir()), [])
         self.assert_no_intermediates(cli_input)
+
+    def test_marked_ddt_project_uses_pdflatex_and_preserves_existing_output_on_failure(self):
+        self.install_compiler()
+        (self.bin / "pdflatex").write_text(f"#!{sys.executable}\n")
+        (self.bin / "pdflatex").chmod(0o755)
+        cli_input, source, destination = self.make_source("paper-latex")
+        original_source = source.read_bytes()
+        (cli_input / "prism-template.json").write_text(json.dumps({"template": "ddt", "engine": "pdflatex"}))
+        result = self.run_cli("paper-latex", [str(cli_input), "--strict", "--no-build-script"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("-pdf", self.compiler_calls()[0]["arguments"])
+        self.assertEqual(destination.read_bytes(), b"new PDF from stub")
+        result = self.run_cli("paper-latex", [str(cli_input), "--no-build-script"], mode="failure")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(destination.read_bytes(), b"new PDF from stub")
+        self.assertEqual(source.read_bytes(), original_source)
+        self.assertEqual(list(self.work.iterdir()), [])
+        self.assert_no_intermediates(cli_input)
+
+    def test_real_ddt_citations_and_spl_stay_out_of_source(self):
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real DDT build needs {command}")
+        for resource in ("elsarticle.cls", "elsarticle-num.bst"):
+            check = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
+            if check.returncode != 0 or not check.stdout.strip():
+                self.skipTest(f"Real DDT build needs {resource}")
+        project = self.root / "real DDT citation test"
+        project.mkdir()
+        (project / "main.tex").write_text(
+            r"""\documentclass[review,12pt]{elsarticle}
+\setcitestyle{super,sort&compress}
+\begin{document}
+\begin{frontmatter}\title{Citation test}\author{Example Author}\end{frontmatter}
+First citation\cite{zulu2025}; second citation\cite{alpha2025}.
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+\end{document}
+""", encoding="utf-8",
+        )
+        (project / "references.bib").write_text(
+            "@article{zulu2025,author={Zulu, Zoe},title={Synthetic Zulu reference},journal={Example Journal},year={2025}}\n"
+            "@article{alpha2025,author={Alpha, Aaron},title={Synthetic Alpha reference},journal={Example Journal},year={2025}}\n",
+            encoding="utf-8",
+        )
+        (project / "prism-template.json").write_text('{"template":"ddt","engine":"pdflatex"}', encoding="utf-8")
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        result = subprocess.run(
+            [str(ROOT / "scripts" / "latex-paper.sh"), str(project), "--strict", "--no-build-script"],
+            capture_output=True, text=True, check=False, env=env, timeout=120,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        extracted = subprocess.run(["pdftotext", "-raw", str(project / "main.pdf"), "-"], capture_output=True, text=True, check=True).stdout
+        self.assertRegex(extracted, re.compile(r"First citation\s*(?:1|\[1\])\s*;", re.S))
+        self.assertRegex(extracted, re.compile(r"second citation\s*(?:2|\[2\])\s*\.", re.S))
+        self.assertLess(extracted.index("Zulu"), extracted.index("Alpha"))
+        # System tools may create unrelated caches under TMPDIR (e.g. xcrun_db).
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+        self.assert_no_intermediates(project)
 
     def test_paper_output_rejects_source_suffixes_and_symlink_aliases_before_compilation(self):
         self.install_compiler()
@@ -313,7 +377,7 @@ class WorkflowTests(unittest.TestCase):
         self.install_compiler()
         cli_input, _, destination = self.make_source("paper-latex")
         destination.write_bytes(b"previous PDF")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 (cli_input / "prism-template.json").write_text(json.dumps({"template": template}))
                 result = self.run_cli("paper-latex", [str(cli_input), "--engine", engine])
@@ -368,6 +432,13 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn(f"{resource}: {cli_input / resource}", result.stdout)
             self.assertNotIn(f"{resource}: MISSING", result.stdout)
 
+    def test_ddt_dependency_profile_reports_missing_official_class_and_style(self):
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "ddt"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        for resource in ("pdflatex", "elsarticle.cls", "elsarticle-num.bst"):
+            self.assertIn(f"{resource}: MISSING", result.stdout)
+        self.assertNotIn("fontspec", result.stdout)
+
     def test_paper_dependencies_require_bibtex_even_when_other_tools_are_available(self):
         self.install_compiler()
         (self.bin / "python3").symlink_to(sys.executable)
@@ -375,7 +446,7 @@ class WorkflowTests(unittest.TestCase):
             executable = self.bin / command
             executable.write_text(f"#!{sys.executable}\nprint('/tex/resource')\n")
             executable.chmod(0o755)
-        for template in ("prism", "nature", "bib"):
+        for template in ("prism", "nature", "bib", "ddt"):
             with self.subTest(template=template):
                 result = self.run_cli("paper-latex", ["--check-deps", "--template", template])
                 self.assertEqual(result.returncode, 1, result.stderr)

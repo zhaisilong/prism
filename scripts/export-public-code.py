@@ -31,7 +31,7 @@ CACHE_DIRS = frozenset({
 })
 GENERATED_SUFFIXES = frozenset({
     ".pyc", ".pyo", ".aux", ".bbl", ".bcf", ".blg", ".fdb_latexmk", ".fls",
-    ".idx", ".ilg", ".ind", ".lof", ".log", ".lot", ".out", ".toc",
+    ".idx", ".ilg", ".ind", ".lof", ".log", ".lot", ".out", ".spl", ".toc",
 })
 METADATA_NAMES = frozenset({".git", ".hg", ".svn"})
 MAX_TEXT_BYTES = 5 * 1024 * 1024

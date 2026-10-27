@@ -59,7 +59,16 @@ scripts/latex-paper.sh projects/Papers/bib-paper --strict
 
 离线时提供原始 OUP 模板 ZIP：`--template-source path/to/oup-authoring-template.zip`。补充材料用 `--main supplementary.tex --no-build-script` 单独编译。来源与配置见[模板选型](templates.md)。
 
-## 4. 图片、表格与公式较多时
+## 4. Drug Discovery Today（DDT）
+
+```bash
+scripts/latex-paper.sh --init projects/Papers/ddt-review --template ddt
+scripts/latex-paper.sh projects/Papers/ddt-review --strict
+```
+
+这是单栏叙述性综述草稿；`highlights.txt` 和 `teaser.txt` 是可选占位，按期刊当时要求编辑。使用已安装的 Elsevier `elsarticle` 和 BibTeX；缺少依赖时运行 `scripts/latex-paper.sh projects/Papers/ddt-review --check-deps`。补充材料使用 `--main supplementary.tex --no-build-script` 单独编译。投稿要求与官方来源见[模板选型](templates.md)。
+
+## 5. 图片、表格与公式较多时
 
 - 图片优先用矢量 PDF；照片等位图保持合适分辨率。用 `width=\linewidth,keepaspectratio` 控制尺寸，给长图注留出页面空间。论文字体设置不能改变图片内部的轴标签字体。
 - 多面板图使用统一字号和清晰的 a/b/c 标签；在正文按首次出现顺序引用。图注说明已有的单位、误差和样本量，排版过程不补造科研信息。
@@ -69,7 +78,7 @@ scripts/latex-paper.sh projects/Papers/bib-paper --strict
 
 可复制的完整演示见模板中的 `examples.tex`；详细排版建议见 [layout guidance](../skills/paper-latex/references/layout.md)。示例数据明确为合成内容，正式交付前全部替换。
 
-## 5. 笔记和已有 review
+## 6. 笔记和已有 review
 
 ```bash
 scripts/latex-note.sh projects/Notes/note.md --strict
@@ -80,7 +89,7 @@ scripts/latex-review.sh projects/Reviews/Others/draft.md \
 
 review 的编辑备注只出现在独立的 `_editor_notes.pdf` 中。交付前分别核对作者版和编辑版。`--outdir` 选择输出目录，`--out` 优先指定作者版路径。仅导出 TeX 可使用 `--no-compile`，无需 LaTeX 编译器；DOCX 输入可选依赖 `python-docx`，文本型 PDF 可用 `pypdf` 或 `pdftotext`。
 
-## 6. 重建、排错和在 Codex 中使用
+## 7. 重建、排错和在 Codex 中使用
 
 主文成功构建后：
 

@@ -123,6 +123,7 @@ class PublicExportTests(unittest.TestCase):
     def test_caches_and_compiler_outputs_are_excluded_even_if_force_tracked(self):
         self.write("scripts/__pycache__/cached.pyc", "cached\n")
         self.write("skills/paper/main.aux", "intermediate\n")
+        self.write("skills/paper/main.spl", "intermediate\n")
         self.write("skills/paper/main.synctex.gz", "intermediate\n")
         self.write("skills/paper/.DS_Store", "desktop metadata\n")
         self.write("scripts/run.py", "print('safe')\n")
@@ -132,9 +133,10 @@ class PublicExportTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse((self.output / "scripts/__pycache__").exists())
         self.assertFalse((self.output / "skills/paper/main.aux").exists())
+        self.assertFalse((self.output / "skills/paper/main.spl").exists())
         counts = json.loads(self.manifest.read_text())["exclusions"]
         self.assertEqual(counts["generated-directories"], 1)
-        self.assertEqual(counts["generated-files"], 3)
+        self.assertEqual(counts["generated-files"], 4)
 
     def test_nested_repository_binary_and_unrecognized_files_are_blocked(self):
         for relative, data in [

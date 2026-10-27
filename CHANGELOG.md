@@ -4,6 +4,24 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.27
+
+### Added
+
+- Added a Drug Discovery Today (`ddt`) narrative-review starter using the installed Elsevier `elsarticle` class, with an independent supplement and optional highlights and teaser placeholders.
+
+### Changed
+
+- Registered the offline DDT template and its pdfLaTeX/BibTeX dependencies without modifying the existing journal templates.
+- Kept the concise guide current and excluded Elsevier `.spl` build intermediates from code exports.
+
+### Validation
+
+- Passed all 63 regression tests, three wrapper help checks, the paper skill validator, and the DDT dependency check.
+- Strictly compiled and visually checked DDT main, supplementary, and shared examples PDFs; verified numeric superscript references in first-citation order.
+- Confirmed offline initialization, failed-build output preservation, main rebuild-script preservation, and source-directory cleanliness including `.spl` files.
+- Audited the public code export; research data, archives, and the original local Git history remain outside the public snapshot.
+
 ## 2026.10.24.2
 
 ### Added

@@ -21,6 +21,7 @@ scripts/latex-paper.sh projects/Papers/my-paper
 
 - `nature`：Nature / NMI 英文初稿；首次创建需要联网。
 - `bib`：Briefings in Bioinformatics 英文稿；将命令中的 `nature` 换成 `bib` 即可。
+- `ddt`：Drug Discovery Today 单栏综述；将 `nature` 换成 `ddt` 即可，可离线创建。
 - `prism`：通用科研草稿，支持中英混排。
 
 需要 Python 3.9+、TeX Live 和 `latexmk`。模板会自动选择编译引擎。
@@ -29,4 +30,4 @@ scripts/latex-paper.sh projects/Papers/my-paper
 
 研究内容放在 `projects/`，代码公开同步时排除研究内容。同步方式见[维护说明](docs/public-sync.md)。版本以 `VERSION` 为准，采用日期版本。
 
-Prism 自有代码与模板采用 [MIT License](LICENSE)；Nature 官方文件保留上游许可。开发维护规则见 [AGENTS.md](AGENTS.md)。
+Prism 自有代码与模板采用 [MIT License](LICENSE)；期刊模板使用的官方文件保留上游许可。开发维护规则见 [AGENTS.md](AGENTS.md)。

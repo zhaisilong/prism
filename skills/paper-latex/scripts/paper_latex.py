@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Initialize or compile a portable split-section LaTeX manuscript."""
+"""Initialize or compile a portable academic LaTeX manuscript."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 ---
 name: paper-latex
-description: Initialize or compile a Prism, Nature, or Briefings in Bioinformatics (BIB) manuscript starter with bibliography, figures, tables, equations, and supplementary material. Use for academic manuscript projects; route ordinary single-file notes to notes-latex.
+description: Initialize or compile Prism, Nature, Briefings in Bioinformatics (BIB), or Drug Discovery Today (DDT) manuscripts with bibliography, figures, tables, equations, and supplementary material. Use for academic manuscript projects; route ordinary single-file notes to notes-latex.
 ---
 
 # Paper LaTeX
@@ -20,6 +20,8 @@ Run the root wrappers from the Prism repository; from another directory, use the
    scripts/latex-paper.sh --init TARGET_DIR --template nature
    # For Briefings in Bioinformatics:
    scripts/latex-paper.sh --init TARGET_DIR --template bib
+   # For a Drug Discovery Today narrative review:
+   scripts/latex-paper.sh --init TARGET_DIR --template ddt
    ```
 
 2. Replace author placeholders, example citations, and synthetic demonstration content. Prism uses `main.tex` plus `sections/`; journal starters keep the main text in one `main.tex`. All use `references.bib`.
@@ -38,8 +40,9 @@ Run the root wrappers from the Prism repository; from another directory, use the
 - `prism-paper.sty` provides matched text/math fonts, consistent table and caption sizes, numeric columns, and multi-panel figures. Read [layout guidance](references/layout.md) when changing presentation or adapting an existing manuscript; the results and appendix sections contain working examples.
 - `nature` uses official `sn-jnl` / `sn-nature` with pdfLaTeX and BibTeX. Initialization verifies a pinned official ZIP before changing the target; `--template-source PACKAGE.zip` supplies that ZIP offline. Keep downloaded official files in the local project with their original licensing; do not vendor them into the public source assets. Do not layer Prism typography over this class.
 - `bib` means the journal Briefings in Bioinformatics. Use its official OUP class configuration, retaining journal typography and the numeric bibliography setup. Pinned official files stay in the generated project, with offline ZIP support through `--template-source`.
+- `ddt` means Drug Discovery Today narrative-review drafts. Use the installed Elsevier `elsarticle` class and `elsarticle-num.bst`; initialization is offline. Keep optional highlights and teaser as separate draft placeholders, and check current journal requirements before submission.
 - The starters use numeric BibTeX citations; supplementary counters are independent. Read [layout guidance](references/layout.md) for rich examples. Thesis/book/proposal templates, CSL, Biber, and GB/T 7714 need project-specific configuration.
-- Use `--main`, `--out`, `--engine auto|xelatex|lualatex|pdflatex`, `--strict`, and `--keep-work` as needed. Project template metadata lets `auto` select Nature's pdfLaTeX without changing existing unmarked projects.
+- Use `--main`, `--out`, `--engine auto|xelatex|lualatex|pdflatex`, `--strict`, and `--keep-work` as needed. Project template metadata lets `auto` select pdfLaTeX for journal starters without changing existing unmarked projects.
 - Use `--no-build-script` only when the user wants no reproducible project script. Use `--force-build-script` to back up and replace a conflicting `prism-build.sh`.
 - Run `scripts/latex-paper.sh PAPER_DIR --check-deps` for the initialized project's engine, local class, and resources; `--version` requires no TeX.
 - Refuse to overwrite a non-empty initialization target unless `--force` creates a backup first.

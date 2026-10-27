@@ -12,13 +12,14 @@
 | --- | --- |
 | `nature` | Nature / NMI 英文初稿 |
 | `bib` | Briefings in Bioinformatics 英文稿 |
+| `ddt` | Drug Discovery Today 单栏综述 |
 | `prism` | 通用论文、中英混排 |
 
 ```bash
 scripts/latex-paper.sh --init projects/Papers/my-paper --template nature
 ```
 
-更换模板时，把 `nature` 换成 `bib` 或 `prism`。期刊模板首次创建需要联网。
+更换模板时，把 `nature` 换成 `bib`、`ddt` 或 `prism`。Nature 和 BIB 模板首次创建需要联网；DDT 使用已安装的 TeX Live 宏包。
 
 ## 2. 写内容
 
