@@ -50,7 +50,7 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template", "bib-template", "ddt-template", "jcim-template"):
+        for name in ("paper-template", "nature-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
@@ -104,6 +104,19 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(metadata["engine"], "pdflatex")
         self.assertNotIn("upstream", metadata)
         self.assertEqual(templates.template_for_project(destination), "ddt")
+        self.assertFalse(list(destination.glob("*.zip")))
+
+    def test_nature_communications_initialization_is_offline(self):
+        destination = self.root / "论文 with spaces" / "Nature Communications"
+        with mock.patch.object(templates, "nature_package", side_effect=AssertionError("unexpected network package")), mock.patch.object(templates, "bib_package", side_effect=AssertionError("unexpected network package")):
+            templates.initialize(destination, False, "nature-communications")
+        self.assertEqual((destination / "main.tex").read_text(), "% nature-communications-template\n")
+        self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["template"], "nature-communications")
+        self.assertEqual(metadata["engine"], "pdflatex")
+        self.assertNotIn("upstream", metadata)
+        self.assertEqual(templates.template_for_project(destination), "nature-communications")
         self.assertFalse(list(destination.glob("*.zip")))
 
     def test_jcim_initialization_is_offline_and_copies_shared_examples(self):
@@ -307,6 +320,8 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_engine("prism", "auto"), "auto")
         self.assertEqual(templates.template_engine("nature", "auto"), "pdflatex")
         self.assertEqual(templates.template_engine("nature", "pdflatex"), "pdflatex")
+        self.assertEqual(templates.template_engine("nature-communications", "auto"), "pdflatex")
+        self.assertEqual(templates.template_engine("nature-communications", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine("bib", "auto"), "pdflatex")
         self.assertEqual(templates.template_engine("bib", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine("ddt", "auto"), "pdflatex")
@@ -314,7 +329,7 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_engine("jcim", "auto"), "pdflatex")
         self.assertEqual(templates.template_engine("jcim", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine(None, "pdflatex"), "pdflatex")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 with self.assertRaisesRegex(SystemExit, "requires"):
                     templates.template_engine(template, engine)
@@ -328,6 +343,14 @@ class TemplateTests(unittest.TestCase):
         for excluded in ("fontspec.sty", "unicode-math.sty", "xeCJK.sty"):
             self.assertNotIn(excluded, packages)
         self.assertEqual(templates.template_resources("bib"), ("oup-authoring-template.cls", "oup-plain.bst"))
+
+    def test_nature_communications_dependencies_use_distribution_resources(self):
+        packages = templates.template_packages("nature-communications", "auto")
+        for package in ("article.cls", "natbib.sty", "unsrt.bst", "graphicx.sty", "longtable.sty"):
+            self.assertIn(package, packages)
+        for excluded in ("sn-jnl.cls", "fontspec.sty", "unicode-math.sty", "xeCJK.sty"):
+            self.assertNotIn(excluded, packages)
+        self.assertEqual(templates.template_resources("nature-communications"), ())
 
     def test_ddt_dependency_profile_uses_tex_distribution_resources(self):
         packages = templates.template_packages("ddt", "auto")

@@ -230,6 +230,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("prism:", result.stdout)
         self.assertIn("nature:", result.stdout)
+        self.assertIn("nature-communications:", result.stdout)
         self.assertIn("bib: Briefings in Bioinformatics", result.stdout)
         self.assertIn("ddt: Drug Discovery Today", result.stdout)
         self.assertIn("jcim:", result.stdout)
@@ -256,6 +257,56 @@ class WorkflowTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("nature template requires pdfLaTeX", result.stderr)
         self.assertEqual(len(self.compiler_calls()), 1)
+
+    def test_real_nature_communications_main_and_independent_supplement(self):
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real Nature Communications build needs {command}")
+        for resource in ("natbib.sty", "unsrt.bst", "siunitx.sty"):
+            check = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
+            if check.returncode != 0 or not check.stdout.strip():
+                self.skipTest(f"Real Nature Communications build needs {resource}")
+        project = self.root / "论文 with spaces" / "Nature Communications"
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        wrapper = str(ROOT / "scripts" / "latex-paper.sh")
+        init = subprocess.run([wrapper, "--init", str(project), "--template", "nature-communications"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(init.returncode, 0, init.stdout + init.stderr)
+        before = {path: path.read_bytes() for path in project.rglob("*") if path.is_file()}
+        main = subprocess.run([wrapper, str(project), "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(main.returncode, 0, main.stdout + main.stderr)
+        script = project / "prism-build.sh"
+        self.assertTrue(script.is_file())
+        script_before = script.read_bytes()
+        supplement = subprocess.run([wrapper, str(project), "--main", "supplementary.tex", "--no-build-script", "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(supplement.returncode, 0, supplement.stdout + supplement.stderr)
+        self.assertEqual(script.read_bytes(), script_before)
+        main_text = subprocess.run(["pdftotext", "-raw", str(project / "main.pdf"), "-"], capture_output=True, text=True, check=True).stdout
+        supp_text = subprocess.run(["pdftotext", "-raw", str(project / "supplementary.pdf"), "-"], capture_output=True, text=True, check=True).stdout
+        self.assertIn("fair guiding principles", main_text.lower())
+        self.assertIn("fair guiding principles", supp_text.lower())
+        self.assertIn("Supplementary Fig. 1", supp_text)
+        self.assertIn("Supplementary Table 1", supp_text)
+        self.assertIn("Supplementary Table 2", supp_text)
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
+        # An unresolved reference must fail strict mode without replacing the
+        # previously published PDF or the main project's rebuild script.
+        pdf_before = (project / "main.pdf").read_bytes()
+        main_tex = project / "main.tex"
+        main_tex.write_text(main_tex.read_text(encoding="utf-8").replace(r"\end{document}", r"Broken citation\cite{missing_fixture}." + "\n" + r"\end{document}"), encoding="utf-8")
+        failed = subprocess.run([wrapper, str(project), "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertNotEqual(failed.returncode, 0, failed.stdout + failed.stderr)
+        self.assertIn("missing_fixture", failed.stdout + failed.stderr)
+        self.assertEqual((project / "main.pdf").read_bytes(), pdf_before)
+        self.assertEqual(script.read_bytes(), script_before)
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
 
     def test_marked_bib_project_uses_pdflatex_and_preserves_source_on_failure(self):
         self.install_compiler()
@@ -457,7 +508,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.install_compiler()
         cli_input, _, destination = self.make_source("paper-latex")
         destination.write_bytes(b"previous PDF")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
+        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex")):
             with self.subTest(template=template, engine=engine):
                 (cli_input / "prism-template.json").write_text(json.dumps({"template": template}))
                 result = self.run_cli("paper-latex", [str(cli_input), "--engine", engine])
@@ -526,6 +577,13 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             self.assertIn(f"{resource}: MISSING", result.stdout)
         self.assertNotIn("fontspec", result.stdout)
 
+    def test_nature_communications_dependency_profile_reports_missing_resources(self):
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature-communications"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        for resource in ("pdflatex", "article.cls", "natbib.sty", "unsrt.bst"):
+            self.assertIn(f"{resource}: MISSING", result.stdout)
+        self.assertNotIn("fontspec", result.stdout)
+
     def test_paper_dependencies_require_bibtex_even_when_other_tools_are_available(self):
         self.install_compiler()
         (self.bin / "python3").symlink_to(sys.executable)
@@ -533,7 +591,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             executable = self.bin / command
             executable.write_text(f"#!{sys.executable}\nprint('/tex/resource')\n")
             executable.chmod(0o755)
-        for template in ("prism", "nature", "bib", "ddt", "jcim"):
+        for template in ("prism", "nature", "nature-communications", "bib", "ddt", "jcim"):
             with self.subTest(template=template):
                 result = self.run_cli("paper-latex", ["--check-deps", "--template", template])
                 self.assertEqual(result.returncode, 1, result.stderr)

@@ -47,6 +47,11 @@ TEMPLATES = {
         "engine": "pdflatex",
         "description": "Nature / NMI manuscript and supplementary information; English; pdfLaTeX",
     },
+    "nature-communications": {
+        "directory": "nature-communications-template",
+        "engine": "pdflatex",
+        "description": "Nature Communications research article and supplementary information; English; pdfLaTeX",
+    },
     "bib": {
         "directory": "bib-template",
         "engine": "pdflatex",
@@ -76,6 +81,11 @@ NATURE_PACKAGES = (
     "setspace.sty", "cuted.sty", "rotating.sty", "threeparttable.sty",
     "appendix.sty", "wrapfig.sty", "amsthm.sty", "fix-cm.sty", "natbib.sty",
     "caption.sty", "subcaption.sty", "pdflscape.sty",
+)
+NATURE_COMMUNICATIONS_PACKAGES = (
+    "article.cls", "graphicx.sty", "amsmath.sty", "amssymb.sty",
+    "booktabs.sty", "tabularx.sty", "siunitx.sty", "longtable.sty",
+    "caption.sty", "subcaption.sty", "pdflscape.sty", "natbib.sty", "unsrt.bst",
 )
 BIB_PACKAGES = (
     "crop.sty", "graphicx.sty", "caption.sty", "amsmath.sty", "array.sty",
@@ -118,7 +128,7 @@ def template_for_project(project: Path) -> str | None:
 def template_engine(template: str | None, requested: str) -> str:
     if template == "prism" and requested == "pdflatex":
         raise SystemExit("The prism template requires XeLaTeX or LuaLaTeX; use --engine auto, xelatex, or lualatex.")
-    if template in ("nature", "bib", "ddt", "jcim"):
+    if template in ("nature", "nature-communications", "bib", "ddt", "jcim"):
         if requested not in ("auto", "pdflatex"):
             raise SystemExit(f"The {template} template requires pdfLaTeX; use --engine auto or pdflatex.")
         return "pdflatex"
@@ -129,6 +139,8 @@ def template_packages(template: str | None, engine: str) -> tuple[str, ...]:
     engine = template_engine(template, engine)
     if template == "nature":
         return NATURE_PACKAGES
+    if template == "nature-communications":
+        return NATURE_COMMUNICATIONS_PACKAGES
     if template == "bib":
         return BIB_PACKAGES
     if template == "ddt":
@@ -234,7 +246,7 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     if not (asset / "main.tex").is_file():
         raise SystemExit(f"Template assets are missing: {asset}")
     examples = ASSET_DIR / "paper-template" / "examples.tex"
-    if template in ("nature", "bib", "ddt", "jcim") and not examples.is_file():
+    if template in ("nature", "nature-communications", "bib", "ddt", "jcim") and not examples.is_file():
         raise SystemExit(f"Shared typesetting examples are missing: {examples}")
     archive, members = (None, {})
     if template == "nature":
@@ -246,7 +258,7 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     backup = None
     try:
         shutil.copytree(asset, stage, dirs_exist_ok=True)
-        if template in ("nature", "bib", "ddt", "jcim"):
+        if template in ("nature", "nature-communications", "bib", "ddt", "jcim"):
             shutil.copy2(examples, stage / "examples.tex")
         for name, content in members.items():
             (stage / name).write_bytes(content)

@@ -4,6 +4,18 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.27.2
+
+### Added
+
+- Added an offline Nature Communications research-paper starter using standard article and BibTeX with independent supplementary material.
+
+### Validation
+
+- Ran the full regression suite, wrapper help checks, paper skill validation, and the Nature Communications dependency check.
+- Strictly compiled and visually inspected synthetic main, supplementary, and shared examples PDFs; verified bibliography resolution, supplementary numbering, rebuild-script and failure preservation, and clean sources.
+- Audited the public code export; research data and original local Git history remain outside the snapshot.
+
 ## 2026.10.27.1
 
 ### Added

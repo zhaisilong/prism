@@ -1,0 +1,125 @@
+% Independent supplement: --main supplementary.tex --no-build-script.
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable}
+% The supplement has its own independently numbered bibliography.
+\usepackage[super,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\sisetup{uncertainty-mode=separate}
+\renewcommand{\figurename}{Supplementary Fig.}
+\renewcommand{\tablename}{Supplementary Table}
+\title{Supplementary Information: Research manuscript title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small \texttt{second.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+Replace this instructional text with a brief overview of the supplementary
+material. This document compiles independently. All sample values and graphics
+are synthetic and do not report scientific findings.
+
+\section{Supporting overview}
+Supplementary Fig.~\ref{fig:si} is an optional supporting figure and
+Supplementary Equation~\eqref{eq:si} demonstrates independent numbering.
+\begin{equation}
+\begin{split}
+ s_{\mathrm{A}} &= \sum_{i=1}^{n} w_i x_i,\\
+ \Delta s &= s_{\mathrm{A}}-s_{\mathrm{B}}.
+\end{split}\label{eq:si}
+\end{equation}
+The equations are typesetting examples; define or replace them for real use.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][46mm][c]{0.80\linewidth}{\centering
+Supplementary figure slot\\[8pt]Replace with an original PDF or PNG}}
+\caption{\textbf{Supporting layout example.} Replace the placeholder and
+legend with the actual figure and its explanatory information.}
+\label{fig:si}
+\end{figure}
+\clearpage
+
+\section{Supporting tables}
+Supplementary Table~\ref{tab:si-values} illustrates an editable numerical table.
+Supplementary Table~\ref{tab:si-inventory} demonstrates a long table with repeated headings.
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic values used to demonstrate numerical alignment.}
+\label{tab:si-values}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Example & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Replace with verified data and define uncertainty.
+\end{table}
+
+\small
+\begin{longtable}{@{}p{0.14\linewidth}p{0.28\linewidth}p{0.48\linewidth}@{}}
+\caption{Synthetic inventory demonstrating table continuation.}
+\label{tab:si-inventory}\\
+\toprule Item & Topic & Description\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Supplementary Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Description\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+S01 & Scope & Define the question and limits of the study.\\
+S02 & Terminology & Define important terms and any abbreviations.\\
+S03 & Context & Explain the context needed to interpret a comparison.\\
+S04 & Source & Record where the cited information originated.\\
+S05 & Version & Preserve the version used for a supporting source.\\
+S06 & Study type & Describe the design of each cited study accurately.\\
+S07 & Evidence & Link claims to the supporting published material.\\
+S08 & Comparison & Explain the basis for each comparison.\\
+S09 & Conditions & Describe the conditions under which results apply.\\
+S10 & Units & Preserve the original measurement units.\\
+S11 & Variability & Describe the reported variability accurately.\\
+S12 & Uncertainty & Define how any reported uncertainty was calculated.\\
+S13 & Counts & Record the counts underlying each reported result.\\
+S14 & Measures & Define each metric and its direction of interpretation.\\
+S15 & Dependence & Explain any relationships between observations.\\
+S16 & Missing data & Mark unavailable entries without treating them as zero.\\
+S17 & Precision & Retain the precision justified by the source.\\
+S18 & Rounding & Document display rounding without changing source values.\\
+S19 & Differences & Distinguish observed differences from interpretation.\\
+S20 & Agreement & Identify agreement across studies where supported.\\
+S21 & Disagreement & Describe meaningful disagreement across studies.\\
+S22 & Limitations & Record limitations supported by the source material.\\
+S23 & Assumptions & State assumptions underlying an interpretation.\\
+S24 & Sensitivity & Describe any sensitivity analysis actually performed.\\
+S25 & Validation & Report validation performed by the cited study.\\
+S26 & Generality & Explain the context to which a conclusion applies.\\
+S27 & Figures & Retain editable source graphics and their provenance.\\
+S28 & Labels & Check figure labels at their intended final size.\\
+S29 & Tables & Link every table entry to its verified source.\\
+S30 & Symbols & Define mathematical symbols and their dimensions.\\
+S31 & Equations & Check cross-references and numerical ordering.\\
+S32 & Citations & Check each bibliography entry against its source.\\
+S33 & Availability & State actual access conditions for materials.\\
+S34 & Permissions & Record permissions for any reused material.\\
+S35 & Context & Describe any contextual difference between sources.\\
+S36 & Synthesis & Relate each comparison to the study's question.\\
+S37 & Gaps & State evidence gaps without inventing missing findings.\\
+S38 & Interpretation & Separate what was observed from the authors' view.\\
+S39 & Implications & Explain implications that follow from the evidence.\\
+S40 & Next steps & Identify questions for future work without asserting results.\\
+\end{longtable}
+\normalsize
+
+\section{Supplementary references}
+This example citation tests the independent bibliography\cite{wilkinson2016fair};
+it is not evidence for any synthetic example above.
+\bibliographystyle{unsrt}
+\bibliography{references}
+\end{document}

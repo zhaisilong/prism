@@ -20,6 +20,7 @@ scripts/latex-paper.sh projects/Papers/my-paper
 修改 `main.tex` 和 `references.bib`，再次运行第二条命令更新 PDF。
 
 - `nature`：Nature / NMI 英文初稿；首次创建需要联网。
+- `nature-communications`：Nature Communications 研究论文草稿，可离线创建。
 - `bib`：Briefings in Bioinformatics 英文稿；将命令中的 `nature` 换成 `bib` 即可。
 - `ddt`：Drug Discovery Today 单栏综述；将 `nature` 换成 `ddt` 即可，可离线创建。
 - `jcim`：Journal of Chemical Information and Modeling 研究论文，可离线创建。

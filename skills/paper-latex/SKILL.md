@@ -1,6 +1,6 @@
 ---
 name: paper-latex
-description: Initialize or compile Prism, Nature, BIB, DDT, or JCIM manuscripts with bibliography, figures, tables, equations, and supplementary material. Use for academic manuscript projects; route ordinary single-file notes to notes-latex.
+description: Initialize or compile Prism, Nature, Nature Communications, BIB, DDT, or JCIM manuscripts with bibliography, figures, tables, equations, and supplementary material. Use for academic manuscript projects; route ordinary single-file notes to notes-latex.
 ---
 
 # Paper LaTeX
@@ -18,6 +18,8 @@ Run the root wrappers from the Prism repository; from another directory, use the
    scripts/latex-paper.sh --init TARGET_DIR --template prism
    # For Nature / NMI drafts:
    scripts/latex-paper.sh --init TARGET_DIR --template nature
+   # For a Nature Communications research paper:
+   scripts/latex-paper.sh --init TARGET_DIR --template nature-communications
    # For Briefings in Bioinformatics:
    scripts/latex-paper.sh --init TARGET_DIR --template bib
    # For a Drug Discovery Today narrative review:
@@ -41,6 +43,7 @@ Run the root wrappers from the Prism repository; from another directory, use the
 - `prism` is the default `article` starter for English or mixed Chinese-English manuscripts. Its default engine remains XeLaTeX or LuaLaTeX.
 - `prism-paper.sty` provides matched text/math fonts, consistent table and caption sizes, numeric columns, and multi-panel figures. Read [layout guidance](references/layout.md) when changing presentation or adapting an existing manuscript; the results and appendix sections contain working examples.
 - `nature` uses official `sn-jnl` / `sn-nature` with pdfLaTeX and BibTeX. Initialization verifies a pinned official ZIP before changing the target; `--template-source PACKAGE.zip` supplies that ZIP offline. Keep downloaded official files in the local project with their original licensing; do not vendor them into the public source assets. Do not layer Prism typography over this class.
+- `nature-communications` is an offline standard `article` research draft with BibTeX and independent supplementary material; consult the journal's requirements before preparing final TeX.
 - `bib` means the journal Briefings in Bioinformatics. Use its official OUP class configuration, retaining journal typography and the numeric bibliography setup. Pinned official files stay in the generated project, with offline ZIP support through `--template-source`.
 - `ddt` means Drug Discovery Today narrative-review drafts. Use the installed Elsevier `elsarticle` class and `elsarticle-num.bst`; initialization is offline. Keep optional highlights and teaser as separate draft placeholders, and check current journal requirements before submission.
 - `jcim` is a research-paper draft using installed ACS `achemso` with BibTeX. Replace the TOC graphic placeholder and check current journal requirements; initialization is offline.

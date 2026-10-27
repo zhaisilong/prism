@@ -8,6 +8,7 @@
 | --- | --- | --- | --- |
 | `prism`（默认） | 通用科研草稿、中英混排、复杂图表公式与补充材料 | XeLaTeX 或 LuaLaTeX / BibTeX | Prism 原创模板，MIT |
 | `nature` | Nature Portfolio / NMI 初稿写作 | pdfLaTeX / BibTeX，`sn-nature` | Prism 原创启动文件 + 本地获取的官方 Springer Nature 3.1 文件 |
+| `nature-communications` | Nature Communications 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创 `article` 草稿，MIT |
 | `bib` | Briefings in Bioinformatics 英文稿、双栏图表与公式 | pdfLaTeX / BibTeX | Prism 原创启动文件 + 官方 OUP 1.5 class |
 | `ddt` | Drug Discovery Today 单栏叙述性综述草稿 | pdfLaTeX / BibTeX，数字上标 | Prism 原创启动文件 + TeX Live 安装的 Elsevier `elsarticle` |
 | `jcim` | Journal of Chemical Information and Modeling 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
@@ -19,6 +20,8 @@
 Nature 官方包来自 [Springer Nature 作者支持页](https://www.springernature.com/gp/authors/campaigns/latex-author-support)，也可从[官方 Overleaf 模板](https://www.overleaf.com/latex/templates/springer-nature-latex-template/myxmhdsbzkyd)查看。接入实现固定下载地址、版本与 SHA-256，并保留下载的完整 ZIP。上游 class/BST 保留其许可，不纳入 Prism MIT，也不上传到公开代码库。
 
 NMI 提供[初稿要求](https://www.nature.com/natmachintell/submission-guidelines/initial-formatting)和[接收后格式要求](https://www.nature.com/natmachintell/submission-guidelines/aip-and-formatting)。`sn-jnl` 是官方提供的可选方案；不要把它理解为 NMI 强制 class，或宣称本模板已完成最终投稿整理。
+
+Nature Communications 允许首次提交合并正文和图的 PDF，补充材料单独提供。根据[投稿说明](https://www.nature.com/ncomms/submit/how-to-submit)，修订稿的 TeX 需使用标准文档类，将参考文献并入单一正文 `.tex`，不接受单独的 `.bib`。此模板使用 BibTeX 辅助写初稿，不自动整理最终投稿文件。
 
 BIB 使用 [OUP 作者模板](https://ctan.org/pkg/oup-authoring-template) 1.5（2026-07-14），采用 `unnumsec,webpdf,contemporary,large`，使用该版本默认的数字引用；旧期刊配置表中的 `numbered` 在新版 class 中会干扰编号，因此省略。首次初始化校验官方 ZIP 后将所需文件存入本地项目，离线可用 `--template-source`。主文为官方双栏，独立补充材料使用标准 `article` 单栏；参考文献使用 `unsrt` 按首次引用顺序编号。最终格式以 [BIB 作者指南](https://academic.oup.com/bib/pages/author-guidelines)和 [OUP 模板说明](https://academic.oup.com/pages/for-authors/journals/preparing-and-submitting-your-manuscript)为准。上游文件保留 LPPL 许可，公开仓库只保存原创启动稿与导入代码。
 
