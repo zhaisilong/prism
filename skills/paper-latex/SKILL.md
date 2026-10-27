@@ -1,75 +1,34 @@
 ---
 name: paper-latex
-description: Initialize or compile Prism and journal manuscripts with bibliography, figures, tables, equations, and supplementary material. Use for academic manuscript projects; route ordinary single-file notes to notes-latex.
+description: Initialize or compile academic LaTeX manuscripts using Prism journal templates, bibliography, figures, tables, equations, and supplementary material. Use for manuscript projects; route ordinary single-file notes to notes-latex.
 ---
 
 # Paper LaTeX
 
-Initialize or compile a manuscript draft without generating scientific content. This skill depends on the complete Prism repository and its shared implementation under `scripts/`. Read the [Chinese guide](../../docs/guide.zh-CN.md) for user-facing examples and [template sources](../../docs/templates.md) when choosing a journal template.
+Use the complete Prism repository as the source of truth. Run its root wrapper by absolute path when outside the repository; the installed skill is only an entrypoint. Respect `PRISM_PROJECT_DIR` when the repository has moved. Never fall back to an older installed copy of the build implementation.
 
-## Workflow
+## Create and build
 
-Run the root wrappers from the Prism repository; from another directory, use their absolute paths.
+```bash
+scripts/latex-paper.sh --list-templates
+scripts/latex-paper.sh --init TARGET_DIR --template TEMPLATE
+scripts/latex-paper.sh TARGET_DIR --strict
+```
 
-1. Initialize a new project when needed:
+All default starters initialize offline from repository assets. Choose a template from the list rather than maintaining a second catalog here. Read [template sources](../../docs/templates.md) for journal-specific structure, citation styles, and upstream licensing; read the [short Chinese guide](../../docs/guide.zh-CN.md) for user-facing instructions.
 
-   ```bash
-   scripts/latex-paper.sh --list-templates
-   scripts/latex-paper.sh --init TARGET_DIR --template prism
-   # For Nature / NMI drafts:
-   scripts/latex-paper.sh --init TARGET_DIR --template nature
-   # For a Nature Communications research paper:
-   scripts/latex-paper.sh --init TARGET_DIR --template nature-communications
-   # For Briefings in Bioinformatics:
-   scripts/latex-paper.sh --init TARGET_DIR --template bib
-   # For a Drug Discovery Today narrative review:
-   scripts/latex-paper.sh --init TARGET_DIR --template ddt
-   # For a JCIM research paper:
-   scripts/latex-paper.sh --init TARGET_DIR --template jcim
-   # For JACS or Bioinformatics research papers:
-   scripts/latex-paper.sh --init TARGET_DIR --template journal/jacs
-   scripts/latex-paper.sh --init TARGET_DIR --template journal/bioinformatics
-   # For Science Advances, provide the official template directory or ZIP:
-   scripts/latex-paper.sh --init TARGET_DIR --template science-advances --template-source PACKAGE
-   ```
+- Edit the existing project's content in place. Replace demonstration text, authors, and citations before delivery; do not invent scientific claims, data, or references.
+- Preserve the main `prism-build.sh` when compiling independent supplements or examples: use `--main supplementary.tex --no-build-script` or `--main examples.tex --no-build-script`. Science Advances combines its supplement with the main text.
+- Inspect the first page, references, dense figures/tables, and representative pagination. Read [layout guidance](references/layout.md) when adjusting presentation.
+- Link the final PDF and show `cd "TARGET_DIR" && ./prism-build.sh` for rebuilding. Builds use temporary directories; a failed build preserves the previous PDF. Use `--keep-work` only for debugging and report the retained path.
 
-2. Replace author placeholders, example citations, and synthetic demonstration content. Prism uses `main.tex` plus `sections/`; journal starters keep the main text in one `main.tex`. All use `references.bib`.
-3. Compile with:
+## Options and boundaries
 
-   ```bash
-   scripts/latex-paper.sh PAPER_DIR
-   ```
+- `--check-deps` checks the initialized project's engine and resources; `--version` needs no TeX. Missing dependencies should be reported, not silently installed.
+- Initialization refuses a nonempty directory unless explicitly requested with `--force`, which backs it up. Preserve unrelated build scripts unless `--force-build-script` is requested.
+- Nature defaults to a Prism-maintained `article` draft. Existing `sn-jnl` projects remain supported; explicit local official import uses `--template-source`. Read [advanced usage](../../docs/reference.zh-CN.md) only when needed.
+- Install or update the local entrypoint only when requested, using `scripts/install-paper-skill.py`. Do not copy the shared implementation into global skills or modify other skills.
+- Keep research files and local installation paths private. Do not submit manuscripts, publish research, or upload project contents as part of formatting.
+- Route single-file notes to `notes-latex` and existing peer-review drafts to `reviewer-latex`. Do not convert a Markdown, DOCX, or PDF document into a complete scientific paper.
 
-4. Retain and link the PDF and generated `prism-build.sh` in the manuscript root. Show `cd "PAPER_DIR" && ./prism-build.sh` to rebuild.
-5. Compile independent `supplementary.tex` or `examples.tex` with `--main FILE --no-build-script` to preserve the main rebuild script. Science Advances keeps supplementary material in `main.tex` to share bibliography numbering. Inspect the first page, references, dense figures/tables, equations, and representative pagination. Use `--strict` for delivery checks.
-
-## Structure and options
-
-- `prism` is the default `article` starter for English or mixed Chinese-English manuscripts. Its default engine remains XeLaTeX or LuaLaTeX.
-- `prism-paper.sty` provides matched text/math fonts, consistent table and caption sizes, numeric columns, and multi-panel figures. Read [layout guidance](references/layout.md) when changing presentation or adapting an existing manuscript; the results and appendix sections contain working examples.
-- `nature` uses official `sn-jnl` / `sn-nature` with pdfLaTeX and BibTeX. Initialization verifies a pinned official ZIP before changing the target; `--template-source PACKAGE.zip` supplies that ZIP offline. Keep downloaded official files in the local project with their original licensing; do not vendor them into the public source assets. Do not layer Prism typography over this class.
-- `nature-communications` is an offline standard `article` research draft with BibTeX and independent supplementary material; consult the journal's requirements before preparing final TeX.
-- `bib` means the journal Briefings in Bioinformatics. Use its official OUP class configuration, retaining journal typography and the numeric bibliography setup. Pinned official files stay in the generated project, with offline ZIP support through `--template-source`.
-- `ddt` means Drug Discovery Today narrative-review drafts. Use the installed Elsevier `elsarticle` class and `elsarticle-num.bst`; initialization is offline. Keep optional highlights and teaser as separate draft placeholders, and check current journal requirements before submission.
-- `jcim` is a research-paper draft using installed ACS `achemso` with BibTeX. Replace the TOC graphic placeholder and check current journal requirements; initialization is offline.
-- `jacs` is an ACS research-paper draft using the same isolated build, with TOC graphic placeholder and independent supplement.
-- `bioinformatics` is an OUP original-paper draft using `namedate` author–year citations; import the pinned OUP ZIP online or with `--template-source`. The default draft column width is approximately 89.5 mm, not the 86 mm listed in current guidance.
-- `science-advances` imports the verified Science-family style files and copyright notice from a user-provided official directory or ZIP. Keep these upstream files local and unchanged; use one shared bibliography for main and supplementary text.
-- The starters use BibTeX citations; Bioinformatics uses author–year, while the others use numeric citations. Supplementary counters are independent. Read [layout guidance](references/layout.md) for rich examples. Thesis/book/proposal templates, CSL, Biber, and GB/T 7714 need project-specific configuration.
-- Use `--main`, `--out`, `--engine auto|xelatex|lualatex|pdflatex`, `--strict`, and `--keep-work` as needed. Project template metadata lets `auto` select pdfLaTeX for journal starters without changing existing unmarked projects.
-- Use `--no-build-script` only when the user wants no reproducible project script. Use `--force-build-script` to back up and replace a conflicting `prism-build.sh`.
-- Run `scripts/latex-paper.sh PAPER_DIR --check-deps` for the initialized project's engine, local class, and resources; `--version` requires no TeX.
-- Refuse to overwrite a non-empty initialization target unless `--force` creates a backup first.
-- Rebuild scripts locate this local Prism project. Set `PRISM_PROJECT_DIR` when the repository moves; the older `PRISM_LATEX_SKILLS_DIR` override remains supported. Do not install or modify global skills for this workflow.
-
-In Codex desktop, use the available built-in editor and native compiler for local single-file or multi-file TeX projects according to host instructions. Use the wrapper for this workflow's initialization, strict checks, temporary build isolation, and reproducible build scripts.
-
-## Boundary
-
-- Do not generate scientific claims, data, conclusions, or citations.
-- Do not convert Markdown, DOCX, or PDF into a complete paper.
-- Do not perform journal submission, plagiarism checking, literature search, or analysis execution.
-- Nature/NMI support is for drafting and initial-submission PDFs. Consult current journal guidance before final source submission; no automatic flattening, macro removal, or bibliography embedding is provided.
-- Route single-file research records to `notes-latex`.
-
-The build occurs in a temporary directory and copies back the final PDF plus the project-local reproducible build script.
+For desktop TeX editing, follow the host's native editor/compiler workflow when available; use Prism wrappers for template initialization and reproducible strict builds.

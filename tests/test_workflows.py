@@ -291,19 +291,17 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("achemso.sty: MISSING", result.stdout)
         self.assertNotIn("Invalid Prism template metadata", result.stderr)
 
-    def test_science_init_requires_source_before_creating_target(self):
+    def test_science_default_initialization_needs_neither_source_nor_tex(self):
         target = self.root / "new science parent" / "paper"
         result = self.run_cli("paper-latex", ["--init", str(target), "--template", "science-advances"])
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("--template-source", result.stderr)
-        self.assertFalse(target.parent.exists())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for name in ("main.tex", "scicite.sty", "sciencemag.bst", "science-template-readme.txt"):
+            self.assertTrue((target / name).is_file(), name)
+        self.assertFalse((target / "main.pdf").exists())
+        self.assertEqual(self.compiler_calls(), [])
 
     def test_real_science_unifies_main_and_supplement_references(self):
-        # The upstream source is intentionally not vendored. CI can opt in by
-        # setting PRISM_SCIENCE_SOURCE to its own verified official directory.
-        source = Path(os.environ.get("PRISM_SCIENCE_SOURCE", ROOT / "tmp" / "LaTeX_Template_for_Science_family_journals"))
-        if not source.is_dir():
-            self.skipTest("Real Science build needs PRISM_SCIENCE_SOURCE official directory")
+        source = ROOT / "skills/paper-latex/assets/upstream/science/1.0"
         for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
             if not shutil.which(command):
                 self.skipTest(f"Real Science build needs {command}")
@@ -318,7 +316,7 @@ class WorkflowTests(unittest.TestCase):
         for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
             env.pop(key, None)
         wrapper = str(ROOT / "scripts" / "latex-paper.sh")
-        initialized = subprocess.run([wrapper, "--init", str(target), "--template", "science-advances", "--template-source", str(source)], capture_output=True, text=True, check=False, env=env, timeout=120)
+        initialized = subprocess.run([wrapper, "--init", str(target), "--template", "science-advances"], capture_output=True, text=True, check=False, env=env, timeout=120)
         self.assertEqual(initialized.returncode, 0, initialized.stdout + initialized.stderr)
         before = {path: path.read_bytes() for path in target.rglob("*") if path.is_file()}
         built = subprocess.run([wrapper, str(target), "--strict"], capture_output=True, text=True, check=False, env=env, timeout=120)
@@ -386,6 +384,48 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("nature template requires pdfLaTeX", result.stderr)
         self.assertEqual(len(self.compiler_calls()), 1)
 
+    def test_real_default_nature_draft_and_independent_supplement(self):
+        for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
+            if not shutil.which(command):
+                self.skipTest(f"Real Nature draft build needs {command}")
+        for resource in ("natbib.sty", "unsrt.bst", "siunitx.sty"):
+            check = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
+            if check.returncode != 0 or not check.stdout.strip():
+                self.skipTest(f"Real Nature draft build needs {resource}")
+        project = self.root / "论文 with spaces" / "Nature offline draft"
+        env = os.environ.copy()
+        env.update(TMPDIR=str(self.work), PYTHONDONTWRITEBYTECODE="1")
+        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
+            env.pop(key, None)
+        wrapper = str(ROOT / "scripts" / "latex-paper.sh")
+        initialized = subprocess.run([wrapper, "--init", str(project), "--template", "nature"],
+                                     capture_output=True, text=True, check=False, env=env, timeout=120)
+        self.assertEqual(initialized.returncode, 0, initialized.stdout + initialized.stderr)
+        before = {p: p.read_bytes() for p in project.rglob("*") if p.is_file()}
+        for filename in ("main.tex", "supplementary.tex", "examples.tex"):
+            with self.subTest(filename=filename):
+                arguments = [wrapper, str(project), "--main", filename, "--strict"]
+                if filename != "main.tex":
+                    arguments.append("--no-build-script")
+                built = subprocess.run(arguments, capture_output=True, text=True, check=False,
+                                       env=env, timeout=120)
+                self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+        script = project / "prism-build.sh"
+        self.assertTrue(script.is_file())
+        self.assertIn("main.tex", script.read_text())
+        main = subprocess.run(["pdftotext", "-raw", str(project / "main.pdf"), "-"],
+                              capture_output=True, text=True, check=True).stdout
+        supplement = subprocess.run(["pdftotext", "-raw", str(project / "supplementary.pdf"), "-"],
+                                    capture_output=True, text=True, check=True).stdout
+        self.assertIn("Wilkinson", main)
+        self.assertIn("Wilkinson", supplement)
+        self.assertIn("Figure S1", supplement)
+        self.assertIn("Table S2", supplement)
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+        self.assert_no_intermediates(project)
+        self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
+
     def test_real_nature_communications_main_and_independent_supplement(self):
         for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
             if not shutil.which(command):
@@ -437,9 +477,6 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(list(self.work.glob("prism-paper-latex.*")), [])
 
     def test_real_bioinformatics_author_year_and_independent_supplement(self):
-        source_name = os.environ.get("PRISM_OUP_SOURCE")
-        if not source_name or not Path(source_name).is_file():
-            self.skipTest("Real Bioinformatics build needs PRISM_OUP_SOURCE official ZIP")
         for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
             if not shutil.which(command):
                 self.skipTest(f"Real Bioinformatics build needs {command}")
@@ -449,8 +486,7 @@ class WorkflowTests(unittest.TestCase):
         for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
             env.pop(key, None)
         wrapper = str(ROOT / "scripts" / "latex-paper.sh")
-        init = subprocess.run([wrapper, "--init", str(project), "--template", "journal/bioinformatics",
-                               "--template-source", source_name], capture_output=True, text=True,
+        init = subprocess.run([wrapper, "--init", str(project), "--template", "journal/bioinformatics"], capture_output=True, text=True,
                               check=False, env=env, timeout=120)
         self.assertEqual(init.returncode, 0, init.stdout + init.stderr)
         before = {p: p.read_bytes() for p in project.rglob("*") if p.is_file()}
@@ -765,6 +801,19 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.assertEqual(result.returncode, 1)
         self.assertIn("sn-jnl.cls: MISSING", result.stdout)
         self.assertIn("sn-nature.bst: MISSING", result.stdout)
+
+    def test_nature_draft_dependency_check_avoids_official_class(self):
+        cli_input, _, _ = self.make_source("paper-latex")
+        metadata = cli_input / "prism-template.json"
+        original = b'{"schema_version":1,"template":"nature","template_id":"family/nature-nmi","variant":"prism-article"}\n'
+        metadata.write_bytes(original)
+        result = self.run_cli("paper-latex", [str(cli_input), "--check-deps"])
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("article.cls: MISSING", result.stdout)
+        self.assertIn("unsrt.bst: MISSING", result.stdout)
+        self.assertNotIn("sn-jnl", result.stdout + result.stderr)
+        self.assertNotIn("sn-nature", result.stdout + result.stderr)
+        self.assertEqual(metadata.read_bytes(), original)
 
     def test_bib_dependency_profile_checks_oup_packages_and_local_resources(self):
         result = self.run_cli("paper-latex", ["--check-deps", "--template", "bib"])

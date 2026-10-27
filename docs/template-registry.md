@@ -5,3 +5,7 @@
 已有项目的 `prism-template.json` 保持只读兼容。新项目使用 `schema_version: 1`，同时记录短名称 `template`、规范名称 `template_id`、Prism 版本和引擎；两种名称必须指向同一模板。上游文件的版本或哈希单独记录，不写入本地来源路径。`--check-deps` 显式指定的 `--template` 继续优先于项目标识。
 
 会议模板未来使用 `conference/<会议>/<年份>` 标识，并在注册项分别记录 `venue`、`edition`、`track` 和 `stage`。评审政策和模板的作者显示模式应分别描述；具体模式、年份和来源由对应会议模板实现与验证。未实现的会议不出现在可用模板列表中。
+
+Nature 新项目记录 `variant: prism-article`（默认离线初稿）或 `sn-jnl`（显式本地官方导入）。旧 Nature 元数据缺少 `variant` 时按原 `sn-jnl` 模式处理，不改写文件；依赖检查按项目模式选择资源。其他模板不接受此字段。
+
+默认初始化只复制仓库中的原创骨架和已审核的上游文件。上游文件集中在 `skills/paper-latex/assets/upstream/`，manifest 记录版本、来源、大小和 SHA-256，两个 OUP 模板共享一份资源。`--template-source` 是本地高级覆盖入口，不触发网络请求。

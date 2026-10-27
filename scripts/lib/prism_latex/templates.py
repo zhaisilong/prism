@@ -9,8 +9,6 @@ import os
 import shutil
 import stat
 import tempfile
-import urllib.error
-import urllib.request
 import zipfile
 from pathlib import Path
 from typing import TypedDict
@@ -21,6 +19,7 @@ from .build_support import project_version
 PROJECT_DIR = Path(__file__).resolve().parents[3]
 ASSET_DIR = PROJECT_DIR / "skills" / "paper-latex" / "assets"
 METADATA_NAME = "prism-template.json"
+BUNDLED_PACKAGES = {"oup": ("1.5", "oup/1.5"), "science": ("1.0", "science/1.0")}
 NATURE_URL = "https://cms-resources.apps.public.k8s.springernature.io/springer-cms/rest/v1/content/18782940/data/v12"
 NATURE_SIZE = 901814
 NATURE_SHA256 = "812e76dcaa9c28dc1bff1fb6065d51729b67d4ea140552a05088317414a3ecae"
@@ -152,7 +151,7 @@ NATURE_PACKAGES = (
     "caption.sty", "subcaption.sty", "pdflscape.sty",
 )
 NATURE_COMMUNICATIONS_PACKAGES = (
-    "article.cls", "graphicx.sty", "amsmath.sty", "amssymb.sty",
+    "article.cls", "geometry.sty", "hyperref.sty", "array.sty", "graphicx.sty", "amsmath.sty", "amssymb.sty",
     "booktabs.sty", "tabularx.sty", "siunitx.sty", "longtable.sty",
     "caption.sty", "subcaption.sty", "pdflscape.sty", "natbib.sty", "unsrt.bst",
 )
@@ -188,7 +187,7 @@ JCIM_PACKAGES = (
 
 BUILD_PROFILES = {
     "prism": {"packages": PRISM_PACKAGES, "source": None, "examples": False},
-    "nature": {"packages": NATURE_PACKAGES, "source": "nature", "examples": True},
+    "nature": {"packages": NATURE_COMMUNICATIONS_PACKAGES + ("geometry.sty", "hyperref.sty", "amsfonts.sty", "array.sty"), "source": "nature", "examples": True},
     "nature-communications": {"packages": NATURE_COMMUNICATIONS_PACKAGES, "source": None, "examples": True},
     "science": {"packages": SCIENCE_PACKAGES, "source": "science", "examples": True},
     "oup-numeric": {"packages": BIB_PACKAGES, "source": "oup-numeric", "examples": True},
@@ -225,8 +224,15 @@ def resolve_template(name: str) -> str:
     raise ValueError(f"unknown template: {name}")
 
 
-def template_profile(template: str) -> dict:
+def template_profile(template: str, variant: str | None = None) -> dict:
     alias = resolve_template(template)
+    if alias == "nature":
+        if variant not in (None, "prism-article", "sn-jnl"):
+            raise ValueError("unknown Nature template variant")
+        if variant == "sn-jnl":
+            return {**BUILD_PROFILES["nature"], "packages": NATURE_PACKAGES}
+    elif variant is not None:
+        raise ValueError("template variant is only supported for Nature")
     return BUILD_PROFILES[TEMPLATES[alias]["backend"]]
 
 
@@ -234,10 +240,10 @@ def template_isolated_build(template: str | None) -> bool:
     return bool(template and template_profile(template).get("isolate_cwd", False))
 
 
-def template_for_project(project: Path) -> str | None:
+def _template_metadata(project: Path) -> tuple[str | None, str | None]:
     path = project / METADATA_NAME
     if not path.exists():
-        return None
+        return None, None
     try:
         metadata = json.loads(path.read_text(encoding="utf-8"))
         template = resolve_template(metadata["template"])
@@ -246,9 +252,24 @@ def template_for_project(project: Path) -> str | None:
                 raise ValueError("unsupported template metadata schema version")
             if metadata.get("template_id") != TEMPLATES[template]["id"]:
                 raise ValueError("template and template_id do not match")
+        if "variant" in metadata:
+            variant = metadata["variant"]
+            if template != "nature" or not isinstance(variant, str) or variant not in ("prism-article", "sn-jnl"):
+                raise ValueError("invalid template variant")
+        else:
+            # Nature projects created before offline starters use sn-jnl.
+            variant = "sn-jnl" if template == "nature" else None
     except (OSError, ValueError, TypeError, KeyError) as exc:
         raise SystemExit(f"Invalid Prism template metadata: {path}: {exc}") from exc
-    return template
+    return template, variant
+
+
+def template_for_project(project: Path) -> str | None:
+    return _template_metadata(project)[0]
+
+
+def template_variant_for_project(project: Path) -> str | None:
+    return _template_metadata(project)[1]
 
 
 def template_engine(template: str | None, requested: str) -> str:
@@ -262,10 +283,10 @@ def template_engine(template: str | None, requested: str) -> str:
     return requested
 
 
-def template_packages(template: str | None, engine: str) -> tuple[str, ...]:
+def template_packages(template: str | None, engine: str, variant: str | None = None) -> tuple[str, ...]:
     engine = template_engine(template, engine)
     if template:
-        return template_profile(template)["packages"]
+        return template_profile(template, variant)["packages"]
     # Existing, unmarked projects can explicitly request pdfLaTeX too.
     if engine == "pdflatex":
         return ("graphicx.sty", "amsmath.sty", "amssymb.sty", "natbib.sty")
@@ -273,20 +294,16 @@ def template_packages(template: str | None, engine: str) -> tuple[str, ...]:
 
 
 def _pinned_package(
-    source: Path | None, *, label: str, url: str, size: int,
+    source: Path | None, *, label: str, size: int,
     sha256: str, required: dict[str, str],
 ) -> tuple[bytes, dict[str, bytes]]:
-    """Validate one original archive in memory and read only named resources."""
+    """Validate an explicitly supplied original archive; never fetch online."""
+    if source is None:
+        raise SystemExit(f"The official {label} mode requires --template-source PACKAGE.zip; initialization does not download files.")
     try:
-        if source is not None:
-            with source.expanduser().open("rb") as handle:
-                archive = handle.read(size + 1)
-        else:
-            request = urllib.request.Request(url, headers={"User-Agent": "Prism-LaTeX"})
-            with urllib.request.urlopen(request, timeout=30) as response:
-                archive = response.read(size + 1)
-    except (OSError, urllib.error.URLError) as exc:
-        raise SystemExit(f"Cannot read the pinned {label} template package: {exc}. Use --template-source PACKAGE.zip for offline initialization.") from exc
+        archive = _read_science_file(source.expanduser(), size)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"Cannot read the pinned {label} template package: {exc}. The initialization target was not changed.") from exc
     digest = hashlib.sha256(archive).hexdigest()
     if len(archive) != size or digest != sha256:
         raise SystemExit(f"{label} template package checksum mismatch; expected the pinned official ZIP. The initialization target was not changed.")
@@ -309,21 +326,21 @@ def _pinned_package(
 
 def nature_package(source: Path | None) -> tuple[bytes, dict[str, bytes]]:
     return _pinned_package(
-        source, label="Nature", url=NATURE_URL, size=NATURE_SIZE,
+        source, label="Nature", size=NATURE_SIZE,
         sha256=NATURE_SHA256, required=NATURE_MEMBERS,
     )
 
 
 def bib_package(source: Path | None) -> tuple[bytes, dict[str, bytes]]:
     return _pinned_package(
-        source, label="BIB", url=BIB_URL, size=BIB_SIZE,
+        source, label="BIB", size=BIB_SIZE,
         sha256=BIB_SHA256, required=BIB_MEMBERS,
     )
 
 
 def bioinformatics_package(source: Path | None) -> tuple[bytes, dict[str, bytes]]:
     return _pinned_package(
-        source, label="Bioinformatics", url=BIB_URL, size=BIB_SIZE,
+        source, label="Bioinformatics", size=BIB_SIZE,
         sha256=BIB_SHA256, required=BIOINFORMATICS_MEMBERS,
     )
 
@@ -391,13 +408,55 @@ def science_package(source: Path | None) -> dict[str, bytes]:
         raise SystemExit(f"Invalid Science-family template source: {exc}. The initialization target was not changed.") from exc
 
 
-def template_resources(template: str | None) -> tuple[str, ...]:
+def _bundled_package(package_id: str, required: dict[str, str]) -> tuple[dict[str, bytes], dict]:
+    """Verify the maintained source selection before touching a target."""
+    root = ASSET_DIR / "upstream"
+    version, directory = BUNDLED_PACKAGES[package_id]
+    try:
+        manifest = json.loads(_read_science_file(root / "manifest.json", 100_000).decode("utf-8"))
+        if type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1:
+            raise ValueError("unsupported bundled manifest schema")
+        packages = [record for record in manifest["packages"] if record["id"] == package_id]
+        if len(packages) != 1 or packages[0]["version"] != version:
+            raise ValueError("missing, duplicated or unexpected bundled package version")
+        package = packages[0]
+        files: dict[str, bytes] = {}
+        for record in package["files"]:
+            relative = Path(record["path"])
+            if relative.parent.as_posix() != directory or relative.name in files:
+                raise ValueError("unsafe or duplicated bundled member")
+            size = record["size"]
+            if type(size) is not int or not 0 <= size <= 2_000_000:
+                raise ValueError("invalid bundled member size")
+            content = _read_science_file(root / relative, size)
+            if len(content) != size or hashlib.sha256(content).hexdigest() != record["sha256"]:
+                raise ValueError(f"checksum mismatch for {relative.name}")
+            files[relative.name] = content
+        notices = ({"README": "oup-template-README", "manifest.txt": "oup-template-manifest.txt",
+                    "NOTICE.md": "oup-template-NOTICE.md", "LICENSE.txt": "oup-template-LICENSE.txt"}
+                   if package_id == "oup" else
+                   {"NOTICE.md": "science-template-NOTICE.md", "LICENSE.txt": "science-template-LICENSE.txt"})
+        selected = {**required, **notices}
+        contents = {destination: files[name] for name, destination in selected.items()}
+        upstream = {
+            "package": package_id, "version": version, "url": package["source"],
+            "distribution": "bundled",
+            "files_sha256": {name: hashlib.sha256(content).hexdigest() for name, content in contents.items()},
+        }
+        return contents, upstream
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        raise SystemExit(f"Invalid bundled {package_id} template resources: {exc}. Restore or update the complete Prism repository. The initialization target was not changed.") from exc
+
+
+def template_resources(template: str | None, variant: str | None = None) -> tuple[str, ...]:
     """Project-local upstream resources required by an initialized template."""
     sources = {
         "nature": NATURE_MEMBERS, "oup-numeric": BIB_MEMBERS,
         "oup-authoryear": BIOINFORMATICS_MEMBERS, "science": SCIENCE_MEMBERS,
     }
-    source = template_profile(template)["source"] if template else None
+    source = template_profile(template, variant)["source"] if template else None
+    if source == "nature" and variant != "sn-jnl":
+        return ()
     return tuple(sources[source].values()) if source else ()
 
 
@@ -430,7 +489,8 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
         template = resolve_template(template)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
-    profile = template_profile(template)
+    variant = ("sn-jnl" if source is not None else "prism-article") if template == "nature" else None
+    profile = template_profile(template, variant)
     upstream_type = profile["source"]
     # Do not resolve the final component: doing so would follow a target symlink.
     requested = Path(os.path.abspath(target.expanduser()))
@@ -438,28 +498,37 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
     before = _snapshot(destination)
     if before is not None and before[2] and not force:
         raise SystemExit(f"Initialization target is not empty: {destination}")
-    asset = ASSET_DIR / TEMPLATES[template]["directory"]
+    directory = "nature-official-template" if variant == "sn-jnl" else TEMPLATES[template]["directory"]
+    asset = ASSET_DIR / directory
     if not (asset / "main.tex").is_file():
         raise SystemExit(f"Template assets are missing: {asset}")
     examples = ASSET_DIR / "paper-template" / "examples.tex"
     if profile["examples"] and not examples.is_file():
         raise SystemExit(f"Shared typesetting examples are missing: {examples}")
-    archive, members = (None, {})
-    if upstream_type == "nature":
+    archive, members, bundled_upstream = (None, {}, None)
+    if source is not None:
+        source_path = source.expanduser().resolve()
+        # Replacing a target must not retire or overwrite the supplied source.
+        if (source_path == destination or destination in source_path.parents
+                or (source_path.is_dir() and source_path in destination.parents)):
+            raise SystemExit("Template source and initialization target must not overlap. The initialization target was not changed.")
+    if upstream_type == "nature" and variant == "sn-jnl":
         archive, members = nature_package(source)
     elif upstream_type == "oup-numeric":
-        archive, members = bib_package(source)
+        if source is not None:
+            archive, members = bib_package(source)
+        else:
+            members, bundled_upstream = _bundled_package("oup", {Path(name).name: dest for name, dest in BIB_MEMBERS.items()})
     elif upstream_type == "oup-authoryear":
-        archive, members = bioinformatics_package(source)
+        if source is not None:
+            archive, members = bioinformatics_package(source)
+        else:
+            members, bundled_upstream = _bundled_package("oup", {Path(name).name: dest for name, dest in BIOINFORMATICS_MEMBERS.items()})
     elif upstream_type == "science":
         if source is not None:
-            source_path = source.expanduser().resolve()
-            # Do not move the source when replacing a target, or write the
-            # generated project into the user's supplied template directory.
-            if (source_path == destination or destination in source_path.parents
-                    or (source_path.is_dir() and source_path in destination.parents)):
-                raise SystemExit("Science template source and initialization target must not overlap. The initialization target was not changed.")
-        members = science_package(source)
+            members = science_package(source)
+        else:
+            members, bundled_upstream = _bundled_package("science", SCIENCE_MEMBERS)
     destination.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=f".{destination.name}.prism-init-", dir=destination.parent))
     backup = None
@@ -476,6 +545,8 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
             "prism_version": project_version(),
             "engine": TEMPLATES[template]["engine"],
         }
+        if variant is not None:
+            metadata["variant"] = variant
         if archive is not None:
             if upstream_type == "nature":
                 upstream = {"url": NATURE_URL, "sha256": NATURE_SHA256, "archive": NATURE_ARCHIVE}
@@ -483,6 +554,8 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
                 upstream = {"url": BIB_URL, "sha256": BIB_SHA256, "archive": BIB_ARCHIVE}
             (stage / upstream["archive"]).write_bytes(archive)
             metadata["upstream"] = upstream
+        elif bundled_upstream is not None:
+            metadata["upstream"] = bundled_upstream
         elif upstream_type == "science":
             metadata["upstream"] = {
                 "template": "Science-family v1.0 (July 2024)",

@@ -7,7 +7,7 @@ Prism maintains local LaTeX workflows. Use this guide for project work and futur
 - Maintain workflow instructions and templates under `skills/`; share build implementations through `scripts/lib/prism_latex/`.
 - Prefer `scripts/latex-note.sh`, `scripts/latex-review.sh`, and `scripts/latex-paper.sh` over global tools or ad hoc compiler commands.
 - Skill-local `build_support.py` and `build_script.py` are compatibility shims. Change the shared implementation instead of duplicating it.
-- Do not recreate or rely on the deleted global reviewer-latex skill. Do not install or modify global Codex skills for Prism.
+- Do not recreate or rely on the deleted global reviewer-latex skill. Install or update the paper-latex entrypoint only when requested, using `scripts/install-paper-skill.py`; keep implementations in this repository and do not modify other global skills.
 - This is a local Git repository. Add remotes, publishing workflows, or distribution functionality only when the user requests them.
 - Authorized public synchronization uses an audited export and independent Git history; never push this research checkout's original history. See `docs/public-sync.md` and `scripts/export-public-code.py`.
 

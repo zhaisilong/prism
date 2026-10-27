@@ -2,7 +2,9 @@
 
 也可以直接告诉 Codex：
 
-> 用 Nature 模板创建论文，放在 `projects/Papers/my-paper`。帮我处理图表、公式和编译。
+> 用 $paper-latex 的 Nature 模板创建论文，放在 `projects/Papers/my-paper`，并编译。
+
+第一次使用先在完整仓库中运行 `python3 scripts/install-paper-skill.py` 安装入口。
 
 自己操作时，在 Prism 根目录完成下面三步。
 
@@ -24,11 +26,7 @@
 scripts/latex-paper.sh --init projects/Papers/my-paper --template nature
 ```
 
-更换模板时，把 `nature` 换成表格中的标识。也可以使用完整名称，例如 `journal/jacs`；运行 `scripts/latex-paper.sh --list-templates` 查看全部名称。Nature、BIB 和 Bioinformatics 模板首次创建需要联网；Science Advances 创建时还需提供[官方模板](https://www.overleaf.com/latex/templates/latex-template-for-science-family-journals/kjytmmfyxthd)目录或 ZIP：
-
-```bash
-scripts/latex-paper.sh --init projects/Papers/my-paper --template science-advances --template-source path/to/science-template
-```
+更换模板时，把 `nature` 换成表格中的标识。全部模板均可离线创建。Nature 默认是我们维护的标准 `article` 初稿；官方版式见[高级用法](reference.zh-CN.md)。运行 `scripts/latex-paper.sh --list-templates` 查看完整名称；例如 `journal/jacs` 与 `jacs` 等价。
 
 ## 2. 写内容
 
@@ -48,4 +46,4 @@ scripts/latex-paper.sh projects/Papers/my-paper
 
 打开项目文件夹里的 `main.pdf`。修改后重复这一步即可。
 
-更多操作交给 Codex，例如：“编译补充材料”“把宽表排得更清楚”“修复编译报错”。离线模板、笔记、review 和排错见[高级用法](reference.zh-CN.md)。
+更多操作交给 Codex，例如：“编译补充材料”“把宽表排得更清楚”“修复编译报错”。官方模板导入、笔记、review 和排错见[高级用法](reference.zh-CN.md)。

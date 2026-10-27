@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.request
 import zipfile
 from pathlib import Path
 from unittest import mock
@@ -50,11 +51,12 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template"):
+        for name in ("paper-template", "nature-template", "nature-official-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
         (self.asset_dir / "paper-template" / "examples.tex").write_text("% shared standalone examples\n")
+        shutil.copytree(ROOT / "skills/paper-latex/assets/upstream", self.asset_dir / "upstream")
         self.addCleanup(mock.patch.stopall)
         mock.patch.object(templates, "ASSET_DIR", self.asset_dir).start()
 
@@ -133,7 +135,7 @@ class TemplateTests(unittest.TestCase):
         self.assertFalse(list(destination.glob("*.zip")))
 
     def science_fixture(self):
-        """Use synthetic bytes so tests never redistribute the AAAS files."""
+        """Use synthetic bytes to exercise local source validation independently."""
         files = {name: f"synthetic upstream {name}\n".encode() for name in templates.SCIENCE_MEMBERS}
         mock.patch.object(templates, "SCIENCE_SHA256", {name: hashlib.sha256(content).hexdigest() for name, content in files.items()}).start()
         source = self.root / "官方 template source"
@@ -174,7 +176,6 @@ class TemplateTests(unittest.TestCase):
             self.assertEqual(original.read_bytes(), b"private research")
             self.assertFalse(target.with_name(target.name + ".backup").exists())
             self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
-        check_rejected(None)
         (source / "scicite.sty").write_bytes(b"wrong file")
         check_rejected(source)
         (source / "scicite.sty").write_bytes(files["scicite.sty"])
@@ -206,7 +207,7 @@ class TemplateTests(unittest.TestCase):
         self.assertFalse((self.root / "escape.txt").exists())
         missing_parent = self.root / "new parent" / "paper"
         with self.assertRaises(SystemExit):
-            templates.initialize(missing_parent, False, "science-advances", None)
+            templates.initialize(missing_parent, False, "science-advances", bad_zip)
         self.assertFalse(missing_parent.parent.exists())
 
     def test_science_force_backs_up_existing_project_only_after_validation(self):
@@ -235,6 +236,7 @@ class TemplateTests(unittest.TestCase):
         source = self.pinned_source(archive)
         destination = self.root / "nature paper"
         templates.initialize(destination, False, "nature", source)
+        self.assertEqual((destination / "main.tex").read_text(), "% nature-official-template\n")
         self.assertEqual((destination / templates.NATURE_ARCHIVE).read_bytes(), archive)
         self.assertTrue((destination / "sn-jnl.cls").is_file())
         self.assertTrue((destination / "sn-nature.bst").is_file())
@@ -244,16 +246,14 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_for_project(destination), "nature")
         self.assertEqual(templates.template_engine("nature", "auto"), "pdflatex")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["variant"], "sn-jnl")
         self.assertEqual(metadata["upstream"]["sha256"], hashlib.sha256(archive).hexdigest())
 
-    def test_download_uses_the_same_pinned_archive_validation(self):
-        archive = self.package()
-        self.pinned_source(archive)
-        with mock.patch.object(templates.urllib.request, "urlopen", return_value=io.BytesIO(archive)) as fetch:
-            original, members = templates.nature_package(None)
-        self.assertEqual(original, archive)
-        self.assertEqual(set(members), {"sn-jnl.cls", "sn-nature.bst"})
-        self.assertEqual(fetch.call_args.args[0].full_url, templates.NATURE_URL)
+    def test_official_nature_requires_explicit_local_source_without_network(self):
+        with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("unexpected network access")) as fetch:
+            with self.assertRaises(SystemExit):
+                templates.nature_package(None)
+        fetch.assert_not_called()
 
     def test_offline_bib_keeps_official_archive_and_only_required_resources(self):
         archive = self.package(template="bib")
@@ -277,14 +277,122 @@ class TemplateTests(unittest.TestCase):
         })
         self.assertEqual(list(destination.parent.glob(".*.prism-init-*")), [])
 
-    def test_bib_download_uses_the_same_pinned_validation_as_offline_import(self):
-        archive = self.package(template="bib")
-        self.pinned_source(archive, "bib")
-        with mock.patch.object(templates.urllib.request, "urlopen", return_value=io.BytesIO(archive)) as fetch:
-            original, members = templates.bib_package(None)
-        self.assertEqual(original, archive)
-        self.assertEqual(set(members), set(templates.BIB_MEMBERS.values()))
-        self.assertEqual(fetch.call_args.args[0].full_url, templates.BIB_URL)
+    def test_bundled_bib_initialization_never_downloads_or_stores_archive(self):
+        destination = self.root / "bundled BIB"
+        with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("unexpected network access")) as fetch:
+            templates.initialize(destination, False, "bib")
+        fetch.assert_not_called()
+        for filename in templates.BIB_MEMBERS.values():
+            expected = self.asset_dir / "upstream/oup/1.5" / filename
+            self.assertEqual((destination / filename).read_bytes(), expected.read_bytes())
+        self.assertFalse(list(destination.glob("*.zip")))
+        metadata = json.loads((destination / templates.METADATA_NAME).read_text())
+        self.assertNotIn(str(self.root), json.dumps(metadata))
+
+    def test_every_default_template_initializes_without_network_in_chinese_paths(self):
+        before = {path.relative_to(self.asset_dir): path.read_bytes()
+                  for path in self.asset_dir.rglob("*") if path.is_file()}
+        with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("unexpected network access")) as fetch:
+            for name, details in templates.TEMPLATES.items():
+                with self.subTest(template=name):
+                    target = self.root / "离线论文 with spaces" / name
+                    templates.initialize(target, False, details["id"])
+                    metadata = json.loads((target / templates.METADATA_NAME).read_text())
+                    self.assertEqual(metadata["template"], name)
+                    self.assertEqual(metadata["template_id"], details["id"])
+                    self.assertEqual(templates.template_for_project(target), name)
+                    self.assertFalse(list(target.glob("*.zip")))
+                    self.assertNotIn(str(self.root), json.dumps(metadata))
+                    variant = templates.template_variant_for_project(target)
+                    for filename in templates.template_resources(name, variant):
+                        self.assertTrue((target / filename).is_file(), filename)
+        fetch.assert_not_called()
+        self.assertEqual({path.relative_to(self.asset_dir): path.read_bytes()
+                          for path in self.asset_dir.rglob("*") if path.is_file()}, before)
+
+    def test_nature_default_and_legacy_variants_keep_distinct_dependencies(self):
+        target = self.root / "Nature 离线初稿"
+        templates.initialize(target, False, "nature")
+        self.assertEqual((target / "main.tex").read_text(), "% nature-template\n")
+        metadata_path = target / templates.METADATA_NAME
+        metadata = json.loads(metadata_path.read_text())
+        self.assertEqual(metadata["variant"], "prism-article")
+        self.assertEqual(templates.template_variant_for_project(target), "prism-article")
+        self.assertEqual(templates.template_resources("nature", "prism-article"), ())
+        self.assertIn("article.cls", templates.template_packages("nature", "auto", "prism-article"))
+        self.assertNotIn("upstream", metadata)
+        self.assertFalse((target / "sn-jnl.cls").exists())
+        for legacy in ({"template": "nature"},
+                       {"schema_version": 1, "template": "nature", "template_id": "family/nature-nmi"}):
+            with self.subTest(legacy=legacy):
+                original = json.dumps(legacy).encode()
+                metadata_path.write_bytes(original)
+                self.assertEqual(templates.template_for_project(target), "nature")
+                self.assertEqual(templates.template_variant_for_project(target), "sn-jnl")
+                self.assertEqual(metadata_path.read_bytes(), original)
+        self.assertEqual(templates.template_resources("nature", "sn-jnl"),
+                         ("sn-jnl.cls", "sn-nature.bst"))
+
+    def test_invalid_metadata_variants_are_rejected_without_rewriting(self):
+        metadata_path = self.root / templates.METADATA_NAME
+        for metadata in ({"template": "nature", "variant": "unknown"},
+                         {"template": "nature", "variant": []},
+                         {"template": "nature", "variant": None},
+                         {"template": "jcim", "variant": "sn-jnl"}):
+            with self.subTest(metadata=metadata):
+                original = json.dumps(metadata).encode()
+                metadata_path.write_bytes(original)
+                with self.assertRaisesRegex(SystemExit, "Invalid Prism template metadata"):
+                    templates.template_for_project(self.root)
+                self.assertEqual(metadata_path.read_bytes(), original)
+
+    def test_missing_corrupt_or_linked_bundled_resources_never_replace_targets(self):
+        resources = (("bib", "oup/1.5/oup-authoring-template.cls"),
+                     ("bioinformatics", "oup/1.5/oup-abbrvnat.bst"),
+                     ("science-advances", "science/1.0/scicite.sty"))
+        for name, relative in resources:
+            path = self.asset_dir / "upstream" / relative
+            content = path.read_bytes()
+            for state in ("missing", "corrupt", "symlink"):
+                with self.subTest(template=name, state=state):
+                    target = self.root / f"existing-{name}-{state}"
+                    target.mkdir()
+                    original = target / "research.tex"
+                    original.write_bytes(b"private research fixture")
+                    path.unlink()
+                    if state == "corrupt":
+                        path.write_bytes(content + b"changed")
+                    elif state == "symlink":
+                        path.symlink_to(original)
+                    try:
+                        with self.assertRaises(SystemExit):
+                            templates.initialize(target, True, name)
+                        self.assertEqual(original.read_bytes(), b"private research fixture")
+                        self.assertFalse(target.with_name(target.name + ".backup").exists())
+                        fresh = self.root / f"new-{name}-{state}" / "paper"
+                        with self.assertRaises(SystemExit):
+                            templates.initialize(fresh, False, name)
+                        self.assertFalse(fresh.parent.exists())
+                    finally:
+                        if path.exists() or path.is_symlink():
+                            path.unlink()
+                        path.write_bytes(content)
+        self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
+
+    def test_explicit_official_sources_inside_targets_are_never_retired_by_force(self):
+        for name in ("nature", "bib", "bioinformatics"):
+            with self.subTest(template=name):
+                target = self.root / f"existing-{name}-source"
+                target.mkdir()
+                source = target / "official source.zip"
+                source.write_bytes(b"source archive fixture")
+                original = target / "research.tex"
+                original.write_bytes(b"private research fixture")
+                with self.assertRaisesRegex(SystemExit, "must not overlap"):
+                    templates.initialize(target, True, name, source)
+                self.assertEqual(source.read_bytes(), b"source archive fixture")
+                self.assertEqual(original.read_bytes(), b"private research fixture")
+                self.assertFalse(target.with_name(target.name + ".backup").exists())
 
     def test_bad_bib_archives_preserve_existing_project_before_force_backup(self):
         destination = self.root / "existing BIB paper"
@@ -382,12 +490,12 @@ class TemplateTests(unittest.TestCase):
         original = destination / "original"
         original.write_text("before")
         def changed_source(source):
-            original.write_text("changed while downloading")
+            original.write_text("changed while preparing source")
             return b"archive", {"sn-jnl.cls": b"class", "sn-nature.bst": b"bst"}
         with mock.patch.object(templates, "nature_package", side_effect=changed_source):
             with self.assertRaisesRegex(SystemExit, "changed during preparation"):
-                templates.initialize(destination, True, "nature")
-        self.assertEqual(original.read_text(), "changed while downloading")
+                templates.initialize(destination, True, "nature", self.root / "explicit source.zip")
+        self.assertEqual(original.read_text(), "changed while preparing source")
         self.assertFalse(destination.with_name("existing.backup").exists())
 
     def test_template_metadata_rejects_unknown_or_broken_content(self):

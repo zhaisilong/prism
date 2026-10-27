@@ -1,22 +1,23 @@
 % Independent supplement: --main supplementary.tex --no-build-script.
-\documentclass[pdflatex,sn-nature]{sn-jnl}
+% Original Prism draft using the standard article class.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
 \usepackage{graphicx,amsmath,amssymb,amsfonts,booktabs,array,tabularx,siunitx,longtable}
+\usepackage[super,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
 \sisetup{uncertainty-mode=separate}
 \renewcommand{\thesection}{S\arabic{section}}
 \renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\thetable}{S\arabic{table}}
 \renewcommand{\theequation}{S\arabic{equation}}
+\title{Supplementary information: Manuscript title}
+\author{First Author and Second Author}
+\date{}
 
 \begin{document}
-\title[Supplementary information]{Supplementary information: Manuscript title}
-\author*[1]{\fnm{First} \sur{Author}}\email{first.author@example.org}
-\author[1]{\fnm{Second} \sur{Author}}
-\affil*[1]{\orgdiv{Department},\orgname{Institution},
-  \orgaddress{\city{City},\country{Country}}}
-\abstract{Replace this instructional summary with an overview of the
-supplement, or remove it if the journal's current instructions require a
-different opening. This document is independent of the main manuscript.}
 \maketitle
+This document is independent of the main manuscript. Replace its instructional
+text and synthetic examples with the study's supporting material.
 
 \section{Supplementary methods}
 Describe supporting details and derivations. All figures, tables and equations
@@ -65,7 +66,6 @@ Example B & 36 & 0.415 +- 0.021\\
 All values are invented. Replace them with verified study results and define
 the actual measure of uncertainty.
 \end{table}
-\clearpage
 
 \small
 \begin{longtable}{@{}p{0.15\linewidth}p{0.29\linewidth}p{0.46\linewidth}@{}}
@@ -120,5 +120,6 @@ S34 & Limitations & State limitations supported by the actual study design.\\
 \section{Supplementary references}
 The citation here tests this document's independent bibliography
 \cite{wilkinson2016fair}; it is not evidence for the synthetic examples.
+\bibliographystyle{unsrt}
 \bibliography{references}
 \end{document}

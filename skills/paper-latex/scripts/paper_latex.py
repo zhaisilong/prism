@@ -28,6 +28,7 @@ from prism_latex.templates import (
     template_choices,
     template_engine,
     template_for_project,
+    template_variant_for_project,
     template_isolated_build,
     template_packages,
     template_profile,
@@ -42,7 +43,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--init", metavar="TARGET_DIR", type=Path, help="Create a new manuscript project")
     result.add_argument("--list-templates", action="store_true", help="List available manuscript templates")
     result.add_argument("--template", choices=template_choices(), help="Template alias or stable ID for --init or --check-deps (default: prism)")
-    result.add_argument("--template-source", metavar="PATH", type=Path, help="Official template package or folder for supported templates")
+    result.add_argument("--template-source", metavar="PATH", type=Path, help="Explicit local official package/folder override; default initialization is offline")
     result.add_argument("--main", default="main.tex", help="Main TeX path relative to PAPER_DIR")
     result.add_argument("--out", type=Path, help="Output PDF path")
     result.add_argument("--engine", choices=("auto", "xelatex", "lualatex", "pdflatex"), default="auto")
@@ -93,16 +94,17 @@ def main(argv: list[str] | None = None) -> int:
     if paper_dir is not None and not paper_dir.is_dir():
         raise SystemExit(f"Paper directory not found: {paper_dir}")
     template = selected_template or (template_for_project(paper_dir) if paper_dir else None)
+    variant = template_variant_for_project(paper_dir) if paper_dir and not selected_template else None
     requested_engine = template_engine(template, args.engine)
     if args.check_deps:
         ok, rows = dependency_report(
-            requested_engine, template_packages(template, requested_engine),
+            requested_engine, template_packages(template, requested_engine, variant),
         )
         bibtex = shutil.which("bibtex")
         rows.append(f"bibtex: {bibtex or 'MISSING'}")
         ok = ok and bool(bibtex)
         if paper_dir:
-            for filename in template_resources(template):
+            for filename in template_resources(template, variant):
                 exists = (paper_dir / filename).is_file()
                 rows.append(f"{filename}: {paper_dir / filename if exists else 'MISSING'}")
                 ok = ok and exists

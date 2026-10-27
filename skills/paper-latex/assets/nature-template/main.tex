@@ -1,24 +1,26 @@
-% Original Prism starter using the official Springer Nature class.
-% Initial draft; see Prism docs/guide.zh-CN.md for scope and final-file requirements.
-% The official class and bibliography style are imported during initialization.
-\documentclass[pdflatex,sn-nature]{sn-jnl}
+% Original Prism Nature / NMI draft using the standard article class.
+% Optional official sn-jnl mode is selected by an explicit --template-source.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
 \usepackage{graphicx,amsmath,amssymb,amsfonts,booktabs,array,tabularx,siunitx}
+\usepackage[super,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
 \sisetup{uncertainty-mode=separate}
+\title{Manuscript title}
+\author{First Author\textsuperscript{1,*} and Second Author\textsuperscript{1,2}\\
+  \small \textsuperscript{1}Department, First institution, City, Country\\
+  \small \textsuperscript{2}Department, Second institution, City, Country\\
+  \small \textsuperscript{*}Correspondence: \texttt{first.author@example.org}}
+\date{}
 
 \begin{document}
-\title[Short manuscript title]{Manuscript title}
-\author*[1]{\fnm{First} \sur{Author}}\email{first.author@example.org}
-\author[1,2]{\fnm{Second} \sur{Author}}
-\affil*[1]{\orgdiv{Department},\orgname{First institution},
-  \orgaddress{\city{City},\country{Country}}}
-\affil[2]{\orgdiv{Department},\orgname{Second institution},
-  \orgaddress{\city{City},\country{Country}}}
-\abstract{Replace this paragraph with an unreferenced abstract describing
-the research problem, approach, verified findings and their implications.
-For a Nature Machine Intelligence Article, the current guidance allows up
-to 150 words. All examples in this starter demonstrate typesetting only;
-they are not scientific results.}
 \maketitle
+\begin{abstract}
+Replace this paragraph with an unreferenced abstract describing the research
+problem, approach, verified findings and their implications. For a Nature
+Machine Intelligence Article, check the current abstract word limit.
+All examples demonstrate typesetting only; they are not scientific results.
+\end{abstract}
 
 % NMI Articles begin with introductory text without an Introduction heading.
 Replace this introductory text with the context, unresolved question and
@@ -26,7 +28,7 @@ specific contribution of the study. Explain the problem for readers outside
 the immediate field. The citation below tests bibliography mechanics only;
 retain it only if it is relevant to the manuscript\cite{wilkinson2016fair}.
 
-This is a working manuscript, using the official Nature reference style.
+This is a working manuscript, using a standard numeric reference style.
 It does not reproduce the published journal's final layout. Replace every
 instructional statement, synthetic number and graphic slot before submission.
 
@@ -132,6 +134,7 @@ statement appropriate to the work.
 \section*{Competing interests}
 Replace with the authors' confirmed competing-interest statement.
 
-% The sn-nature class option already selects \bibliographystyle{sn-nature}.
+% BibTeX supports editing this draft; check final submission requirements.
+\bibliographystyle{unsrt}
 \bibliography{references}
 \end{document}

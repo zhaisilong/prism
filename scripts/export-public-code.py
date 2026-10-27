@@ -18,13 +18,13 @@ import tempfile
 from dataclasses import dataclass
 
 
-ROOT_FILES = frozenset({".gitignore", "AGENTS.md", "CHANGELOG.md", "LICENSE", "README.md", "VERSION"})
+ROOT_FILES = frozenset({".gitattributes", ".gitignore", "AGENTS.md", "CHANGELOG.md", "LICENSE", "README.md", "VERSION"})
 SOURCE_DIRS = frozenset({"scripts", "skills", "tests", "docs"})
 TEXT_SUFFIXES = frozenset({
     ".md", ".rst", ".txt", ".py", ".sh", ".tex", ".sty", ".bib", ".cls", ".bst",
     ".yaml", ".yml", ".json", ".toml", ".cfg", ".ini", ".csl", ".dtx", ".ins",
 })
-TEXT_NAMES = frozenset({"LICENSE", "NOTICE", "COPYING", "Makefile", "VERSION", ".gitignore", ".gitkeep", ".latexmkrc"})
+TEXT_NAMES = frozenset({"LICENSE", "NOTICE", "COPYING", "README", "Makefile", "VERSION", ".gitattributes", ".gitignore", ".gitkeep", ".latexmkrc"})
 CACHE_DIRS = frozenset({
     "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".cache", ".tox",
     ".venv", "node_modules", "build", "dist", "out", "tmp", "temp",
@@ -48,6 +48,20 @@ PRIVATE_PATTERNS = (
 )
 EMAIL = re.compile(r"[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})", re.I)
 EXAMPLE_DOMAINS = frozenset({"example.com", "example.net", "example.org"})
+
+# Only these reviewed, byte-identical upstream notices may retain their
+# published author/support email addresses. Never exempt an entire directory,
+# accept a user-supplied manifest as an exemption, or skip credential/path scans.
+UPSTREAM_NOTICE_SHA256 = {
+    "skills/paper-latex/assets/upstream/oup/1.5/README":
+        "3abf3f975cb4ecb6d02a0de30b3f72b59d7c7c496bf3e7111c3249e7586b7fe4",
+    "skills/paper-latex/assets/upstream/oup/1.5/oup-abbrvnat.bst":
+        "8004033e134786884125d7312a65f042d453c18f5970a54ecc193042904e00f9",
+    "skills/paper-latex/assets/upstream/science/1.0/scicite.sty":
+        "8030d7867d4094da12e59f3f0a6bc1d646d9c8454518872086d34bf25bbf2a99",
+    "skills/paper-latex/assets/upstream/science/1.0/readme.txt":
+        "a8ede7d50779a9f5e82f332780efeba5b6dba4b9cc04c87b1d0fd2464cc1cd9d",
+}
 
 
 class ExportError(Exception):
@@ -106,11 +120,11 @@ def _read_regular(source: Path, relative: str):
             os.close(descriptor)
 
 
-def _privacy_rules(text: str):
+def _privacy_rules(text: str, *, upstream_attribution: bool = False):
     rules = {name for name, pattern in PRIVATE_PATTERNS if pattern.search(text)}
     for match in EMAIL.finditer(text):
         domain = match.group(1).lower()
-        if not any(domain == allowed or domain.endswith("." + allowed) for allowed in EXAMPLE_DOMAINS):
+        if not upstream_attribution and not any(domain == allowed or domain.endswith("." + allowed) for allowed in EXAMPLE_DOMAINS):
             rules.add("non-example-email")
     return sorted(rules)
 
@@ -168,9 +182,14 @@ def inventory(source: Path) -> Inventory:
         if any(ord(char) < 32 and char not in "\t\r\n\f" for char in text):
             findings.append(f"{relative}: binary-control-characters")
             return
-        for rule in _privacy_rules(text + "\n" + relative):
+        digest = hashlib.sha256(data).hexdigest()
+        approved_notice = UPSTREAM_NOTICE_SHA256.get(relative)
+        if approved_notice and digest != approved_notice:
+            findings.append(f"{relative}: upstream-notice-changed")
+        for rule in _privacy_rules(text + "\n" + relative,
+                                   upstream_attribution=approved_notice == digest):
             findings.append(f"{relative}: {rule}")
-        entries.append(Entry(relative, len(data), hashlib.sha256(data).hexdigest(),
+        entries.append(Entry(relative, len(data), digest,
                              0o755 if opened.st_mode & 0o111 else 0o644, _signature(opened)))
 
     if not source.is_dir():

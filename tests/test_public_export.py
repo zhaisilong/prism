@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -43,6 +44,7 @@ class PublicExportTests(unittest.TestCase):
                               text=True, capture_output=True, check=False, timeout=20)
 
     def test_export_uses_allowlist_without_git_and_preserves_text_and_execution(self):
+        self.write(".gitattributes", "skills/paper-latex/assets/upstream/** -text -whitespace\n")
         self.write("VERSION", "1.0.0\n")
         runner = self.write("scripts/run.sh", "#!/bin/sh\nexit 0\n")
         runner.chmod(0o755)
@@ -58,7 +60,7 @@ class PublicExportTests(unittest.TestCase):
         result = self.run_cli("--out", self.output, "--manifest", self.manifest)
         self.assertEqual(result.returncode, 0, result.stderr)
         expected = {
-            "README.md", "LICENSE", "VERSION", "projects/.gitkeep", "scripts/run.sh",
+            ".gitattributes", "README.md", "LICENSE", "VERSION", "projects/.gitkeep", "scripts/run.sh",
             "skills/paper/assets/references.bib", "docs/中文 guide.md", "tests/fixtures/review.md",
         }
         self.assertEqual({path.relative_to(self.output).as_posix() for path in self.output.rglob("*") if path.is_file()}, expected)
@@ -119,6 +121,55 @@ class PublicExportTests(unittest.TestCase):
         self.write("docs/safe.md", "safe\n")
         (self.source / "docs" / "linked.md").symlink_to(outside / "document.md")
         self.assertEqual(self.run_cli("--check").returncode, 1)
+
+    def test_reviewed_upstream_notices_keep_attribution_only_at_exact_paths(self):
+        for relative in EXPORT.UPSTREAM_NOTICE_SHA256:
+            target = self.source / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((ROOT / relative).read_bytes())
+        result = self.run_cli("--out", self.output)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for relative in EXPORT.UPSTREAM_NOTICE_SHA256:
+            self.assertEqual((self.output / relative).read_bytes(), (ROOT / relative).read_bytes())
+        unrelated = self.source / "docs/copied-notice.txt"
+        unrelated.parent.mkdir(exist_ok=True)
+        unrelated.write_bytes((ROOT / next(iter(EXPORT.UPSTREAM_NOTICE_SHA256))).read_bytes())
+        rejected = self.run_cli("--check")
+        self.assertEqual(rejected.returncode, 1)
+        self.assertIn("docs/copied-notice.txt: non-example-email", rejected.stderr)
+
+    def test_changed_upstream_notice_cannot_hide_personal_data(self):
+        relative = next(iter(EXPORT.UPSTREAM_NOTICE_SHA256))
+        original = (ROOT / relative).read_bytes()
+        target = self.source / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        private = "private-person" + chr(64) + "private-domain.invalid"
+        target.write_bytes(original + ("\n" + private).encode())
+        result = self.run_cli("--check")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("upstream-notice-changed", result.stderr)
+        self.assertIn("non-example-email", result.stderr)
+        self.assertNotIn(private, result.stdout + result.stderr)
+        target.write_bytes(original + b"\n")
+        self.assertEqual(self.run_cli("--check").returncode, 1)
+
+    def test_attribution_exception_never_disables_credentials_or_path_checks(self):
+        relative = next(iter(EXPORT.UPSTREAM_NOTICE_SHA256))
+        fixtures = {
+            "github-token": "gh" + "p_" + "A" * 36,
+            "absolute-home-path": "/" + "Users" + "/" + "private-person" + "/draft.tex",
+        }
+        for rule, private in fixtures.items():
+            with self.subTest(rule=rule):
+                target = self.source / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                content = ("Copyright contact: " + private + "\n").encode()
+                target.write_bytes(content)
+                approved = {relative: hashlib.sha256(content).hexdigest()}
+                with mock.patch.object(EXPORT, "UPSTREAM_NOTICE_SHA256", approved):
+                    with self.assertRaisesRegex(EXPORT.ExportError, rule) as caught:
+                        EXPORT.inventory(self.source)
+                self.assertNotIn(private, str(caught.exception))
 
     def test_caches_and_compiler_outputs_are_excluded_even_if_force_tracked(self):
         self.write("scripts/__pycache__/cached.pyc", "cached\n")

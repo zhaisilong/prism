@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "packages": [
+    {
+      "id": "oup",
+      "version": "1.5",
+      "source": "https://mirrors.ctan.org/macros/latex/contrib/oup-authoring-template.zip",
+      "license": "LPPL-1.3-or-later; individual file notices apply",
+      "files": [
+        {
+          "path": "oup/1.5/LICENSE.txt",
+          "size": 19040,
+          "sha256": "ca3227f672053cb608959d7e1d476c7a13efea11be3f6e53758a68b650c918e8"
+        },
+        {
+          "path": "oup/1.5/NOTICE.md",
+          "size": 1013,
+          "sha256": "e1a0579fadbaee0c6eb1e7bf56d8247ad3e9289f5b03b3b55001c62d5abe4bda"
+        },
+        {
+          "path": "oup/1.5/README",
+          "size": 1218,
+          "sha256": "3abf3f975cb4ecb6d02a0de30b3f72b59d7c7c496bf3e7111c3249e7586b7fe4"
+        },
+        {
+          "path": "oup/1.5/manifest.txt",
+          "size": 1417,
+          "sha256": "4543819ff08de0cac7206c64ff61be26bb6093c856297ddd3ba23ce6de0036b1"
+        },
+        {
+          "path": "oup/1.5/oup-abbrvnat.bst",
+          "size": 26536,
+          "sha256": "8004033e134786884125d7312a65f042d453c18f5970a54ecc193042904e00f9"
+        },
+        {
+          "path": "oup/1.5/oup-authoring-template.cls",
+          "size": 147051,
+          "sha256": "d821dccff84d040d68c4c3d0edb97a866f0778d51b5ab265a83d589b7ea7096a"
+        },
+        {
+          "path": "oup/1.5/oup-plain.bst",
+          "size": 20621,
+          "sha256": "c32b0fff1ae22c72afc2357db634fa3a4366e8f2eef84b1bb90e6423aac18f51"
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "version": "1.0",
+      "source": "https://www.science.org/content/page/preparing-manuscripts-using-latex",
+      "license": "Individual file notices; LPPL-1.0-or-later for sciencemag.bst",
+      "files": [
+        {
+          "path": "science/1.0/LICENSE.txt",
+          "size": 19040,
+          "sha256": "ca3227f672053cb608959d7e1d476c7a13efea11be3f6e53758a68b650c918e8"
+        },
+        {
+          "path": "science/1.0/NOTICE.md",
+          "size": 909,
+          "sha256": "86872ec65eadb2ee6ec3f87571945a79d35e0004f960c8f9a6354401e5e19d15"
+        },
+        {
+          "path": "science/1.0/readme.txt",
+          "size": 1494,
+          "sha256": "a8ede7d50779a9f5e82f332780efeba5b6dba4b9cc04c87b1d0fd2464cc1cd9d"
+        },
+        {
+          "path": "science/1.0/scicite.sty",
+          "size": 22015,
+          "sha256": "8030d7867d4094da12e59f3f0a6bc1d646d9c8454518872086d34bf25bbf2a99"
+        },
+        {
+          "path": "science/1.0/sciencemag.bst",
+          "size": 28804,
+          "sha256": "2ce0f9f1dad69ab331fbf1a8d0210d757f85043025f777ba01e53533c3b659c3"
+        }
+      ]
+    }
+  ]
+}

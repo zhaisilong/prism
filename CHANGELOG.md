@@ -4,6 +4,25 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.10.27.5
+
+### Added
+
+- Bundled reviewed OUP and Science source styles with original notices, licensing, provenance and per-file checksums for offline initialization.
+- Added a backed-up, atomic paper-latex skill entrypoint installer pointing to the complete local checkout.
+
+### Changed
+
+- Removed automatic upstream downloads from manuscript initialization. Nature now defaults to an original article draft; explicit official imports and existing sn-jnl projects remain supported.
+- Simplified paper-latex instructions and installation guidance. Kept private installation paths and research data outside public snapshots.
+- Bound public copyright-email exceptions to reviewed upstream file paths and hashes without relaxing credential or personal-path scans.
+
+### Validation
+
+- Passed all 114 regression tests and focused export privacy checks, including malformed markers and duplicate entry protection.
+- Strictly compiled all default template manuscripts, supplements and shared examples; checked citations, representative pages and clean sources.
+- Updated and validated the local paper-latex entrypoint with a complete local backup; audited public exports without research data or original checkout history.
+
 ## 2026.10.27.4
 
 ### Added

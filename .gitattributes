@@ -1,0 +1,2 @@
+# Preserve reviewed upstream sources, including their original whitespace.
+skills/paper-latex/assets/upstream/** -text -whitespace
