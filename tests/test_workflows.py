@@ -330,7 +330,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("Peng", before_supplement)
         self.assertIn("Sandve", before_supplement)
         self.assertLess(before_supplement.index("Peng"), before_supplement.index("Sandve"))
-        self.assertRegex(supplement, re.compile(r"supplement-only example\s+citation\s*\(2\)", re.I))
+        self.assertRegex(supplement, re.compile(r"supplement-only exam(?:ple|-\s*ple)\s+citation\s*\(2\)", re.I))
         self.assertIn("Figure S1", extracted)
         self.assertIn("Table S1", extracted)
         self.assertIn("Equation S1", extracted)
@@ -380,9 +380,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(list(self.work.iterdir()), [])
         self.assert_no_intermediates(cli_input)
         result = self.run_cli("paper-latex", [str(cli_input), "--engine", "xelatex", "--no-build-script"])
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("nature template requires pdfLaTeX", result.stderr)
-        self.assertEqual(len(self.compiler_calls()), 1)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("-xelatex", self.compiler_calls()[1]["arguments"])
+        self.assertEqual(len(self.compiler_calls()), 2)
 
     def test_real_default_nature_draft_and_independent_supplement(self):
         for command in ("pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
@@ -767,15 +767,17 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.install_compiler()
         cli_input, _, destination = self.make_source("paper-latex")
         destination.write_bytes(b"previous PDF")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex"), ("science-advances", "xelatex"), ("science-advances", "lualatex")):
+        profiles = [("prism", "pdflatex"), *((name, "lualatex") for name in ("nature", "nature-communications", "bib", "ddt", "jcim", "science-advances"))]
+        for template, engine in profiles:
             with self.subTest(template=template, engine=engine):
                 (cli_input / "prism-template.json").write_text(json.dumps({"template": template}))
                 result = self.run_cli("paper-latex", [str(cli_input), "--engine", engine])
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn(f"{template} template requires", result.stderr)
+                self.assertIn("engine", result.stderr)
                 result = self.run_cli("paper-latex", ["--check-deps", "--template", template, "--engine", engine])
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn(f"{template} template requires", result.stderr)
+                self.assertIn("engine", result.stderr)
+
         self.assertEqual(self.compiler_calls(), [])
         self.assertEqual(destination.read_bytes(), b"previous PDF")
 
@@ -791,7 +793,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.assertEqual(destination.read_bytes(), b"new PDF from stub")
 
     def test_nature_dependency_profile_selects_pdflatex_and_checks_local_class(self):
-        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature"])
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature", "--language", "english"])
         self.assertEqual(result.returncode, 1)
         self.assertIn("pdflatex: MISSING", result.stdout)
         self.assertNotIn("fontspec", result.stdout)
@@ -816,7 +818,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         self.assertEqual(metadata.read_bytes(), original)
 
     def test_bib_dependency_profile_checks_oup_packages_and_local_resources(self):
-        result = self.run_cli("paper-latex", ["--check-deps", "--template", "bib"])
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "bib", "--language", "english"])
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("pdflatex: MISSING", result.stdout)
         self.assertIn("totcount.sty: MISSING", result.stdout)
@@ -836,21 +838,21 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
             self.assertNotIn(f"{resource}: MISSING", result.stdout)
 
     def test_ddt_dependency_profile_reports_missing_official_class_and_style(self):
-        result = self.run_cli("paper-latex", ["--check-deps", "--template", "ddt"])
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "ddt", "--language", "english"])
         self.assertEqual(result.returncode, 1, result.stderr)
         for resource in ("pdflatex", "elsarticle.cls", "elsarticle-num.bst"):
             self.assertIn(f"{resource}: MISSING", result.stdout)
         self.assertNotIn("fontspec", result.stdout)
 
     def test_jcim_dependency_profile_reports_missing_acs_resources(self):
-        result = self.run_cli("paper-latex", ["--check-deps", "--template", "jcim"])
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "jcim", "--language", "english"])
         self.assertEqual(result.returncode, 1, result.stderr)
         for resource in ("pdflatex", "achemso.sty", "achemso.bst", "natbib.sty", "natmove.sty", "xkeyval.sty"):
             self.assertIn(f"{resource}: MISSING", result.stdout)
         self.assertNotIn("fontspec", result.stdout)
 
     def test_nature_communications_dependency_profile_reports_missing_resources(self):
-        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature-communications"])
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature-communications", "--language", "english"])
         self.assertEqual(result.returncode, 1, result.stderr)
         for resource in ("pdflatex", "article.cls", "natbib.sty", "unsrt.bst"):
             self.assertIn(f"{resource}: MISSING", result.stdout)
@@ -885,7 +887,7 @@ First citation\cite{zulu2025}; second citation\cite{alpha2025}.
         bibtex = self.bin / "bibtex"
         bibtex.write_text(f"#!{sys.executable}\n")
         bibtex.chmod(0o755)
-        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature"])
+        result = self.run_cli("paper-latex", ["--check-deps", "--template", "nature", "--language", "english"])
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 

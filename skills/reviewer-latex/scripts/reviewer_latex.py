@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -72,8 +73,50 @@ SECTION_ALIASES = {
         "confidential comment",
         "confidential comments",
         "confidential comments to editor",
+        "confidential comment to editor",
+        "confidential",
+        "private",
+        "private comment to editor",
+        "private comments to editor",
+        "comment to editor",
+        "comments to editor",
+        "editor only",
+        "for editor only",
+        "for the editor only",
         "editor note",
         "editor notes",
+    },
+}
+
+CHINESE_SECTION_ALIASES = {
+    "overall": {
+        "总体意见", "總體意見", "总体评价", "總體評價", "总体评述", "總體評述",
+        "总体评估", "總體評估", "总体评论", "總體評論", "整体意见", "整體意見",
+        "整体评价", "整體評價", "综合意见", "綜合意見", "综合评价", "綜合評價",
+        "一般意见", "一般意見", "审稿意见", "審稿意見", "给作者的意见", "給作者的意見",
+        "作者意见", "作者意見",
+    },
+    "major": {
+        "主要问题", "主要問題", "主要意见", "主要意見", "主要关切", "主要關切",
+        "重要问题", "重要問題", "重大问题", "重大問題", "重大意见", "重大意見",
+        "关键问题", "關鍵問題",
+    },
+    "minor": {
+        "次要问题", "次要問題", "次要意见", "次要意見", "小问题", "小問題",
+        "其他问题", "其他問題",
+    },
+    "notes": {
+        "给编辑的保密意见", "給編輯的保密意見", "给编辑的保密评论", "給編輯的保密評論",
+        "给编辑的私密意见", "給編輯的私密意見", "给编辑的意见", "給編輯的意見",
+        "致编辑的意见", "致編輯的意見", "致编辑保密意见", "致編輯保密意見",
+        "编辑保密意见", "編輯保密意見", "编辑专属意见", "編輯專屬意見",
+        "保密意见", "保密意見", "保密评论", "保密評論", "编辑备注", "編輯備註",
+        "保密", "机密", "機密", "私密", "私密意见", "私密意見", "编辑意见", "編輯意見",
+        "仅编辑可见", "僅編輯可見", "仅供编辑", "僅供編輯", "仅供编辑的意见", "僅供編輯的意見",
+        "给编辑的机密意见", "給編輯的機密意見", "机密意见", "機密意見",
+        "给编者的意见", "給編者的意見", "致编者的意见", "致編者的意見",
+        "给编者的保密意见", "給編者的保密意見", "致编者的保密意见", "致編者的保密意見",
+        "给主编的意见", "給主編的意見", "给主编的保密意见", "給主編的保密意見",
     },
 }
 
@@ -94,6 +137,14 @@ LABEL_ALIASES = {
     "title": "title",
     "decision": "decision",
     "recommendation": "decision",
+}
+
+CHINESE_LABEL_ALIASES = {
+    "journal": {"期刊", "期刊名称", "期刊名稱", "期刊名"},
+    "journal_short": {"期刊简称", "期刊簡稱", "期刊缩写", "期刊縮寫", "期刊简写", "期刊簡寫"},
+    "review_id": {"稿件编号", "稿件編號", "稿件号码", "稿件號碼", "稿件id", "论文编号", "論文編號", "稿号", "稿號", "审稿编号", "審稿編號"},
+    "title": {"论文题目", "論文題目", "论文标题", "論文標題", "稿件标题", "稿件標題", "题目", "題目", "标题", "標題"},
+    "decision": {"审稿建议", "審稿建議", "审稿决定", "審稿決定", "处理建议", "處理建議", "处理意见", "處理意見", "建议", "建議"},
 }
 
 DEFAULT_TEXT = {
@@ -243,26 +294,80 @@ def normalize_key(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def normalize_chinese_label(text: str) -> str:
+    text = unicodedata.normalize("NFKC", clean_markdown_heading(text)).casefold()
+    text = re.sub(r"^\s*(?:[一二三四五六七八九十]+[、.)]|\d+(?:\.\d+)*[、.)])\s*", "", text)
+    return re.sub(r"\s+", "", text.strip(" :：-–—\t"))
+
+
+def label_parts(text: str) -> list[str]:
+    normalized = unicodedata.normalize("NFKC", clean_markdown_heading(text))
+    # Parentheses and slashes commonly carry an English translation.
+    return [normalized, *re.split(r"[()/|]+", normalized)]
+
+
 def classify_heading(line: str) -> str | None:
-    key = normalize_key(line)
-    for section, aliases in SECTION_ALIASES.items():
-        if key in aliases:
-            return section
-    return None
+    matched: set[str] = set()
+    for part in label_parts(line):
+        key = normalize_key(part)
+        chinese_key = normalize_chinese_label(part)
+        for section, aliases in SECTION_ALIASES.items():
+            if key in aliases or chinese_key in CHINESE_SECTION_ALIASES[section]:
+                matched.add(section)
+    if len(matched) > 1:
+        raise SystemExit("Ambiguous review section heading; use one recognized section heading.")
+    return next(iter(matched), None)
+
+
+def split_label_value(line: str) -> tuple[str, str] | None:
+    raw = clean_markdown_heading(line)
+    raw = re.sub(r"^\*\*(.+?)[：:]\*\*\s*(.*)$", r"\1: \2", raw)
+    match = re.match(r"^([^:：]{1,80}?)[：:]\s*(.*)$", raw)
+    return (match.group(1).strip(), match.group(2).strip()) if match else None
+
+
+CONFIDENTIAL_CLUE = re.compile(
+    r"保密|机密|機密|私密|不公开|不公開|(?:(?:仅|僅|只)(?:供|给|給)?(?:主编|主編|编辑|編輯|编者|編者))"
+    r"|(?:编辑|編輯|编者|編者).{0,15}(?:专属|專屬|内部|內部)"
+    r"|^(?:给|給|致)(?:主编|主編|编辑|編輯|编者|編者)"
+    r"|\bconfidential\b|\bprivate\b|\beditor[ -]?only\b|\b(?:for |to )(?:the )?editor\b",
+    re.IGNORECASE,
+)
+
+
+def unrecognized_confidential_label(line: str, label: str | None = None) -> bool:
+    raw = line.strip()
+    content = label if label is not None else clean_markdown_heading(raw)
+    if not CONFIDENTIAL_CLUE.search(unicodedata.normalize("NFKC", content)):
+        return False
+    if label is not None or re.match(r"^#{1,6}\s*", raw) or re.fullmatch(r"(?:\*\*|__).+(?:\*\*|__)", raw):
+        return True
+    # Match section-like plain headings and labels, but do not treat an
+    # ordinary sentence mentioning editors or confidentiality as a heading.
+    if re.match(r"^(?:给|給|致)(?:编者|編者)", content) and len(content) <= 80 and not re.search(r"[。.!！？?]$", content):
+        return True
+    return bool(len(content) <= 80 and not re.search(r"[。.!！？?]$", content) and re.match(
+        r"^(?:保密|机密|機密|私密|(?:给|給|致)(?:主编|主編|编辑|編輯)(?:的|之)?(?:其他|补充|補充|特殊|额外|額外|内部|內部)?(?:意见|意見|建议|建議|反馈|反饋|备注|備註|评论|評論|说明|說明|评语|評語|信件|信函)$|(?:给|給|致)(?:主编|主編|编辑|編輯).{0,20}(?:保密|机密|機密|私密|专属|專屬|内部|內部)|(?:编辑|編輯)(?:专属|專屬|保密|机密|機密|私密|内部|內部)|(?:仅|僅|只)(?:供|给|給)?(?:主编|主編|编辑|編輯)|(?:confidential|private)\s+(?:notes?|comments?|remarks?|feedback|editor)|editor(?:ial)?\s+(?:confidential|private|only|notes?|comments?|remarks?|feedback))",
+        content, re.IGNORECASE,
+    ))
 
 
 def parse_metadata_line(line: str) -> tuple[str, str] | None:
-    raw = clean_markdown_heading(line)
-    raw = re.sub(r"^\*\*(.+?):\*\*\s*(.+)$", r"\1: \2", raw)
-    match = re.match(r"^([A-Za-z][A-Za-z /_-]{1,35})\s*:\s*(.+)$", raw)
-    if not match:
+    pair = split_label_value(line)
+    if pair is None or not pair[1]:
         return None
-    label = normalize_key(match.group(1))
-    field = LABEL_ALIASES.get(label)
-    if not field:
+    label, raw_value = pair
+    fields: set[str] = set()
+    for part in label_parts(label):
+        field = LABEL_ALIASES.get(normalize_key(part))
+        if field:
+            fields.add(field)
+        chinese_key = normalize_chinese_label(part)
+        fields.update(name for name, aliases in CHINESE_LABEL_ALIASES.items() if chinese_key in aliases)
+    if len(fields) != 1:
         return None
-    value = normalize_space(match.group(2).strip(" *"))
-    return field, value
+    value = normalize_space(raw_value.strip(" *"))
+    return next(iter(fields)), value
 
 
 def parse_report(text: str) -> Report:
@@ -276,8 +381,18 @@ def parse_report(text: str) -> Report:
                 report.sections[current].append("")
             continue
 
+        pair = split_label_value(stripped)
+        label = pair[0] if pair else stripped
+        section = classify_heading(label)
+        # Check the audience before metadata extraction: a label such as
+        # "Title (confidential): ..." must not enter the author PDF as title.
+        if section != "notes" and unrecognized_confidential_label(stripped, label if pair else None):
+            raise SystemExit("Unrecognized confidential or editor-only heading or label; use a recognized editor-only section before publishing.")
+
         metadata = parse_metadata_line(stripped)
         if metadata:
+            if section == "notes":
+                raise SystemExit("Ambiguous confidential metadata label; separate editor-only comments from public manuscript metadata before publishing.")
             field_name, value = metadata
             if value and getattr(report, field_name) in {
                 "",
@@ -288,9 +403,10 @@ def parse_report(text: str) -> Report:
                 setattr(report, field_name, value)
             continue
 
-        section = classify_heading(stripped)
         if section:
             current = section
+            if pair and pair[1]:
+                report.sections[current].append(clean_content_line(pair[1]))
             continue
 
         report.sections[current].append(clean_content_line(raw_line))
@@ -321,9 +437,12 @@ def apply_overrides(report: Report, args: argparse.Namespace) -> None:
 
 def has_cjk(text: str) -> bool:
     return any(
-        "\u3400" <= char <= "\u4dbf"
+        "\u3000" <= char <= "\u303f"
+        or "\u3400" <= char <= "\u4dbf"
         or "\u4e00" <= char <= "\u9fff"
         or "\uf900" <= char <= "\ufaff"
+        or "\uff00" <= char <= "\uffef"
+        or "\U00020000" <= char <= "\U0002ffff"
         for char in text
     )
 

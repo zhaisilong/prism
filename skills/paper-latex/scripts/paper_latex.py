@@ -28,6 +28,7 @@ from prism_latex.templates import (
     template_choices,
     template_engine,
     template_for_project,
+    template_language_for_project,
     template_variant_for_project,
     template_isolated_build,
     template_packages,
@@ -44,6 +45,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--list-templates", action="store_true", help="List available manuscript templates")
     result.add_argument("--template", choices=template_choices(), help="Template alias or stable ID for --init or --check-deps (default: prism)")
     result.add_argument("--template-source", metavar="PATH", type=Path, help="Explicit local official package/folder override; default initialization is offline")
+    result.add_argument("--language", choices=("bilingual", "english"), help="Language profile for initialization or dependency preview (default for new projects: bilingual)")
     result.add_argument("--main", default="main.tex", help="Main TeX path relative to PAPER_DIR")
     result.add_argument("--out", type=Path, help="Output PDF path")
     result.add_argument("--engine", choices=("auto", "xelatex", "lualatex", "pdflatex"), default="auto")
@@ -72,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
     argument_parser = parser()
     args = argument_parser.parse_args(argv)
     if args.list_templates:
-        if args.paper_dir or args.init or args.check_deps or args.template or args.template_source or args.force:
+        if args.paper_dir or args.init or args.check_deps or args.template or args.template_source or args.force or args.language:
             argument_parser.error("--list-templates must be used without a project, initialization, or dependency options.")
         for name, details in TEMPLATES.items():
             publisher = details["publisher"] or "Prism"
@@ -82,29 +84,47 @@ def main(argv: list[str] | None = None) -> int:
         argument_parser.error("Use --init TARGET_DIR without PAPER_DIR or --check-deps.")
     if args.template and not (args.init or args.check_deps):
         argument_parser.error("--template is only supported with --init or --check-deps.")
+    if args.language and not (args.init or args.check_deps):
+        argument_parser.error("--language is only supported with --init or --check-deps.")
     selected_template = resolve_template(args.template) if args.template else None
     if args.template_source and not (args.init and selected_template and template_profile(selected_template)["source"]):
         argument_parser.error("--template-source requires --init and a template that accepts an official source package.")
     if args.force and not args.init:
         argument_parser.error("--force requires --init TARGET_DIR.")
     if args.init:
-        return initialize(args.init, args.force, selected_template or "prism", args.template_source)
+        init_template = selected_template or "prism"
+        language = args.language or "bilingual"
+        requested = template_engine(init_template, args.engine, language)
+        default = template_engine(init_template, "auto", language)
+        if args.engine != "auto" and default != "auto" and requested != default:
+            argument_parser.error("--init selects its engine from --language; use --engine when building an existing project.")
+        return initialize(args.init, args.force, init_template, args.template_source, language)
 
     paper_dir = args.paper_dir.expanduser().resolve() if args.paper_dir else None
     if paper_dir is not None and not paper_dir.is_dir():
         raise SystemExit(f"Paper directory not found: {paper_dir}")
     template = selected_template or (template_for_project(paper_dir) if paper_dir else None)
+    if args.check_deps and paper_dir is None and template is None:
+        template = "prism"
     variant = template_variant_for_project(paper_dir) if paper_dir and not selected_template else None
-    requested_engine = template_engine(template, args.engine)
+    if args.language:
+        language = args.language
+    elif paper_dir and not selected_template:
+        language = template_language_for_project(paper_dir)
+    else:
+        language = "bilingual" if args.check_deps else None
+    requested_engine = template_engine(template, args.engine, language)
     if args.check_deps:
+        is_prism = not template or resolve_template(template) == "prism"
         ok, rows = dependency_report(
-            requested_engine, template_packages(template, requested_engine, variant),
+            requested_engine, template_packages(template, requested_engine, variant, language),
+            include_latin_fonts=is_prism, include_cjk=is_prism or language == "bilingual",
         )
         bibtex = shutil.which("bibtex")
         rows.append(f"bibtex: {bibtex or 'MISSING'}")
         ok = ok and bool(bibtex)
         if paper_dir:
-            for filename in template_resources(template, variant):
+            for filename in template_resources(template, variant, language):
                 exists = (paper_dir / filename).is_file()
                 rows.append(f"{filename}: {paper_dir / filename if exists else 'MISSING'}")
                 ok = ok and exists
@@ -164,14 +184,22 @@ def main(argv: list[str] | None = None) -> int:
             script_options = ["--main", args.main, "--engine", args.engine]
             if args.strict:
                 script_options.append("--strict")
-            write_build_script(
-                workflow="paper-latex",
-                input_path=main_path,
-                output_path=destination,
-                project_dir=paper_dir,
-                options=script_options,
-                force=args.force_build_script,
+            legacy_xe_override = (
+                language is None and args.engine == "xelatex"
+                and os.path.lexists(paper_dir / "prism-build.sh")
+                and not args.force_build_script
             )
+            if legacy_xe_override:
+                print("Warning: kept the existing prism-build.sh; use --force-build-script to update it for XeLaTeX.", file=sys.stderr)
+            else:
+                write_build_script(
+                    workflow="paper-latex",
+                    input_path=main_path,
+                    output_path=destination,
+                    project_dir=paper_dir,
+                    options=script_options,
+                    force=args.force_build_script,
+                )
         return 0
     finally:
         if args.keep_work:

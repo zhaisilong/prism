@@ -7,24 +7,24 @@
 | 标识 | 用途 | 引擎 / 文献 | 文件来源 |
 | --- | --- | --- | --- |
 | `prism`（默认） | 通用科研草稿、中英混排、复杂图表公式与补充材料 | XeLaTeX 或 LuaLaTeX / BibTeX | Prism 原创模板，MIT |
-| `nature` | Nature Portfolio / NMI 初稿写作 | pdfLaTeX / BibTeX | Prism 原创 `article` 初稿；可显式本地导入官方版式 |
-| `nature-communications` | Nature Communications 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创 `article` 草稿，MIT |
-| `bib` | Briefings in Bioinformatics 英文稿、双栏图表与公式 | pdfLaTeX / BibTeX | Prism 原创启动文件 + 仓库维护的 OUP 1.5 class |
-| `ddt` | Drug Discovery Today 单栏叙述性综述草稿 | pdfLaTeX / BibTeX，数字上标 | Prism 原创启动文件 + TeX Live 安装的 Elsevier `elsarticle` |
-| `jcim` | Journal of Chemical Information and Modeling 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
-| `jacs` | Journal of the American Chemical Society 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
-| `bioinformatics` | Bioinformatics 原始论文草稿 | pdfLaTeX / BibTeX，作者—年份 | Prism 原创启动文件 + 仓库维护的 OUP 1.5 class 和样式 |
-| `science-advances` | Science Advances 研究论文草稿 | pdfLaTeX / BibTeX | Prism 原创启动文件 + 仓库维护的 Science-family v1.0 样式 |
+| `nature` | Nature Portfolio / NMI 初稿写作 | XeLaTeX / BibTeX | Prism 原创 `article` 初稿；可显式本地导入官方版式 |
+| `nature-communications` | Nature Communications 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创 `article` 草稿，MIT |
+| `bib` | Briefings in Bioinformatics 论文、双栏图表与公式 | XeLaTeX / BibTeX | Prism 原创启动文件 + 仓库维护的 OUP 1.5 class |
+| `ddt` | Drug Discovery Today 单栏叙述性综述草稿 | XeLaTeX / BibTeX，数字上标 | Prism 原创启动文件 + TeX Live 安装的 Elsevier `elsarticle` |
+| `jcim` | Journal of Chemical Information and Modeling 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
+| `jacs` | Journal of the American Chemical Society 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
+| `bioinformatics` | Bioinformatics 原始论文草稿 | XeLaTeX / BibTeX，作者—年份 | Prism 原创启动文件 + 仓库维护的 OUP 1.5 class 和样式 |
+| `science-advances` | Science Advances 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创启动文件 + 仓库维护的 Science-family v1.0 样式 |
 
-全部默认模板均可离线初始化，不下载官方包；编译依赖仍由 TeX 发行版提供。
+全部默认模板均可离线初始化，新项目默认支持中英混排；期刊模板用 XeLaTeX，通用 `prism` 可用 XeLaTeX 或 LuaLaTeX。期刊项目创建时可用 `--language english` 选择原 pdfLaTeX 模式。参考文献使用英文条目。编译依赖由 TeX 发行版提供。
 
-`prism` 的 `main.tex` 分节写作；期刊模板主文是单一 TeX，不加载 Prism 字体样式。各模板均附 `examples.tex`；Science Advances 在 `main.tex` 中合并补充材料，其余模板有独立 `supplementary.tex`。所有演示均为格式示例。
+`prism` 的 `main.tex` 分节写作；期刊模板主文是单一 TeX，仅加载提供中文字体的轻量样式，不叠加 Prism 的英文字体和版式。各模板均附 `examples.tex`；Science Advances 在 `main.tex` 中合并补充材料，其余模板有独立 `supplementary.tex`。所有演示均为格式示例。
 
 以上为简短别名。运行 `scripts/latex-paper.sh --list-templates` 可查看以 `journal/`、`family/` 或 `generic/` 开头的完整名称和分类；旧命令及已有项目无需改动。
 
 模板注册字段和未来会议扩展方式见[维护说明](template-registry.md)。
 
-已在临时目录严格编译各模板的主文、补充材料和示例，检查代表页面；Prism 另通过 LuaLaTeX 构建。独立补充材料与示例使用 `--no-build-script` 保留主文重建入口。
+在临时目录严格编译各模板中英混排的主文、补充材料和示例，检查代表页面；Prism 另通过 LuaLaTeX 构建。独立补充材料与示例使用 `--no-build-script` 保留主文重建入口。
 
 Nature 默认使用 Prism 原创标准 `article` 草稿。需要官方 `sn-jnl` / `sn-nature` 时，用 `--template-source` 显式提供原始 3.1 ZIP；已有官方项目继续原样构建。官方包来自 [Springer Nature 作者支持页](https://www.springernature.com/gp/authors/campaigns/latex-author-support)。该 class 在 LPPL 声明外另有与 LaTeX base 一起分发的文字，因此本仓库不单独镜像它；这不影响其他可分发样式。
 NMI 提供[初稿要求](https://www.nature.com/natmachintell/submission-guidelines/initial-formatting)和[接收后格式要求](https://www.nature.com/natmachintell/submission-guidelines/aip-and-formatting)。`sn-jnl` 是官方提供的可选方案；不要把它理解为 NMI 强制 class，或宣称本模板已完成最终投稿整理。

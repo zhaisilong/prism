@@ -9,3 +9,5 @@
 Nature 新项目记录 `variant: prism-article`（默认离线初稿）或 `sn-jnl`（显式本地官方导入）。旧 Nature 元数据缺少 `variant` 时按原 `sn-jnl` 模式处理，不改写文件；依赖检查按项目模式选择资源。其他模板不接受此字段。
 
 默认初始化只复制仓库中的原创骨架和已审核的上游文件。上游文件集中在 `skills/paper-latex/assets/upstream/`，manifest 记录版本、来源、大小和 SHA-256，两个 OUP 模板共享一份资源。`--template-source` 是本地高级覆盖入口，不触发网络请求。
+
+新项目的 `language` 为 `bilingual`（默认）或 `english`。期刊混排使用 XeLaTeX 和独立中文字体样式，英文模式保留 pdfLaTeX；Prism 通用稿保留 XeLaTeX/LuaLaTeX。旧项目缺该字段时沿用原引擎和样式，不改写元数据或论文。`--check-deps --template NAME --language english` 可检查英文模式；对已有项目直接运行 `--check-deps` 按已记录模式检查。

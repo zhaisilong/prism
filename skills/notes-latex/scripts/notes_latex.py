@@ -103,15 +103,6 @@ def normalize_input_text(text: str) -> str:
     )
 
 
-def has_cjk(text: str) -> bool:
-    return any(
-        "\u3400" <= char <= "\u4dbf"
-        or "\u4e00" <= char <= "\u9fff"
-        or "\uf900" <= char <= "\ufaff"
-        for char in text
-    )
-
-
 def latex_escape(text: str) -> str:
     return "".join(LATEX_ESCAPE.get(char, char) for char in text)
 
@@ -519,7 +510,9 @@ def render_wrapped_document(
     body = render_note_blocks(content_text, skip_first_h1=skip_first_h1)
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
     replacements = {
-        "<<FONT_SETUP>>": portable_font_setup(engine, has_cjk(text)),
+        # The generated date labels are Chinese even when the source, title,
+        # and filename are English. Always prepare CJK for wrapped notes.
+        "<<FONT_SETUP>>": portable_font_setup(engine, True),
         "<<PDF_TITLE>>": escape_text_segment(title),
         "<<TITLE>>": render_inline(title),
         "<<META>>": render_inline(f"创建日期：{created}；更新日期：{updated}"),

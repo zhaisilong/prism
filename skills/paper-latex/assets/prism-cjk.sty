@@ -1,0 +1,22 @@
+% Prism's optional Chinese typesetting support; leaves the journal's Latin
+% and mathematical font selections to its own class and packages.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{prism-cjk}[2026/10/27 Chinese and English draft support]
+\RequirePackage{iftex}
+\ifXeTeX
+  \RequirePackage{xeCJK}
+  \setCJKmainfont{FandolSong-Regular.otf}[BoldFont=FandolSong-Bold.otf]
+  \setCJKsansfont{FandolHei-Regular.otf}[BoldFont=FandolHei-Bold.otf]
+  \setCJKmonofont{FandolFang-Regular.otf}
+  \XeTeXlinebreaklocale "zh"
+  \XeTeXlinebreakskip=0pt plus 1pt
+\else\ifLuaTeX
+  \RequirePackage[match]{luatexja-fontspec}
+  \setmainjfont{FandolSong-Regular.otf}[BoldFont=FandolSong-Bold.otf]
+  \setsansjfont{FandolHei-Regular.otf}[BoldFont=FandolHei-Bold.otf]
+  \setmonojfont{FandolFang-Regular.otf}
+\else
+  \PackageError{prism-cjk}{Chinese and English drafts require XeLaTeX or LuaLaTeX}%
+    {Use the engine selected by Prism for this template.}
+\fi\fi
+\endinput

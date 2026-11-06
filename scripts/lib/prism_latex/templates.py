@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import stat
 import tempfile
@@ -86,54 +87,54 @@ TEMPLATES: dict[str, TemplateRecord] = {
         "publisher": "Springer Nature", "article_type": "research", "backend": "nature",
         "directory": "nature-template",
         "engine": "pdflatex",
-        "description": "Nature / NMI manuscript and supplementary information; English; pdfLaTeX",
+        "description": "Nature / NMI manuscript and supplementary information; bilingual / English",
     },
     "nature-communications": {
         "id": "journal/nature-communications", "kind": "journal", "venue": "Nature Communications",
         "publisher": "Springer Nature", "article_type": "research", "backend": "nature-communications",
         "directory": "nature-communications-template",
         "engine": "pdflatex",
-        "description": "Nature Communications research article and supplementary information; English; pdfLaTeX",
+        "description": "Nature Communications research article and supplementary information; bilingual / English",
     },
     "science-advances": {
         "id": "journal/science-advances", "kind": "journal", "venue": "Science Advances",
         "publisher": "AAAS", "article_type": "research", "backend": "science",
         "directory": "science-advances-template",
         "engine": "pdflatex",
-        "description": "Science Advances research article and combined supplementary material; English; pdfLaTeX",
+        "description": "Science Advances research article and combined supplementary material; bilingual / English",
     },
     "bib": {
         "id": "journal/briefings-in-bioinformatics", "kind": "journal", "venue": "Briefings in Bioinformatics",
         "publisher": "Oxford University Press", "article_type": "manuscript", "backend": "oup-numeric",
         "directory": "bib-template",
         "engine": "pdflatex",
-        "description": "Briefings in Bioinformatics (OUP); English; pdfLaTeX",
+        "description": "Briefings in Bioinformatics (OUP); bilingual / English",
     },
     "ddt": {
         "id": "journal/drug-discovery-today", "kind": "journal", "venue": "Drug Discovery Today",
         "publisher": "Elsevier", "article_type": "review", "backend": "ddt",
         "directory": "ddt-template",
         "engine": "pdflatex",
-        "description": "Drug Discovery Today narrative review (Elsevier); English; pdfLaTeX",
+        "description": "Drug Discovery Today narrative review (Elsevier); bilingual / English",
     },
     "jcim": {
         "id": "journal/jcim", "kind": "journal", "venue": "Journal of Chemical Information and Modeling",
         "publisher": "ACS", "article_type": "research", "backend": "acs",
         "directory": "jcim-template",
         "engine": "pdflatex",
-        "description": "Journal of Chemical Information and Modeling research article (ACS); English; pdfLaTeX",
+        "description": "Journal of Chemical Information and Modeling research article (ACS); bilingual / English",
     },
     "jacs": {
         "id": "journal/jacs", "kind": "journal", "venue": "Journal of the American Chemical Society",
         "publisher": "ACS", "article_type": "research", "backend": "acs",
         "directory": "jacs-template", "engine": "pdflatex",
-        "description": "Journal of the American Chemical Society research article (ACS); English; pdfLaTeX",
+        "description": "Journal of the American Chemical Society research article (ACS); bilingual / English",
     },
     "bioinformatics": {
         "id": "journal/bioinformatics", "kind": "journal", "venue": "Bioinformatics",
         "publisher": "Oxford University Press", "article_type": "original", "backend": "oup-authoryear",
         "directory": "bioinformatics-template", "engine": "pdflatex",
-        "description": "Bioinformatics original paper (OUP); English; pdfLaTeX",
+        "description": "Bioinformatics original paper (OUP); bilingual / English",
     },
 }
 PRISM_PACKAGES = (
@@ -240,10 +241,10 @@ def template_isolated_build(template: str | None) -> bool:
     return bool(template and template_profile(template).get("isolate_cwd", False))
 
 
-def _template_metadata(project: Path) -> tuple[str | None, str | None]:
+def _template_metadata(project: Path) -> tuple[str | None, str | None, str | None]:
     path = project / METADATA_NAME
     if not path.exists():
-        return None, None
+        return None, None, None
     try:
         metadata = json.loads(path.read_text(encoding="utf-8"))
         template = resolve_template(metadata["template"])
@@ -259,9 +260,12 @@ def _template_metadata(project: Path) -> tuple[str | None, str | None]:
         else:
             # Nature projects created before offline starters use sn-jnl.
             variant = "sn-jnl" if template == "nature" else None
+        language = metadata.get("language")
+        if "language" in metadata and language not in ("bilingual", "english"):
+            raise ValueError("invalid template language")
     except (OSError, ValueError, TypeError, KeyError) as exc:
         raise SystemExit(f"Invalid Prism template metadata: {path}: {exc}") from exc
-    return template, variant
+    return template, variant, language
 
 
 def template_for_project(project: Path) -> str | None:
@@ -272,19 +276,34 @@ def template_variant_for_project(project: Path) -> str | None:
     return _template_metadata(project)[1]
 
 
-def template_engine(template: str | None, requested: str) -> str:
+def template_language_for_project(project: Path) -> str | None:
+    return _template_metadata(project)[2]
+
+
+def template_engine(template: str | None, requested: str, language: str | None = None) -> str:
+    if language not in (None, "bilingual", "english"):
+        raise SystemExit("Invalid template language; use bilingual or english.")
     alias = resolve_template(template) if template else None
     if alias and TEMPLATES[alias]["backend"] == "prism" and requested == "pdflatex":
         raise SystemExit("The prism template requires XeLaTeX or LuaLaTeX; use --engine auto, xelatex, or lualatex.")
     if alias and TEMPLATES[alias]["engine"] == "pdflatex":
-        if requested not in ("auto", "pdflatex"):
-            raise SystemExit(f"The {alias} template requires pdfLaTeX; use --engine auto or pdflatex.")
-        return "pdflatex"
+        if language == "bilingual":
+            if requested not in ("auto", "xelatex"):
+                raise SystemExit(f"The bilingual {alias} template requires XeLaTeX; use --engine auto or xelatex.")
+            return "xelatex"
+        if requested in ("auto", "pdflatex"):
+            return "pdflatex"
+        if requested == "xelatex":
+            return "xelatex"
+        raise SystemExit(f"The {alias} template supports pdfLaTeX or XeLaTeX; use --engine auto, pdflatex, or xelatex.")
     return requested
 
 
-def template_packages(template: str | None, engine: str, variant: str | None = None) -> tuple[str, ...]:
-    engine = template_engine(template, engine)
+def template_packages(
+    template: str | None, engine: str, variant: str | None = None,
+    language: str | None = None,
+) -> tuple[str, ...]:
+    engine = template_engine(template, engine, language)
     if template:
         return template_profile(template, variant)["packages"]
     # Existing, unmarked projects can explicitly request pdfLaTeX too.
@@ -448,16 +467,54 @@ def _bundled_package(package_id: str, required: dict[str, str]) -> tuple[dict[st
         raise SystemExit(f"Invalid bundled {package_id} template resources: {exc}. Restore or update the complete Prism repository. The initialization target was not changed.") from exc
 
 
-def template_resources(template: str | None, variant: str | None = None) -> tuple[str, ...]:
+def template_resources(
+    template: str | None, variant: str | None = None, language: str | None = None,
+) -> tuple[str, ...]:
     """Project-local upstream resources required by an initialized template."""
     sources = {
         "nature": NATURE_MEMBERS, "oup-numeric": BIB_MEMBERS,
         "oup-authoryear": BIOINFORMATICS_MEMBERS, "science": SCIENCE_MEMBERS,
     }
     source = template_profile(template, variant)["source"] if template else None
-    if source == "nature" and variant != "sn-jnl":
-        return ()
-    return tuple(sources[source].values()) if source else ()
+    resources = () if source == "nature" and variant != "sn-jnl" else (
+        tuple(sources[source].values()) if source else ()
+    )
+    if template and language == "bilingual":
+        resources += ("prism-cjk.sty",)
+    return resources
+
+
+def _enable_bilingual(stage: Path, template: str) -> None:
+    """Add CJK support to generated Prism-owned files, never upstream classes."""
+    style = ASSET_DIR / "prism-cjk.sty"
+    if not style.is_file():
+        raise SystemExit("Bilingual template assets are missing: prism-cjk.sty")
+    shutil.copy2(style, stage / "prism-cjk.sty")
+    documents = ("examples.tex",) if template == "prism" else (
+        "main.tex", "supplementary.tex", "examples.tex",
+    )
+    for name in documents:
+        path = stage / name
+        if not path.exists():
+            continue  # Science Advances combines the supplement in main.tex.
+        text = path.read_text(encoding="utf-8")
+        text, count = re.subn(
+            r"(?m)^(\\documentclass(?:\[[^\]\n]*\])?\{[^{}\n]+\}[^\S\n]*(?:%[^\n]*)?)(\r?\n|$)",
+            lambda match: match.group(1) + match.group(2) + "\\usepackage{prism-cjk}\n",
+            text, count=1,
+        )
+        if count != 1:
+            raise SystemExit(f"Bilingual template is missing a supported document class: {name}")
+        if name == "examples.tex":
+            marker = r"\section{Bibliography mechanics}"
+            if text.count(marker) != 1:
+                raise SystemExit("Bilingual typesetting examples are missing their insertion point.")
+            example = (
+                "\\section{中英混排示例 / Bilingual example}\n"
+                "这是合成的排版示例：English text、数字 123 和公式 $E=mc^2$。\n\n"
+            )
+            text = text.replace(marker, example + marker, 1)
+        path.write_text(text, encoding="utf-8")
 
 
 def _snapshot(target: Path) -> tuple | None:
@@ -484,11 +541,16 @@ def _snapshot(target: Path) -> tuple | None:
     return (info.st_dev, info.st_ino, tuple(sorted(rows)))
 
 
-def initialize(target: Path, force: bool, template: str = "prism", source: Path | None = None) -> int:
+def initialize(
+    target: Path, force: bool, template: str = "prism", source: Path | None = None,
+    language: str = "bilingual",
+) -> int:
     try:
         template = resolve_template(template)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
+    if language not in ("bilingual", "english"):
+        raise SystemExit("Invalid template language; use bilingual or english.")
     variant = ("sn-jnl" if source is not None else "prism-article") if template == "nature" else None
     profile = template_profile(template, variant)
     upstream_type = profile["source"]
@@ -536,6 +598,8 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
         shutil.copytree(asset, stage, dirs_exist_ok=True)
         if profile["examples"]:
             shutil.copy2(examples, stage / "examples.tex")
+        if language == "bilingual":
+            _enable_bilingual(stage, template)
         for name, content in members.items():
             (stage / name).write_bytes(content)
         metadata = {
@@ -543,7 +607,8 @@ def initialize(target: Path, force: bool, template: str = "prism", source: Path 
             "template": template,
             "template_id": TEMPLATES[template]["id"],
             "prism_version": project_version(),
-            "engine": TEMPLATES[template]["engine"],
+            "engine": template_engine(template, "auto", language),
+            "language": language,
         }
         if variant is not None:
             metadata["variant"] = variant

@@ -18,7 +18,7 @@ Format an existing review while preserving its scientific wording. This skill de
      --title "Paper title" --decision "Major Revision"
    ```
 
-3. Confirm confidential notes appear only in the `_editor_notes.pdf` output.
+3. Recognize Chinese and English section headings and metadata. Confirm confidential notes appear only in the `_editor_notes.pdf` output; if a confidential heading is ambiguous, clarify its intended audience before publishing anything.
 4. Retain and link the PDF outputs and generated `prism-build.sh` beside the input. Show `cd "INPUT_DIR" && ./prism-build.sh` to rebuild.
 5. Inspect warnings and rendered pages. Use `--strict` for delivery checks.
 

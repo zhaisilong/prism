@@ -67,7 +67,10 @@ def choose_engine(requested: str) -> str:
     raise SystemExit("Neither xelatex nor lualatex was found on PATH.")
 
 
-def dependency_report(engine: str, packages: tuple[str, ...]) -> tuple[bool, list[str]]:
+def dependency_report(
+    engine: str, packages: tuple[str, ...], *,
+    include_latin_fonts: bool = True, include_cjk: bool = True,
+) -> tuple[bool, list[str]]:
     if engine not in ("auto", *SUPPORTED_ENGINES):
         raise SystemExit(f"Unsupported engine: {engine}")
     available_engines = {name: shutil.which(name) for name in SUPPORTED_ENGINES}
@@ -85,13 +88,16 @@ def dependency_report(engine: str, packages: tuple[str, ...]) -> tuple[bool, lis
     kpsewhich = shutil.which("kpsewhich")
     rows.append(f"kpsewhich: {kpsewhich or 'MISSING'}")
     ok = ok and bool(kpsewhich)
-    cjk_packages = () if selected == "pdflatex" else (
+    cjk_packages = () if selected == "pdflatex" or not include_cjk else (
         ("xeCJK.sty",) if selected == "xelatex"
         else ("luatexja-fontspec.sty",) if selected == "lualatex"
         else ("xeCJK.sty", "luatexja-fontspec.sty")
     )
     common = tuple(resource for resource in COMMON_PACKAGES if resource != "fontspec.sty") if selected == "pdflatex" else COMMON_PACKAGES
-    fonts = () if selected == "pdflatex" else (*LATIN_FONTS, *CJK_FONTS)
+    fonts = () if selected == "pdflatex" else (
+        *(LATIN_FONTS if include_latin_fonts else ()),
+        *(CJK_FONTS if include_cjk else ()),
+    )
     resources = tuple(dict.fromkeys((*common, *packages, *cjk_packages, *fonts)))
     for resource in resources:
         found = ""

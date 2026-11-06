@@ -23,7 +23,18 @@ scripts/latex-paper.sh projects/Papers/my-paper \
   --main supplementary.tex --strict --no-build-script
 ```
 
-这些命令分别生成 `examples.pdf`、`supplementary.pdf`。补充材料使用 S 编号；它的引用独立解析，不自动继承主文计数。`--no-build-script` 保留主文的重建入口。
+这些命令分别生成 `examples.pdf`、`supplementary.pdf`。上述独立补充材料的引用独立解析，不自动继承主文计数；Science Advances 的补充材料合并在主文中并共享参考文献。`--no-build-script` 保留主文的重建入口。
+
+所有新模板默认支持标题、正文、图表和补充材料的中英混排。期刊模板使用 XeLaTeX 和 TeX Live 的 `xeCJK`、Fandol 中文字体；`prism` 也支持 LuaLaTeX。图表公式演示为合成内容；本轮参考文献按英文条目使用。英文期刊草稿可在初始化时指定 `--language english`，沿用原 pdfLaTeX 模式。双语稿用于写作，提交前应按期刊要求检查字体、引擎和文件格式。
+
+已有项目不会被自动迁移。明确需要给旧稿增加中文时，先备份需编辑的文件，确认目标目录没有冲突的 `prism-cjk.sty`，将仓库 `skills/paper-latex/assets/prism-cjk.sty` 复制到论文目录，并在主文和需要中文的独立补充材料、示例的 `\documentclass` 后加入 `\usepackage{prism-cjk}`。然后运行：
+
+```bash
+scripts/latex-paper.sh PAPER_DIR --check-deps --language bilingual
+scripts/latex-paper.sh PAPER_DIR --engine xelatex
+```
+
+如果旧稿已有中文宏包或字体配置，先检查其兼容性，避免重复设置。也可以让 Codex 在检查并备份后协助修改；现有研究内容和不相关的重建脚本应保留。
 
 ## 2. 使用 Nature / NMI 模板
 
@@ -33,7 +44,7 @@ scripts/latex-paper.sh projects/Papers/nmi-paper --check-deps
 scripts/latex-paper.sh projects/Papers/nmi-paper --strict
 ```
 
-默认初始化使用 Prism 维护的标准 `article` 初稿，无需联网。主文、参考文献和独立补充材料分别在 `main.tex`、`references.bib`、`supplementary.tex`；使用 pdfLaTeX 与 BibTeX。已有 `sn-jnl` 项目继续使用原资源，不会自动转换。
+默认初始化使用 Prism 维护的标准 `article` 初稿，无需联网。主文、参考文献和独立补充材料分别在 `main.tex`、`references.bib`、`supplementary.tex`；默认使用 XeLaTeX 与 BibTeX 支持中英混排。需要原英文期刊模式时，初始化加 `--language english`。已有 `sn-jnl` 项目继续使用原资源和编译引擎，不会自动转换。
 
 需要官方 `sn-jnl` / `sn-nature` 版式时，从[官方作者支持页](https://www.springernature.com/gp/authors/campaigns/latex-author-support)取得[固定版本原始 ZIP](https://cms-resources.apps.public.k8s.springernature.io/springer-cms/rest/v1/content/18782940/data/v12)，显式导入到新目录：
 
@@ -72,7 +83,7 @@ scripts/latex-paper.sh projects/Papers/ddt-review --strict
 - 多面板图使用统一字号和清晰的 a/b/c 标签；在正文按首次出现顺序引用。图注说明已有的单位、误差和样本量，排版过程不补造科研信息。
 - 表格先调整列宽、换行表头或拆分内容，再考虑横向页面。数值与误差用 `siunitx` 对齐；跨页表用 `longtable` 的重复表头，不把它嵌套在浮动体中。
 - 多行公式用 `align` / `split`，分段函数用 `cases`，相关公式用 `subequations`。使用 `\label`、`\ref`、`\eqref`，避免手写序号。
-- `prism` 的默认正文保持中英混排；`nature` 默认为标准 `article` 英文初稿，显式官方模式保留其 class 配置。不要把草稿字体配置直接套在期刊 class 上。
+- `prism` 的默认正文保持中英混排；`nature` 默认为标准 `article` 中英混排初稿，显式官方模式保留其 class 配置。不要把草稿字体配置直接套在期刊 class 上。
 
 可复制的完整演示见模板中的 `examples.tex`；详细排版建议见 [layout guidance](../skills/paper-latex/references/layout.md)。示例数据明确为合成内容，正式交付前全部替换。
 
@@ -85,7 +96,7 @@ scripts/latex-review.sh projects/Reviews/Others/draft.md \
   --title "Example manuscript" --decision "Major Revision" --strict
 ```
 
-review 的编辑备注只出现在独立的 `_editor_notes.pdf` 中。交付前分别核对作者版和编辑版。`--outdir` 选择输出目录，`--out` 优先指定作者版路径。仅导出 TeX 可使用 `--no-compile`，无需 LaTeX 编译器；DOCX 输入可选依赖 `python-docx`，文本型 PDF 可用 `pypdf` 或 `pdftotext`。
+review 支持中英文“总体意见”“主要问题”“次要问题”和“给编辑的保密意见”等标题；编辑备注只出现在独立的 `_editor_notes.pdf` 中。遇到不明确的保密标题会停止并提示先明确读者。交付前分别核对作者版和编辑版。`--outdir` 选择输出目录，`--out` 优先指定作者版路径。仅导出 TeX 可使用 `--no-compile`，无需 LaTeX 编译器；DOCX 输入可选依赖 `python-docx`，文本型 PDF 可用 `pypdf` 或 `pdftotext`。
 
 ## 7. 重建、排错和在 Codex 中使用
 
@@ -106,6 +117,16 @@ cd projects/Papers/my-paper
 | 宽表或公式越界 | 调整换行、列宽或公式分行，重新运行 `--strict` 并检查 PDF |
 | 编译失败需要日志 | 加 `--keep-work` 重试，查看打印出的临时目录；旧 PDF 保留 |
 | 已有 `prism-build.sh` 未被替换 | 检查是否为自有脚本；明确需要替换时用 `--force-build-script`，原文件会备份 |
+
+如果在受限环境使用 LuaLaTeX 时遇到 `no writeable cache path`，可以只为当前命令指定可写的临时字体缓存：
+
+```bash
+PRISM_TEX_CACHE="$(mktemp -d)"
+TEXMFCACHE="$PRISM_TEX_CACHE" TEXMFVAR="$PRISM_TEX_CACHE" XDG_CACHE_HOME="$PRISM_TEX_CACHE" \
+  scripts/latex-paper.sh PAPER_DIR --engine lualatex
+```
+
+同样的环境变量可用于笔记或审稿 wrapper；不需要修改系统或全局 TeX 配置。
 
 可向 Codex 提出：“使用本仓库的 paper-latex，为我初始化 Nature 模板，并编译检查主文和补充材料”；或“按 layout guidance 调整这张宽表，保持全部数值与结论”。桌面原生编辑器支持本地多文件项目；使用根 wrapper 获得这里约定的临时构建、严格检查和重建脚本。
 

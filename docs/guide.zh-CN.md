@@ -12,9 +12,9 @@
 
 | 模板 | 适合 |
 | --- | --- |
-| `nature` | Nature / NMI 英文初稿 |
+| `nature` | Nature / NMI 论文初稿 |
 | `nature-communications` | Nature Communications 研究论文 |
-| `bib` | Briefings in Bioinformatics 英文稿 |
+| `bib` | Briefings in Bioinformatics 论文 |
 | `ddt` | Drug Discovery Today 单栏综述 |
 | `jcim` | Journal of Chemical Information and Modeling 研究论文 |
 | `jacs` | Journal of the American Chemical Society 研究论文 |
@@ -26,7 +26,7 @@
 scripts/latex-paper.sh --init projects/Papers/my-paper --template nature
 ```
 
-更换模板时，把 `nature` 换成表格中的标识。全部模板均可离线创建。Nature 默认是我们维护的标准 `article` 初稿；官方版式见[高级用法](reference.zh-CN.md)。运行 `scripts/latex-paper.sh --list-templates` 查看完整名称；例如 `journal/jacs` 与 `jacs` 等价。
+更换模板时，把 `nature` 换成表格中的标识。全部模板均可离线创建，新项目默认支持中英混排；在标题、正文和图表里直接写中文即可。参考文献使用英文条目。需要原英文期刊模式时，在创建命令末尾加 `--language english`。Nature 默认是我们维护的标准 `article` 初稿；官方版式见[高级用法](reference.zh-CN.md)。
 
 ## 2. 写内容
 

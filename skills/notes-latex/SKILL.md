@@ -7,6 +7,8 @@ description: Compile one research note from Markdown, TXT, or TeX into a clean P
 
 Compile one note without changing its research claims or adding sources. This skill depends on the complete Prism repository and its shared implementation under `scripts/`.
 
+Markdown, TXT and lightweight TeX notes support mixed Chinese and English in titles and body text. Complete TeX documents keep their own preamble and font configuration.
+
 ## Workflow
 
 1. Run the root wrapper from the Prism repository; from another directory, use its absolute path:

@@ -85,9 +85,9 @@ class TemplateTests(unittest.TestCase):
         mock.patch.object(templates, f"{template.upper()}_SHA256", hashlib.sha256(archive).hexdigest()).start()
         return source
 
-    def test_default_initialization_is_portable_and_preserves_assets(self):
+    def test_english_initialization_is_portable_and_preserves_assets(self):
         destination = self.root / "论文 with spaces" / "new paper"
-        templates.initialize(destination, False)
+        templates.initialize(destination, False, language="english")
         self.assertEqual((destination / "main.tex").read_text(), "% paper-template\n")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
         self.assertEqual(metadata["template"], "prism")
@@ -98,7 +98,7 @@ class TemplateTests(unittest.TestCase):
     def test_ddt_initialization_is_offline_and_copies_shared_examples(self):
         destination = self.root / "论文 with spaces" / "DDT review"
         with mock.patch.object(templates, "nature_package", side_effect=AssertionError("unexpected network package")), mock.patch.object(templates, "bib_package", side_effect=AssertionError("unexpected network package")):
-            templates.initialize(destination, False, "ddt")
+            templates.initialize(destination, False, "ddt", language="english")
         self.assertEqual((destination / "main.tex").read_text(), "% ddt-template\n")
         self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
@@ -111,7 +111,7 @@ class TemplateTests(unittest.TestCase):
     def test_nature_communications_initialization_is_offline(self):
         destination = self.root / "论文 with spaces" / "Nature Communications"
         with mock.patch.object(templates, "nature_package", side_effect=AssertionError("unexpected network package")), mock.patch.object(templates, "bib_package", side_effect=AssertionError("unexpected network package")):
-            templates.initialize(destination, False, "nature-communications")
+            templates.initialize(destination, False, "nature-communications", language="english")
         self.assertEqual((destination / "main.tex").read_text(), "% nature-communications-template\n")
         self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
@@ -124,7 +124,7 @@ class TemplateTests(unittest.TestCase):
     def test_jcim_initialization_is_offline_and_copies_shared_examples(self):
         destination = self.root / "论文 with spaces" / "JCIM manuscript"
         with mock.patch.object(templates, "nature_package", side_effect=AssertionError("unexpected network package")), mock.patch.object(templates, "bib_package", side_effect=AssertionError("unexpected network package")):
-            templates.initialize(destination, False, "jcim")
+            templates.initialize(destination, False, "jcim", language="english")
         self.assertEqual((destination / "main.tex").read_text(), "% jcim-template\n")
         self.assertEqual((destination / "examples.tex").read_text(), "% shared standalone examples\n")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
@@ -153,7 +153,7 @@ class TemplateTests(unittest.TestCase):
         for label, origin in (("directory", source), ("zip", archive_path)):
             with self.subTest(source=label):
                 target = self.root / "论文 with spaces" / label
-                templates.initialize(target, False, "science-advances", origin)
+                templates.initialize(target, False, "science-advances", origin, language="english")
                 self.assertEqual((target / "main.tex").read_text(), "% science-advances-template\n")
                 self.assertEqual((target / "examples.tex").read_text(), "% shared standalone examples\n")
                 for source_name, destination_name in templates.SCIENCE_MEMBERS.items():
@@ -172,7 +172,7 @@ class TemplateTests(unittest.TestCase):
         original.write_bytes(b"private research")
         def check_rejected(origin):
             with self.assertRaises(SystemExit):
-                templates.initialize(target, True, "science-advances", origin)
+                templates.initialize(target, True, "science-advances", origin, language="english")
             self.assertEqual(original.read_bytes(), b"private research")
             self.assertFalse(target.with_name(target.name + ".backup").exists())
             self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
@@ -207,7 +207,7 @@ class TemplateTests(unittest.TestCase):
         self.assertFalse((self.root / "escape.txt").exists())
         missing_parent = self.root / "new parent" / "paper"
         with self.assertRaises(SystemExit):
-            templates.initialize(missing_parent, False, "science-advances", bad_zip)
+            templates.initialize(missing_parent, False, "science-advances", bad_zip, language="english")
         self.assertFalse(missing_parent.parent.exists())
 
     def test_science_force_backs_up_existing_project_only_after_validation(self):
@@ -215,7 +215,7 @@ class TemplateTests(unittest.TestCase):
         target = self.root / "existing science project"
         target.mkdir()
         (target / "research.tex").write_bytes(b"private research")
-        templates.initialize(target, True, "science-advances", source)
+        templates.initialize(target, True, "science-advances", source, language="english")
         self.assertEqual((target.with_name(target.name + ".backup") / "research.tex").read_bytes(), b"private research")
         self.assertEqual((target / "scicite.sty").read_bytes(), files["scicite.sty"])
         for name, content in files.items():
@@ -225,7 +225,7 @@ class TemplateTests(unittest.TestCase):
         source, files = self.science_fixture()
         for target in (source, source / "new project", source.parent):
             with self.subTest(target=target), self.assertRaises(SystemExit):
-                templates.initialize(target, True, "science-advances", source)
+                templates.initialize(target, True, "science-advances", source, language="english")
             for name, content in files.items():
                 self.assertEqual((source / name).read_bytes(), content)
             self.assertFalse(source.with_name(source.name + ".backup").exists())
@@ -235,7 +235,7 @@ class TemplateTests(unittest.TestCase):
         archive = self.package()
         source = self.pinned_source(archive)
         destination = self.root / "nature paper"
-        templates.initialize(destination, False, "nature", source)
+        templates.initialize(destination, False, "nature", source, language="english")
         self.assertEqual((destination / "main.tex").read_text(), "% nature-official-template\n")
         self.assertEqual((destination / templates.NATURE_ARCHIVE).read_bytes(), archive)
         self.assertTrue((destination / "sn-jnl.cls").is_file())
@@ -259,7 +259,7 @@ class TemplateTests(unittest.TestCase):
         archive = self.package(template="bib")
         source = self.pinned_source(archive, "bib")
         destination = self.root / "论文 with spaces" / "BIB manuscript"
-        templates.initialize(destination, False, "bib", source)
+        templates.initialize(destination, False, "bib", source, language="english")
         self.assertEqual((destination / templates.BIB_ARCHIVE).read_bytes(), archive)
         self.assertEqual((destination / "main.tex").read_text(), "% bib-template\n")
         for member, filename in templates.BIB_MEMBERS.items():
@@ -280,7 +280,7 @@ class TemplateTests(unittest.TestCase):
     def test_bundled_bib_initialization_never_downloads_or_stores_archive(self):
         destination = self.root / "bundled BIB"
         with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("unexpected network access")) as fetch:
-            templates.initialize(destination, False, "bib")
+            templates.initialize(destination, False, "bib", language="english")
         fetch.assert_not_called()
         for filename in templates.BIB_MEMBERS.values():
             expected = self.asset_dir / "upstream/oup/1.5" / filename
@@ -289,14 +289,14 @@ class TemplateTests(unittest.TestCase):
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
         self.assertNotIn(str(self.root), json.dumps(metadata))
 
-    def test_every_default_template_initializes_without_network_in_chinese_paths(self):
+    def test_every_english_template_initializes_without_network_in_chinese_paths(self):
         before = {path.relative_to(self.asset_dir): path.read_bytes()
                   for path in self.asset_dir.rglob("*") if path.is_file()}
         with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("unexpected network access")) as fetch:
             for name, details in templates.TEMPLATES.items():
                 with self.subTest(template=name):
                     target = self.root / "离线论文 with spaces" / name
-                    templates.initialize(target, False, details["id"])
+                    templates.initialize(target, False, details["id"], language="english")
                     metadata = json.loads((target / templates.METADATA_NAME).read_text())
                     self.assertEqual(metadata["template"], name)
                     self.assertEqual(metadata["template_id"], details["id"])
@@ -312,7 +312,7 @@ class TemplateTests(unittest.TestCase):
 
     def test_nature_default_and_legacy_variants_keep_distinct_dependencies(self):
         target = self.root / "Nature 离线初稿"
-        templates.initialize(target, False, "nature")
+        templates.initialize(target, False, "nature", language="english")
         self.assertEqual((target / "main.tex").read_text(), "% nature-template\n")
         metadata_path = target / templates.METADATA_NAME
         metadata = json.loads(metadata_path.read_text())
@@ -366,12 +366,12 @@ class TemplateTests(unittest.TestCase):
                         path.symlink_to(original)
                     try:
                         with self.assertRaises(SystemExit):
-                            templates.initialize(target, True, name)
+                            templates.initialize(target, True, name, language="english")
                         self.assertEqual(original.read_bytes(), b"private research fixture")
                         self.assertFalse(target.with_name(target.name + ".backup").exists())
                         fresh = self.root / f"new-{name}-{state}" / "paper"
                         with self.assertRaises(SystemExit):
-                            templates.initialize(fresh, False, name)
+                            templates.initialize(fresh, False, name, language="english")
                         self.assertFalse(fresh.parent.exists())
                     finally:
                         if path.exists() or path.is_symlink():
@@ -389,7 +389,7 @@ class TemplateTests(unittest.TestCase):
                 original = target / "research.tex"
                 original.write_bytes(b"private research fixture")
                 with self.assertRaisesRegex(SystemExit, "must not overlap"):
-                    templates.initialize(target, True, name, source)
+                    templates.initialize(target, True, name, source, language="english")
                 self.assertEqual(source.read_bytes(), b"source archive fixture")
                 self.assertEqual(original.read_bytes(), b"private research fixture")
                 self.assertFalse(target.with_name(target.name + ".backup").exists())
@@ -402,13 +402,13 @@ class TemplateTests(unittest.TestCase):
         source = self.root / "wrong.zip"
         source.write_bytes(b"untrusted bytes")
         with self.assertRaisesRegex(SystemExit, "checksum mismatch"):
-            templates.initialize(destination, True, "bib", source)
+            templates.initialize(destination, True, "bib", source, language="english")
         member = next(iter(templates.BIB_MEMBERS))
         for archive in (b"not a zip", self.package(template="bib", missing=member), self.package(template="bib", symlink=member)):
             with self.subTest(archive=archive[:20]):
                 source = self.pinned_source(archive, "bib")
                 with self.assertRaisesRegex(SystemExit, "Invalid BIB template ZIP"):
-                    templates.initialize(destination, True, "bib", source)
+                    templates.initialize(destination, True, "bib", source, language="english")
                 self.assertEqual(original.read_bytes(), b"private research")
                 self.assertFalse(destination.with_name("existing BIB paper.backup").exists())
         self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
@@ -418,7 +418,7 @@ class TemplateTests(unittest.TestCase):
         source.write_bytes(b"untrusted bytes")
         destination = self.root / "new parent" / "new paper"
         with self.assertRaisesRegex(SystemExit, "checksum mismatch"):
-            templates.initialize(destination, False, "bib", source)
+            templates.initialize(destination, False, "bib", source, language="english")
         self.assertFalse(destination.parent.exists())
 
     def test_bad_hash_or_invalid_zip_leaves_force_target_and_backups_untouched(self):
@@ -429,14 +429,14 @@ class TemplateTests(unittest.TestCase):
         source = self.root / "wrong.zip"
         source.write_bytes(b"untrusted bytes")
         with self.assertRaisesRegex(SystemExit, "checksum mismatch"):
-            templates.initialize(destination, True, "nature", source)
+            templates.initialize(destination, True, "nature", source, language="english")
         self.assertEqual(original.read_bytes(), b"private research")
         self.assertFalse(destination.with_name("existing.backup").exists())
         for archive in (b"not a zip", self.package(missing=next(iter(templates.NATURE_MEMBERS))), self.package(symlink=next(iter(templates.NATURE_MEMBERS)))):
             with self.subTest(archive=archive[:20]):
                 source = self.pinned_source(archive)
                 with self.assertRaisesRegex(SystemExit, "Invalid Nature template ZIP"):
-                    templates.initialize(destination, True, "nature", source)
+                    templates.initialize(destination, True, "nature", source, language="english")
                 self.assertEqual(original.read_bytes(), b"private research")
                 self.assertFalse(destination.with_name("existing.backup").exists())
         self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
@@ -446,14 +446,14 @@ class TemplateTests(unittest.TestCase):
         destination.mkdir()
         (destination / "original").write_text("keep")
         with self.assertRaisesRegex(SystemExit, "not empty"):
-            templates.initialize(destination, False)
+            templates.initialize(destination, False, language="english")
         regular_file = self.root / "file"
         regular_file.write_text("keep")
         link = self.root / "link"
         link.symlink_to(destination, target_is_directory=True)
         for target in (regular_file, link):
             with self.subTest(target=target), self.assertRaises(SystemExit):
-                templates.initialize(target, True)
+                templates.initialize(target, True, language="english")
         self.assertEqual((destination / "original").read_text(), "keep")
         self.assertEqual(regular_file.read_text(), "keep")
         self.assertTrue(link.is_symlink())
@@ -464,7 +464,7 @@ class TemplateTests(unittest.TestCase):
         (destination / "original").write_bytes(b"research")
         (destination / "attachment").symlink_to("original")
         destination.with_name("existing.backup").write_text("older backup")
-        templates.initialize(destination, True)
+        templates.initialize(destination, True, language="english")
         backup = destination.with_name("existing.backup-1")
         self.assertEqual((backup / "original").read_bytes(), b"research")
         self.assertEqual(os.readlink(backup / "attachment"), "original")
@@ -479,7 +479,7 @@ class TemplateTests(unittest.TestCase):
             module = templates.shutil if operation == "copytree" else templates.os
             with self.subTest(operation=operation), mock.patch.object(module, operation, side_effect=OSError("deliberate failure")):
                 with self.assertRaisesRegex(SystemExit, "Could not initialize"):
-                    templates.initialize(destination, True)
+                    templates.initialize(destination, True, language="english")
             self.assertEqual((destination / "original").read_text(), "keep")
             self.assertFalse(destination.with_name("existing.backup").exists())
             self.assertEqual(list(self.root.glob(".*.prism-init-*")), [])
@@ -494,7 +494,7 @@ class TemplateTests(unittest.TestCase):
             return b"archive", {"sn-jnl.cls": b"class", "sn-nature.bst": b"bst"}
         with mock.patch.object(templates, "nature_package", side_effect=changed_source):
             with self.assertRaisesRegex(SystemExit, "changed during preparation"):
-                templates.initialize(destination, True, "nature", self.root / "explicit source.zip")
+                templates.initialize(destination, True, "nature", self.root / "explicit source.zip", language="english")
         self.assertEqual(original.read_text(), "changed while preparing source")
         self.assertFalse(destination.with_name("existing.backup").exists())
 
@@ -565,7 +565,7 @@ class TemplateTests(unittest.TestCase):
 
     def test_new_jacs_metadata_contains_canonical_and_compatible_alias(self):
         destination = self.root / "论文 with spaces" / "JACS"
-        templates.initialize(destination, False, "journal/jacs")
+        templates.initialize(destination, False, "journal/jacs", language="english")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
         self.assertEqual(metadata["schema_version"], 1)
         self.assertEqual(metadata["template"], "jacs")
@@ -582,7 +582,7 @@ class TemplateTests(unittest.TestCase):
             updated.writestr("oup-authoring-template/oup-abbrvnat.bst", "author-year fixture")
         source = self.pinned_source(buffer.getvalue(), "bib")
         destination = self.root / "论文 with spaces" / "Bioinformatics"
-        templates.initialize(destination, False, "journal/bioinformatics", source)
+        templates.initialize(destination, False, "journal/bioinformatics", source, language="english")
         metadata = json.loads((destination / templates.METADATA_NAME).read_text())
         self.assertEqual(metadata["template"], "bioinformatics")
         self.assertEqual(metadata["template_id"], "journal/bioinformatics")
@@ -594,7 +594,7 @@ class TemplateTests(unittest.TestCase):
         bad_source.write_bytes(b"wrong version")
         before = {p: p.read_bytes() for p in destination.rglob("*") if p.is_file()}
         with self.assertRaises(SystemExit):
-            templates.initialize(destination, True, "journal/bioinformatics", bad_source)
+            templates.initialize(destination, True, "journal/bioinformatics", bad_source, language="english")
         self.assertEqual({p: p.read_bytes() for p in destination.rglob("*") if p.is_file()}, before)
         self.assertFalse(destination.with_name(destination.name + ".backup").exists())
 
@@ -629,12 +629,17 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_engine("science-advances", "auto"), "pdflatex")
         self.assertEqual(templates.template_engine("science-advances", "pdflatex"), "pdflatex")
         self.assertEqual(templates.template_engine(None, "pdflatex"), "pdflatex")
-        for template, engine in (("prism", "pdflatex"), ("nature", "xelatex"), ("nature", "lualatex"), ("nature-communications", "xelatex"), ("nature-communications", "lualatex"), ("bib", "xelatex"), ("bib", "lualatex"), ("ddt", "xelatex"), ("ddt", "lualatex"), ("jcim", "xelatex"), ("jcim", "lualatex"), ("science-advances", "xelatex"), ("science-advances", "lualatex")):
-            with self.subTest(template=template, engine=engine):
+        with self.assertRaisesRegex(SystemExit, "requires"):
+            templates.template_engine("prism", "pdflatex")
+        for template in ("nature", "nature-communications", "bib", "ddt", "jcim", "science-advances"):
+            with self.subTest(template=template):
+                self.assertEqual(templates.template_engine(template, "xelatex"), "xelatex")
+                with self.assertRaisesRegex(SystemExit, "engine"):
+                    templates.template_engine(template, "lualatex")
                 with self.assertRaisesRegex(SystemExit, "requires"):
-                    templates.template_engine(template, engine)
+                    templates.template_engine(template, "pdflatex", "bilingual")
                 with self.assertRaisesRegex(SystemExit, "requires"):
-                    templates.template_packages(template, engine)
+                    templates.template_packages(template, "pdflatex", language="bilingual")
 
     def test_bib_dependency_profile_has_oup_packages_and_local_resources(self):
         packages = templates.template_packages("bib", "auto")

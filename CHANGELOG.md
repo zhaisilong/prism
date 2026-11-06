@@ -4,6 +4,28 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.11.06
+
+### Added
+
+- Added default bilingual manuscript drafts with a shared Chinese-font setup and an optional original English journal mode.
+- Added a concise macOS and Linux installation guide with dependency checks.
+
+### Fixed
+
+- Kept generated note dates and titles readable when the source body is English.
+- Recognized Chinese and English review sections and metadata, separating editor-only comments and stopping on ambiguous confidential headings.
+
+### Changed
+
+- Preserved the engine and sources of existing manuscript projects while documenting an explicit bilingual setup for older drafts.
+
+### Validation
+
+- Passed 125 regression tests, including bilingual manuscripts, legacy English mode, LuaLaTeX and confidential-review separation.
+- Compiled synthetic manuscript and review fixtures; inspected representative pages and preserved clean source directories.
+- Verified the code export and kept local research data and original Git history outside the public snapshot.
+
 ## 2026.10.27.5
 
 ### Added
