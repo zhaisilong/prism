@@ -10,6 +10,7 @@ Prism maintains local LaTeX workflows. Use this guide for project work and futur
 - Do not recreate or rely on the deleted global reviewer-latex skill. Install or update the paper-latex entrypoint only when requested, using `scripts/install-paper-skill.py`; keep implementations in this repository and do not modify other global skills.
 - This is a local Git repository. Add remotes, publishing workflows, or distribution functionality only when the user requests them.
 - Authorized public synchronization uses an audited export and independent Git history; never push this research checkout's original history. See `docs/public-sync.md` and `scripts/export-public-code.py`.
+- Public files must be listed individually in `scripts/public-export-files.txt`. Review additions and modified content before exporting; keep private examples, protection-file inputs and reports outside that list.
 
 ## Local data and directory policy
 

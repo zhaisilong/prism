@@ -67,7 +67,7 @@ class BilingualTests(unittest.TestCase):
         return subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True,
                               text=True, check=True, timeout=30).stdout
 
-    def test_nine_defaults_are_offline_bilingual_and_support_aliases(self):
+    def test_all_defaults_are_offline_bilingual_and_support_aliases(self):
         with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("network")) as fetch:
             for alias, record in templates.TEMPLATES.items():
                 with self.subTest(template=alias):
@@ -109,6 +109,29 @@ class BilingualTests(unittest.TestCase):
                 self.assertEqual(templates.template_engine(alias, "auto", None), "pdflatex")
                 self.assertEqual(templates.template_engine(alias, "xelatex", None), "xelatex")
                 self.assertEqual(metadata_path.read_bytes(), original)
+
+    def test_journal_of_cheminformatics_is_discoverable_and_offline(self):
+        listing = self.cli(PAPER, "--list-templates")
+        self.assert_success(listing)
+        self.assertIn("jcheminformatics:", listing.stdout)
+        self.assertIn("journal/journal-of-cheminformatics", listing.stdout)
+        target = self.root / "化学信息 论文" / "manuscript"
+        with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("network")) as fetch:
+            templates.initialize(target, False, "journal/journal-of-cheminformatics")
+        fetch.assert_not_called()
+        metadata = json.loads((target / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["template"], "jcheminformatics")
+        self.assertEqual(metadata["template_id"], "journal/journal-of-cheminformatics")
+        self.assertEqual(metadata["language"], "bilingual")
+        self.assertEqual(metadata["engine"], "xelatex")
+        self.assertTrue(all((target / name).is_file() for name in
+                            ("main.tex", "supplementary.tex", "examples.tex", "references.bib")))
+        self.assertNotIn(str(self.root), json.dumps(metadata))
+        marker = target / "preserve.txt"
+        marker.write_text("existing user material", encoding="utf-8")
+        refused = self.cli(PAPER, "--init", target, "--template", "jcheminformatics")
+        self.assertNotEqual(refused.returncode, 0)
+        self.assertEqual(marker.read_text(encoding="utf-8"), "existing user material")
 
     def test_language_check_deps_and_rejection_are_nonmutating(self):
         fake_bin = self.root / "fake bin"
@@ -300,7 +323,7 @@ class BilingualTests(unittest.TestCase):
             self.assertIn("Peng" if alias == "science-advances" else "Wilkinson", self.text_of(project / "main.pdf"))
             self.assert_clean(project)
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-            futures = {pool.submit(check_template, alias): alias for alias in ("nature", "bib", "ddt", "jcim", "science-advances")}
+            futures = {pool.submit(check_template, alias): alias for alias in ("nature", "bib", "ddt", "jcim", "science-advances", "jcheminformatics")}
             for future in concurrent.futures.as_completed(futures):
                 with self.subTest(template=futures[future]):
                     future.result()

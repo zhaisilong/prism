@@ -132,6 +132,16 @@ TEXMFCACHE="$PRISM_TEX_CACHE" TEXMFVAR="$PRISM_TEX_CACHE" XDG_CACHE_HOME="$PRISM
 
 日期版本见根目录 `VERSION`。公开同步前请遵循[独立代码导出流程](public-sync.md)，不要直接推送原仓库历史。
 
+## Journal of Cheminformatics
+
+```bash
+scripts/latex-paper.sh --init projects/Papers/jchemin-paper --template jcheminformatics
+scripts/latex-paper.sh projects/Papers/jchemin-paper
+scripts/latex-paper.sh projects/Papers/jchemin-paper --main supplementary.tex --no-build-script
+```
+
+这是 Prism 维护的研究论文草稿。修改正文、英文参考文献与独立补充材料中的占位内容；摘要中的 Scientific Contribution、数据和代码可用性等声明需要作者按实际研究填写。默认中英混排供写作使用；若在创建时需要英文 pdfLaTeX 版本，在第一条命令末尾加 `--language english`。投稿前参照[期刊研究论文指南](https://link.springer.com/journal/13321/submission-guidelines/research)和[通用格式要求](https://link.springer.com/journal/13321/submission-guidelines)检查。
+
 ## 8. 安装与更新 paper-latex
 
 从完整仓库运行 `python3 scripts/install-paper-skill.py`。不要只下载 `skills/paper-latex/`，它需要仓库共享实现。安装器优先更新已有 Prism 入口；新装默认使用 `~/.agents/skills/paper-latex`，也可用 `--skills-dir PATH` 指定其他 skills 目录。新入口保持自动调用；未显示时重启 Codex。目录发现行为参见 [OpenAI Docs](https://learn.chatgpt.com/docs/build-skills)。

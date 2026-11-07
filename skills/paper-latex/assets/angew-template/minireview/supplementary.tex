@@ -1,0 +1,142 @@
+% Original Prism Supporting Information; compile independently with
+% --main supplementary.tex --no-build-script. All examples are synthetic.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable}
+\usepackage{caption,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,square,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thescheme}{S\arabic{scheme}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\title{Supporting Information: Manuscript Title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+Use this optional supplement for additional comparisons, source details,
+tables or supporting discussion that aid the Review or Minireview. It does
+not report experiments or imply that a systematic literature search was
+performed. Remove the supplement and its main-text reference if not needed.
+All layout examples below are synthetic.
+\tableofcontents
+\clearpage
+
+\section{Scope of Additional Material}
+Explain the purpose and limits of the supplied material. Give additional
+definitions or comparisons only where they support the actual critical
+discussion. The supplement must not substitute for the main perspective.
+
+\section{Sources and Comparison Details}
+Describe the provenance and interpretation of the actual additional
+material. If a documented literature-selection method was used, explain it
+accurately; otherwise do not claim systematic coverage, screening counts or
+a search protocol. Do not add experimental or characterization claims to a
+review merely to fill these example pages.
+
+\section{Supporting Figures and Schemes}
+Figure~\ref{fig:supporting} and Scheme~\ref{sch:supporting} are original slots,
+not experimental evidence. Keep labels and compound numbers consistent
+with the main manuscript.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][30mm][c]{0.75\linewidth}{\centering
+Supporting figure slot\\Replace with original material}}
+\caption{Synthetic supporting figure. Describe the actual panels, units,
+sample sizes, uncertainty and relevant conditions when replacing it.}
+\label{fig:supporting}
+\end{figure}
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][22mm][c]{0.75\linewidth}{\centering
+Supporting scheme slot\\Insert original artwork}}
+\caption{Synthetic scheme slot; it does not report a chemical transformation.}
+\label{sch:supporting}
+\end{scheme}
+
+\section{Supporting Tables and Notation}
+Table~\ref{tab:supporting} tests numerical alignment only.
+\begin{table}[htbp]
+\centering
+\caption{Invented values for formatting, not research data.}
+\label{tab:supporting}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.2(2)]@{}}
+\toprule
+Setting & {Count} & {Value $\pm$ SD}\\
+\midrule
+Example A & 12 & 0.32 +- 0.02\\
+Example B & 18 & 0.41 +- 0.03\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Equation~\eqref{eq:supporting} illustrates a multi-line expression with one
+S number; it is a notation example and carries no scientific claim.
+\begin{equation}
+\begin{split}
+ r_i &= y_i-\widehat y_i,\\
+ E &= \frac{1}{n}\sum_{i=1}^{n}r_i^2.
+\end{split}\label{eq:supporting}
+\end{equation}
+The formula \ce{CO2} and the unit \qty{298}{\kelvin} illustrate chemical
+notation and SI units only.
+
+\small
+\begin{longtable}{@{}p{0.12\linewidth}p{0.23\linewidth}p{0.54\linewidth}@{}}
+\caption{Synthetic supporting-material inventory with continuing headings.}
+\label{tab:inventory}\\
+\toprule Item & Topic & Instruction\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Instruction\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+S01 & Scope & Describe the actual scope and purpose of the supplied materials.\\
+S02 & Sources & Identify sources and access routes without claiming coverage not established.\\
+S03 & Releases & Record the versions or releases used in the actual work.\\
+S04 & Identifiers & Provide stable identifiers where they are available.\\
+S05 & Permissions & Confirm terms for reused or shared material.\\
+S06 & Provenance & Preserve links between source records and displayed material.\\
+S07 & Selection & Describe selection procedures only where they were actually performed.\\
+S08 & Quality & Explain the actual checks used to assess the supporting material.\\
+S09 & Comparison & Define assumptions and limitations of any comparison made.\\
+S10 & Conditions & Record conditions that affect the interpretation of reported values.\\
+S11 & Units & Give units and dimensions, and define any transformations.\\
+S12 & Uncertainty & Explain the uncertainty measure used in the actual analysis.\\
+S13 & Equations & Define each symbol and justify the expression where relevant.\\
+S14 & Software & Record actual software names, versions and applicable settings.\\
+S15 & Repetition & Define independent repetitions only when such work was performed.\\
+S16 & Graphics & Retain editable originals and readable labels for each figure.\\
+S17 & Schemes & Keep chemical labels consistent across main and supporting documents.\\
+S18 & Tables & Link numerical entries to the underlying verified material.\\
+S19 & Privacy & Describe restrictions accurately before sharing sensitive material.\\
+S20 & Availability & State confirmed access and archival arrangements.\\
+S21 & References & Verify the complete metadata for each supporting citation.\\
+S22 & Cross-links & Check every reference between the main and supporting documents.\\
+S23 & Limitations & Distinguish limitations from results and proposed future work.\\
+S24 & Final check & Remove instructional examples and unsupported statements.\\
+\end{longtable}
+\normalsize
+
+\section{Supporting References}
+This public reference tests the independent supporting bibliography
+only~\cite{peng2011reproducible}. It is also cited in the main manuscript's
+Supporting Information paragraph so its citation can be included there.
+Retain the reference only if relevant to the actual work.
+\bibliographystyle{prism-angew}
+\bibliography{references}
+\end{document}

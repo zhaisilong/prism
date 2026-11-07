@@ -76,6 +76,29 @@
           "sha256": "2ce0f9f1dad69ab331fbf1a8d0210d757f85043025f777ba01e53533c3b659c3"
         }
       ]
+    },
+    {
+      "id": "wiley-overleaf",
+      "version": "1.5",
+      "source": "https://github.com/ihrke/markdown-paper/blob/9d58a2550e43b1f6f797417fe4c5fc82d6e0e0bf/templates/dependencies/wiley-article.cls",
+      "license": "CC-BY-4.0; attribution and original publication declaration in NOTICE.md",
+      "files": [
+        {
+          "path": "wiley-overleaf/2019/LICENSE.txt",
+          "size": 18615,
+          "sha256": "2ade8c89b8bbe0d859b124a9e47032c8494022f43091e8278ae8e2554a292196"
+        },
+        {
+          "path": "wiley-overleaf/2019/NOTICE.md",
+          "size": 2356,
+          "sha256": "67a0ea8d5a60fcb39f557fc0c49c183e90f89f013bc937e2685a97ceeae7cc0c"
+        },
+        {
+          "path": "wiley-overleaf/2019/wiley-article.cls",
+          "size": 22898,
+          "sha256": "8f684bcbe3799174b52b7ef7dca48c61645c26583c9f10fb36a1e54390b67168"
+        }
+      ]
     }
   ]
 }

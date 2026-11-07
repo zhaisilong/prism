@@ -1,0 +1,135 @@
+% Original Prism research-article skeleton for Nucleic Acids Research.
+% Uses the unmodified OUP 1.5 class and its Modern Large page design.
+% This is a writing starter, not an official NAR sample manuscript.
+\documentclass[unnumsec,webpdf,modern,large]{oup-authoring-template}
+\usepackage{booktabs,tabularx,siunitx}
+\newcommand{\societylogo}{}
+\sisetup{uncertainty-mode=separate}
+
+\begin{document}
+\journaltitle{Nucleic Acids Research}
+\DOI{}
+\copyrightyear{}
+\pubyear{}
+\access{Draft manuscript}
+\appnotes{Research Article}
+\firstpage{1}
+
+\title[Short manuscript title]{Manuscript title}
+\author[1,$\ast$]{First Author}
+\author[1,2]{Second Author}
+\address[1]{\orgdiv{Department}, \orgname{First institution},
+  \orgaddress{\state{City}, \postcode{Postal code}, \country{Country}}}
+\address[2]{\orgdiv{Department}, \orgname{Second institution},
+  \orgaddress{\state{City}, \postcode{Postal code}, \country{Country}}}
+\corresp[$\ast$]{Corresponding author.
+  \href{mailto:first.author@example.org}{first.author@example.org}}
+
+% One English paragraph, at most 200 words; no citations, figure references
+% or URLs in a standard research-article abstract.
+\abstract{Replace this paragraph with the biological question, approach,
+verified findings and their significance. Use plain language appropriate to
+the readership and define any necessary standard abbreviation. This
+starter illustrates manuscript structure only. Its table values, equation
+and graphic slots are synthetic and do not represent a study. Complete
+the abstract and replace every instructional passage before submission.}
+\maketitle
+% Avoid production-only volume/issue placeholders and the draft title banner.
+\thispagestyle{plain}
+\pagestyle{plain}
+
+\section{Introduction}\label{sec:introduction}
+Introduce the biological question, the unresolved problem and the objective
+of the study. Distinguish the contribution from relevant prior work.
+The public citation here tests bibliography mechanics only; retain it only
+if relevant to the manuscript~\cite{wilkinson2016fair}.
+
+\section{Materials and Methods}\label{sec:methods}
+\subsection{Study design and resources}
+Describe the actual study design, source data, selection rules and
+reagents or biological resources where applicable. Give identifiers and
+versions that permit the work to be reproduced. Keep essential methods
+in the main text; use the supplement for additional detail.
+
+\subsection{Analysis and statistical methods}
+Define the analysis, comparison conditions, independent repetitions,
+sample sizes, uncertainty measures and statistical procedures actually
+used. Record software versions and access to new code. Explain applicable
+ethical approvals and data-access restrictions accurately.
+
+Equation~\eqref{eq:residual} demonstrates mathematical cross-referencing.
+Replace or remove this purely illustrative expression.
+\begin{equation}
+ E=\frac{1}{n}\sum_{i=1}^{n}(y_i-\widehat y_i)^2.
+ \label{eq:residual}
+\end{equation}
+
+\section{Results}\label{sec:results}
+Present verified observations in the order needed to answer the study
+question. Figure~\ref{fig:study} and Table~\ref{tab:study} are synthetic
+layout examples, not evidence.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][33mm][c]{0.87\linewidth}{\centering
+Original study graphic\\[5pt]Replace this synthetic slot}}
+\caption{Synthetic graphic slot. Describe the actual panels, units,
+sample sizes and uncertainty when replacing it.}
+\label{fig:study}
+\par\smallskip\small\raggedright
+\textbf{Alt text:} Replace with a concise description of the actual graphic.
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\caption{Synthetic numerical entries for typesetting only.}
+\label{tab:study}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Setting & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Define the actual units and uncertainty measure
+when replacing these entries.
+\end{table}
+
+\section{Discussion}\label{sec:discussion}
+Interpret the findings in relation to the question, prior work and
+biological relevance. Describe limitations and the evidence supporting
+each conclusion; separate speculation from established results.
+Refer to Supplementary Figure~S1, Supplementary Table~S1 and
+Supplementary Equation~(S1) in the separate supplementary document
+only where they support the final manuscript.
+
+\section*{Data Availability}
+Replace with the actual access routes, stable identifiers and versions
+for all underlying data and code, together with any justified restrictions.
+For newly reported software, provide the permanent archived code DOI
+when required at revision or acceptance.
+
+\section*{Supplementary Data}
+Describe the supplied supplementary files and replace this instruction
+with the journal's required availability statement when applicable.
+
+\section*{Author Contributions}
+Replace with the contributions agreed by every author, using appropriate
+CRediT roles where applicable.
+
+\section*{Acknowledgements}
+Replace with confirmed acknowledgements, or remove if not applicable.
+
+\section*{Funding}
+Replace with confirmed funder names, grant identifiers and the source of
+open-access funding where applicable. Do not infer a funding statement.
+
+\section*{Conflict of Interest}
+Replace with the authors' confirmed competing-interest disclosure.
+
+\bibliographystyle{prism-nar}
+\bibliography{references}
+\end{document}

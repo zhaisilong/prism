@@ -20,7 +20,16 @@ from .build_support import project_version
 PROJECT_DIR = Path(__file__).resolve().parents[3]
 ASSET_DIR = PROJECT_DIR / "skills" / "paper-latex" / "assets"
 METADATA_NAME = "prism-template.json"
-BUNDLED_PACKAGES = {"oup": ("1.5", "oup/1.5"), "science": ("1.0", "science/1.0")}
+BUNDLED_PACKAGES = {
+    "oup": ("1.5", "oup/1.5"), "science": ("1.0", "science/1.0"),
+    "wiley-overleaf": ("1.5", "wiley-overleaf/2019"),
+}
+BUNDLED_NOTICES = {
+    "oup": {"README": "oup-template-README", "manifest.txt": "oup-template-manifest.txt",
+            "NOTICE.md": "oup-template-NOTICE.md", "LICENSE.txt": "oup-template-LICENSE.txt"},
+    "science": {"NOTICE.md": "science-template-NOTICE.md", "LICENSE.txt": "science-template-LICENSE.txt"},
+    "wiley-overleaf": {"NOTICE.md": "wiley-template-NOTICE.md", "LICENSE.txt": "wiley-template-LICENSE.txt"},
+}
 NATURE_URL = "https://cms-resources.apps.public.k8s.springernature.io/springer-cms/rest/v1/content/18782940/data/v12"
 NATURE_SIZE = 901814
 NATURE_SHA256 = "812e76dcaa9c28dc1bff1fb6065d51729b67d4ea140552a05088317414a3ecae"
@@ -61,6 +70,7 @@ class TemplateRecord(TypedDict, total=False):
     venue: str
     publisher: str | None
     article_type: str
+    article_types: tuple[str, ...]
     backend: str
     directory: str
     engine: str
@@ -95,6 +105,13 @@ TEMPLATES: dict[str, TemplateRecord] = {
         "directory": "nature-communications-template",
         "engine": "pdflatex",
         "description": "Nature Communications research article and supplementary information; bilingual / English",
+    },
+    "jcheminformatics": {
+        "id": "journal/journal-of-cheminformatics", "kind": "journal",
+        "venue": "Journal of Cheminformatics", "publisher": "Springer Nature",
+        "article_type": "research", "backend": "jcheminformatics",
+        "directory": "jcheminformatics-template", "engine": "pdflatex",
+        "description": "Journal of Cheminformatics research article and supplementary information; bilingual / English",
     },
     "science-advances": {
         "id": "journal/science-advances", "kind": "journal", "venue": "Science Advances",
@@ -135,6 +152,20 @@ TEMPLATES: dict[str, TemplateRecord] = {
         "publisher": "Oxford University Press", "article_type": "original", "backend": "oup-authoryear",
         "directory": "bioinformatics-template", "engine": "pdflatex",
         "description": "Bioinformatics original paper (OUP); bilingual / English",
+    },
+    "nar": {
+        "id": "journal/nucleic-acids-research", "kind": "journal", "venue": "Nucleic Acids Research",
+        "publisher": "Oxford University Press", "article_type": "research",
+        "article_types": ("research", "database", "web-server"), "backend": "oup-nar",
+        "directory": "nar-template", "engine": "pdflatex",
+        "description": "NAR research, Database and Web Server manuscripts (OUP Modern Large); bilingual / English",
+    },
+    "angew": {
+        "id": "journal/angewandte-chemie-international-edition", "kind": "journal",
+        "venue": "Angewandte Chemie International Edition", "publisher": "Wiley-VCH",
+        "article_type": "research", "article_types": ("research", "communication", "review", "minireview"),
+        "backend": "wiley-overleaf", "directory": "angew-template", "engine": "pdflatex",
+        "description": "Angew research, communication, review and minireview drafts; Prism-maintained Wiley derivative; bilingual / English",
     },
 }
 PRISM_PACKAGES = (
@@ -184,15 +215,38 @@ JCIM_PACKAGES = (
     "booktabs.sty", "tabularx.sty", "siunitx.sty", "longtable.sty",
     "caption.sty", "subcaption.sty", "pdflscape.sty",
 )
+WILEY_PACKAGES = (
+    "article.cls", "ifpdf.sty", "ifxetex.sty", "ifluatex.sty", "mathtools.sty", "bm.sty",
+    "graphicx.sty", "tabularx.sty", "textcase.sty", "dashrule.sty", "ragged2e.sty",
+    "authblk.sty", "url.sty", "soul.sty", "xpatch.sty", "afterpage.sty", "lineno.sty",
+    "mdframed.sty", "tikz.sty", "silence.sty", "microtype.sty", "geometry.sty",
+    "alphalph.sty", "scrextend.sty", "titlesec.sty", "footmisc.sty", "fancyhdr.sty",
+    "changepage.sty", "environ.sty", "marginnote.sty", "quoting.sty", "enumitem.sty",
+    "caption.sty", "threeparttable.sty", "stfloats.sty", "newfloat.sty", "enotez.sty",
+    "natbib.sty", "lettrine.sty", "hyperref.sty", "booktabs.sty", "longtable.sty",
+    "siunitx.sty", "mhchem.sty", "subcaption.sty", "pdflscape.sty", "amssymb.sty",
+)
 
 
 BUILD_PROFILES = {
     "prism": {"packages": PRISM_PACKAGES, "source": None, "examples": False},
     "nature": {"packages": NATURE_COMMUNICATIONS_PACKAGES + ("geometry.sty", "hyperref.sty", "amsfonts.sty", "array.sty"), "source": "nature", "examples": True},
     "nature-communications": {"packages": NATURE_COMMUNICATIONS_PACKAGES, "source": None, "examples": True},
+    "jcheminformatics": {"packages": NATURE_COMMUNICATIONS_PACKAGES + ("lineno.sty", "setspace.sty"), "source": None, "examples": True},
     "science": {"packages": SCIENCE_PACKAGES, "source": "science", "examples": True},
     "oup-numeric": {"packages": BIB_PACKAGES, "source": "oup-numeric", "examples": True},
     "oup-authoryear": {"packages": BIB_PACKAGES + ("unsrtnat.bst",), "source": "oup-authoryear", "examples": True},
+    "oup-nar": {"packages": BIB_PACKAGES + ("geometry.sty",), "source": "oup-numeric", "examples": True,
+                "resources": ("prism-nar.bst",),
+                "required_common": ("supplementary.tex", "graphical_abstract.tex", "references.bib", "prism-nar.bst")},
+    "wiley-overleaf": {
+        "packages": WILEY_PACKAGES, "source": None, "examples": True,
+        "bundled": ("wiley-overleaf", {"wiley-article.cls": "wiley-article.cls"}),
+        "shared_assets": ("prism-wiley-article.cls",),
+        "resources": ("prism-wiley-article.cls", "prism-angew.bst",
+                      "wiley-template-NOTICE.md", "wiley-template-LICENSE.txt"),
+        "required_common": ("supplementary.tex", "references.bib", "prism-angew.bst", "NOTICE.md"),
+    },
     "ddt": {"packages": DDT_PACKAGES, "source": None, "examples": True},
     # achemso writes a job-specific control .bib; BibTeX must run away from
     # source files so that an unrelated same-named file cannot override it.
@@ -212,6 +266,11 @@ def template_choices() -> tuple[str, ...]:
             raise ValueError(f"Duplicate Prism template name: {alias} / {canonical}")
         if details["backend"] not in BUILD_PROFILES:
             raise ValueError(f"Unknown build profile for {alias}: {details['backend']}")
+        article_types = details.get("article_types")
+        if article_types is not None and (not isinstance(article_types, tuple) or not article_types
+                or any(not isinstance(value, str) or not value for value in article_types)
+                or len(set(article_types)) != len(article_types) or details["article_type"] not in article_types):
+            raise ValueError(f"Invalid article types for {alias}")
         names.extend((alias, canonical))
     return tuple(names)
 
@@ -223,6 +282,44 @@ def resolve_template(name: str) -> str:
         if name == alias or name == details["id"]:
             return alias
     raise ValueError(f"unknown template: {name}")
+
+
+def article_type_choices() -> tuple[str, ...]:
+    """CLI choices come only from templates that expose content selection."""
+    template_choices()
+    return tuple(dict.fromkeys(value for record in TEMPLATES.values()
+                               for value in record.get("article_types", ())))
+
+
+def format_template_catalog(group_by: str = "none") -> str:
+    """Render the one registry; retain the original flat command's output."""
+    template_choices()
+    if group_by == "none":
+        rows = []
+        for alias, record in TEMPLATES.items():
+            publisher = record["publisher"] or "Prism"
+            articles = f"; article types: {', '.join(record['article_types'])}" if record.get("article_types") else ""
+            rows.append(f"{alias}: {record['description']} [ID: {record['id']}; type: {record['kind']}; publisher: {publisher}{articles}]")
+        return "\n".join(rows)
+    if group_by != "publisher":
+        raise ValueError("Unsupported template grouping; use none or publisher")
+    groups: dict[str, list[tuple[str, TemplateRecord]]] = {}
+    for alias, record in TEMPLATES.items():
+        label = "Prism / 通用" if record["kind"] == "generic" else record["publisher"] or "未指定出版社"
+        groups.setdefault(label, []).append((alias, record))
+    rows = []
+    for label in sorted(groups, key=lambda value: (value != "Prism / 通用", value.casefold())):
+        if rows:
+            rows.append("")
+        rows.append(label)
+        for alias, record in sorted(groups[label], key=lambda item: (item[1]["venue"].casefold(), item[0])):
+            rows.append(f"  {alias}: {record['venue']} [ID: {record['id']}]")
+            if record.get("article_types"):
+                options = ", ".join(record["article_types"])
+                rows.append(f"    --article-type: {options} (default: {record['article_type']})")
+            else:
+                rows.append(f"    用途: {record['description']}")
+    return "\n".join(rows)
 
 
 def template_profile(template: str, variant: str | None = None) -> dict:
@@ -241,10 +338,20 @@ def template_isolated_build(template: str | None) -> bool:
     return bool(template and template_profile(template).get("isolate_cwd", False))
 
 
-def _template_metadata(project: Path) -> tuple[str | None, str | None, str | None]:
+def template_article_type(template: str, requested: str | None = None) -> str:
+    """Select content within a venue without changing its rendering variant."""
+    record = TEMPLATES[resolve_template(template)]
+    if requested is None:
+        return record["article_type"]
+    if not isinstance(requested, str) or requested not in record.get("article_types", ()):
+        raise ValueError(f"Unsupported article type for {template}: use a type listed by --list-templates")
+    return requested
+
+
+def _template_metadata(project: Path) -> tuple[str | None, str | None, str | None, str | None]:
     path = project / METADATA_NAME
     if not path.exists():
-        return None, None, None
+        return None, None, None, None
     try:
         metadata = json.loads(path.read_text(encoding="utf-8"))
         template = resolve_template(metadata["template"])
@@ -263,9 +370,12 @@ def _template_metadata(project: Path) -> tuple[str | None, str | None, str | Non
         language = metadata.get("language")
         if "language" in metadata and language not in ("bilingual", "english"):
             raise ValueError("invalid template language")
+        if "article_type" in metadata and metadata["article_type"] is None:
+            raise ValueError("invalid article type")
+        article_type = template_article_type(template, metadata.get("article_type"))
     except (OSError, ValueError, TypeError, KeyError) as exc:
         raise SystemExit(f"Invalid Prism template metadata: {path}: {exc}") from exc
-    return template, variant, language
+    return template, variant, language, article_type
 
 
 def template_for_project(project: Path) -> str | None:
@@ -278,6 +388,10 @@ def template_variant_for_project(project: Path) -> str | None:
 
 def template_language_for_project(project: Path) -> str | None:
     return _template_metadata(project)[2]
+
+
+def template_article_type_for_project(project: Path) -> str | None:
+    return _template_metadata(project)[3]
 
 
 def template_engine(template: str | None, requested: str, language: str | None = None) -> str:
@@ -305,7 +419,17 @@ def template_packages(
 ) -> tuple[str, ...]:
     engine = template_engine(template, engine, language)
     if template:
-        return template_profile(template, variant)["packages"]
+        profile = template_profile(template, variant)
+        packages = profile["packages"]
+        if TEMPLATES[resolve_template(template)]["backend"] == "wiley-overleaf":
+            if engine == "xelatex":
+                packages += ("fontspec.sty", "unicode-math.sty", "texgyretermes-regular.otf", "texgyretermes-bold.otf",
+                             "texgyretermes-italic.otf", "texgyretermes-bolditalic.otf",
+                             "XITSMath-Regular.otf", "XITSMath-Bold.otf", "Lato-Regular.ttf",
+                             "Lato-Bold.ttf", "Lato-Italic.ttf", "Lato-BoldItalic.ttf", "Lato-Black.ttf")
+            else:
+                packages += ("tgtermes.sty", "lato.sty", "stix.sty")
+        return packages
     # Existing, unmarked projects can explicitly request pdfLaTeX too.
     if engine == "pdflatex":
         return ("graphicx.sty", "amsmath.sty", "amssymb.sty", "natbib.sty")
@@ -451,10 +575,7 @@ def _bundled_package(package_id: str, required: dict[str, str]) -> tuple[dict[st
             if len(content) != size or hashlib.sha256(content).hexdigest() != record["sha256"]:
                 raise ValueError(f"checksum mismatch for {relative.name}")
             files[relative.name] = content
-        notices = ({"README": "oup-template-README", "manifest.txt": "oup-template-manifest.txt",
-                    "NOTICE.md": "oup-template-NOTICE.md", "LICENSE.txt": "oup-template-LICENSE.txt"}
-                   if package_id == "oup" else
-                   {"NOTICE.md": "science-template-NOTICE.md", "LICENSE.txt": "science-template-LICENSE.txt"})
+        notices = BUNDLED_NOTICES[package_id]
         selected = {**required, **notices}
         contents = {destination: files[name] for name, destination in selected.items()}
         upstream = {
@@ -481,6 +602,8 @@ def template_resources(
     )
     if template and language == "bilingual":
         resources += ("prism-cjk.sty",)
+    if template:
+        resources += template_profile(template, variant).get("resources", ())
     return resources
 
 
@@ -491,7 +614,7 @@ def _enable_bilingual(stage: Path, template: str) -> None:
         raise SystemExit("Bilingual template assets are missing: prism-cjk.sty")
     shutil.copy2(style, stage / "prism-cjk.sty")
     documents = ("examples.tex",) if template == "prism" else (
-        "main.tex", "supplementary.tex", "examples.tex",
+        "main.tex", "supplementary.tex", "examples.tex", "graphical_abstract.tex",
     )
     for name in documents:
         path = stage / name
@@ -544,9 +667,11 @@ def _snapshot(target: Path) -> tuple | None:
 def initialize(
     target: Path, force: bool, template: str = "prism", source: Path | None = None,
     language: str = "bilingual",
+    article_type: str | None = None,
 ) -> int:
     try:
         template = resolve_template(template)
+        selected_article = template_article_type(template, article_type)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
     if language not in ("bilingual", "english"):
@@ -554,6 +679,8 @@ def initialize(
     variant = ("sn-jnl" if source is not None else "prism-article") if template == "nature" else None
     profile = template_profile(template, variant)
     upstream_type = profile["source"]
+    if source is not None and profile.get("bundled"):
+        raise SystemExit("This maintained template does not accept --template-source; its reviewed resources are bundled.")
     # Do not resolve the final component: doing so would follow a target symlink.
     requested = Path(os.path.abspath(target.expanduser()))
     destination = requested.parent.resolve() / requested.name
@@ -562,8 +689,17 @@ def initialize(
         raise SystemExit(f"Initialization target is not empty: {destination}")
     directory = "nature-official-template" if variant == "sn-jnl" else TEMPLATES[template]["directory"]
     asset = ASSET_DIR / directory
-    if not (asset / "main.tex").is_file():
+    multi_type = bool(TEMPLATES[template].get("article_types"))
+    main_asset = asset / selected_article / "main.tex" if multi_type else asset / "main.tex"
+    if not main_asset.is_file():
         raise SystemExit(f"Template assets are missing: {asset}")
+    if multi_type:
+        for name in profile.get("required_common", ()):
+            if not (asset / "common" / name).is_file():
+                raise SystemExit(f"Template assets are missing: {asset / 'common' / name}")
+    for name in profile.get("shared_assets", ()):
+        if not (ASSET_DIR / name).is_file():
+            raise SystemExit(f"Shared template assets are missing: {ASSET_DIR / name}")
     examples = ASSET_DIR / "paper-template" / "examples.tex"
     if profile["examples"] and not examples.is_file():
         raise SystemExit(f"Shared typesetting examples are missing: {examples}")
@@ -591,11 +727,20 @@ def initialize(
             members = science_package(source)
         else:
             members, bundled_upstream = _bundled_package("science", SCIENCE_MEMBERS)
+    if profile.get("bundled"):
+        package_id, required = profile["bundled"]
+        members, bundled_upstream = _bundled_package(package_id, required)
     destination.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=f".{destination.name}.prism-init-", dir=destination.parent))
     backup = None
     try:
-        shutil.copytree(asset, stage, dirs_exist_ok=True)
+        if multi_type:
+            shutil.copytree(asset / "common", stage, dirs_exist_ok=True)
+            shutil.copytree(asset / selected_article, stage, dirs_exist_ok=True)
+        else:
+            shutil.copytree(asset, stage, dirs_exist_ok=True)
+        for name in profile.get("shared_assets", ()):
+            shutil.copy2(ASSET_DIR / name, stage / name)
         if profile["examples"]:
             shutil.copy2(examples, stage / "examples.tex")
         if language == "bilingual":
@@ -612,6 +757,8 @@ def initialize(
         }
         if variant is not None:
             metadata["variant"] = variant
+        if TEMPLATES[template].get("article_types"):
+            metadata["article_type"] = selected_article
         if archive is not None:
             if upstream_type == "nature":
                 upstream = {"url": NATURE_URL, "sha256": NATURE_SHA256, "archive": NATURE_ARCHIVE}

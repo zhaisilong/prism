@@ -51,11 +51,26 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template", "nature-official-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template"):
+        for name in ("paper-template", "nature-template", "nature-official-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template", "jcheminformatics-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
         (self.asset_dir / "paper-template" / "examples.tex").write_text("% shared standalone examples\n")
+        nar = self.asset_dir / "nar-template"
+        (nar / "common").mkdir(parents=True)
+        for name in ("supplementary.tex", "graphical_abstract.tex", "references.bib", "prism-nar.bst"):
+            (nar / "common" / name).write_text(f"% NAR fixture {name}\n")
+        for article_type in ("research", "database", "web-server"):
+            (nar / article_type).mkdir()
+            (nar / article_type / "main.tex").write_text(f"% NAR {article_type}\n")
+        angew = self.asset_dir / "angew-template"
+        (angew / "common").mkdir(parents=True)
+        for name in ("supplementary.tex", "references.bib", "prism-angew.bst", "NOTICE.md"):
+            (angew / "common" / name).write_text(f"% Angew fixture {name}\n")
+        for article_type in ("research", "communication", "review", "minireview"):
+            (angew / article_type).mkdir()
+            (angew / article_type / "main.tex").write_text(f"% Angew {article_type}\n")
+        (self.asset_dir / "prism-wiley-article.cls").write_text("% maintained Wiley fixture\n")
         shutil.copytree(ROOT / "skills/paper-latex/assets/upstream", self.asset_dir / "upstream")
         self.addCleanup(mock.patch.stopall)
         mock.patch.object(templates, "ASSET_DIR", self.asset_dir).start()
@@ -514,6 +529,9 @@ class TemplateTests(unittest.TestCase):
             "journal/briefings-in-bioinformatics": "bib",
             "journal/drug-discovery-today": "ddt", "journal/jcim": "jcim",
             "journal/jacs": "jacs", "journal/bioinformatics": "bioinformatics",
+            "journal/journal-of-cheminformatics": "jcheminformatics",
+            "journal/nucleic-acids-research": "nar",
+            "journal/angewandte-chemie-international-edition": "angew",
         }
         for canonical, alias in names.items():
             with self.subTest(canonical=canonical):

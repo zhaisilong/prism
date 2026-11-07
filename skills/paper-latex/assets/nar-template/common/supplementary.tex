@@ -1,0 +1,131 @@
+% Original Prism independent supplement for the three NAR article starters.
+% Compile with --main supplementary.tex --no-build-script.
+% S numbering is a Prism convention, not a claim about a compulsory NAR style.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\sisetup{uncertainty-mode=separate}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\title{Supplementary Data: Manuscript title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Postal code, Country\\
+  \small \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+Describe the accompanying supplementary files. Cite each relevant item
+from the main text. Keep essential methods in the main manuscript and
+use this document for additional information, supporting analyses or a
+tutorial. All graphics, values and examples below are synthetic.
+
+\section{Supplementary Methods}
+Describe supporting details that complement the main manuscript's methods.
+Equation~\eqref{eq:si-residual} illustrates a multi-line expression with one
+S number; replace it with a justified derivation, or remove it.
+\begin{equation}
+\begin{split}
+ r_i&=y_i-\widehat y_i,\\
+ E&=\frac{1}{n}\sum_{i=1}^{n}r_i^2.
+\end{split}\label{eq:si-residual}
+\end{equation}
+This expression is a notation example and reports no scientific result.
+
+\section{Supplementary Figures}
+Figure~\ref{fig:si-slot} is a synthetic slot for a supporting graphic.
+Replace it with the actual figure and legend, or remove it.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][45mm][c]{0.80\linewidth}{\centering
+Supplementary figure slot\\[8pt]Replace with an original graphic}}
+\caption{Synthetic supporting-figure slot. Describe the actual panels,
+units, sample sizes, symbols and uncertainty when replacing it.}
+\label{fig:si-slot}
+\par\smallskip\small\raggedright
+\textbf{Alt text:} Replace with a concise description of the actual graphic.
+\end{figure}
+
+\section{Supplementary Tables}
+Table~\ref{tab:si-numeric} illustrates numerical alignment.
+Table~\ref{tab:si-long} illustrates repeated headings on a continuing table.
+Neither table contains research data.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic numerical values for layout only.}
+\label{tab:si-numeric}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Setting & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Replace them with verified values and define the
+actual units and uncertainty measure.
+\end{table}
+
+\small
+\begin{longtable}{@{}p{0.13\linewidth}p{0.27\linewidth}p{0.50\linewidth}@{}}
+\caption{Synthetic reproducibility inventory demonstrating continuation.}
+\label{tab:si-long}\\
+\toprule Item & Topic & Instruction\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Instruction\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+S01 & Source & Identify the origin and access route of each study input.\\
+S02 & Release & Record the exact source release used in the manuscript.\\
+S03 & Identifier & Record stable identifiers and accession numbers.\\
+S04 & Licence & State the confirmed terms for using and sharing each input.\\
+S05 & Inclusion & Describe the actual rule used to select source records.\\
+S06 & Exclusion & Describe the actual rule used to exclude source records.\\
+S07 & Provenance & Preserve links between source and derived records.\\
+S08 & Curation & Explain manual and automated processing separately.\\
+S09 & Quality control & Describe the validation procedures actually performed.\\
+S10 & Deduplication & Define how duplicate or related observations are handled.\\
+S11 & Partition & Explain separation of training and independent evaluation.\\
+S12 & Parameters & Record actual parameter values and their rationale.\\
+S13 & Repetition & Define what counts as an independent repetition.\\
+S14 & Randomness & Give seeds and initialisation rules where relevant.\\
+S15 & Metrics & Define each evaluation metric and its interpretation.\\
+S16 & Units & Identify the units and dimensions of measured quantities.\\
+S17 & Uncertainty & Define the uncertainty measure and how it is calculated.\\
+S18 & Comparators & Record comparison methods and their actual settings.\\
+S19 & Baseline & Explain reference conditions used to interpret performance.\\
+S20 & Sensitivity & Report sensitivity analyses only where actually performed.\\
+S21 & Software & Record software versions and relevant dependencies.\\
+S22 & Environment & Describe computational details affecting reproducibility.\\
+S23 & Examples & Provide a usable example input where it can be shared.\\
+S24 & Output & Explain how the corresponding output is interpreted.\\
+S25 & Tutorial & State how users can find the actual help and tutorial.\\
+S26 & Access & State the actual resource access route and any restrictions.\\
+S27 & Privacy & Describe verified handling of submitted or sensitive data.\\
+S28 & Maintenance & Describe agreed maintenance and archival arrangements.\\
+S29 & Figures & Retain editable graphics and confirm readable labels.\\
+S30 & Tables & Link displayed values to verified analysis output.\\
+S31 & Code archive & Record the permanent archived version where available.\\
+S32 & References & Verify supplementary references independently of the main text.\\
+S33 & Limitations & Describe limitations supported by the study design.\\
+S34 & Availability & Check that every promised resource is actually accessible.\\
+\end{longtable}
+\normalsize
+
+\section{Supplementary References}
+This public reference tests the independent bibliography~\cite{wilkinson2016fair};
+it is not evidence for the synthetic examples above.
+\bibliographystyle{prism-nar}
+\bibliography{references}
+\end{document}

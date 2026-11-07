@@ -1,0 +1,11 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{manuscript-support}[2026/11/07 Synthetic manuscript helpers]
+\RequirePackage{caption}
+\captionsetup{font={sf,scriptsize},labelfont=bf,labelsep=period,
+  justification=justified,singlelinecheck=false,skip=3pt}
+\newcommand{\syntheticTableStyle}{%
+  \sffamily\fontsize{6.5}{8}\selectfont
+  \setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1.05}}
+\newcommand{\syntheticTableNote}[1]{%
+  \par\smallskip{\footnotesize\raggedright #1\par}}
+\endinput

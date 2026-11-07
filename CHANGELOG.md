@@ -4,6 +4,76 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.11.07.1
+
+### Changed
+
+- Made manuscript adaptation follow the selected template's class, maintained style and starter, with explicit checks for inherited caption, table and figure formatting.
+- Scoped generic Prism typography to the generic template and clarified existing-project, supplementary and image-source handling.
+- Reworked the README around project strengths, offline template choices and a short installation and writing workflow.
+
+### Security
+
+- Required an exact reviewed public-file list and added local protected-file hash checks to the code exporter, alongside existing credential, path, symlink and source-change checks.
+- Anchored directory enumeration to checked file descriptors so replacement symlinks cannot expose external directory names during an audit.
+- Kept migration examples synthetic and research-case validation in temporary local copies.
+
+### Validation
+
+- Passed all 166 regression tests without skips, including 29 public-export tests covering exact paths, protected copies, source changes, directory replacement races and publication rollback.
+- Independently adapted and strictly compiled the synthetic bilingual JACS main text and supplement; checked every output page and preserved content, numerical precision, labels, references and the existing rebuild entrypoint.
+- Verified wrapper help, versions and dependencies, skill metadata and all 15 upstream file hashes; audited the 145-file public boundary. Remote publication was deferred to the maintainer.
+
+## 2026.11.07
+
+### Added
+
+- Added a publisher-grouped template catalog command while retaining the existing flat list interface.
+- Added offline Angew research, communication, review and minireview starters using an attributed, Prism-maintained Wiley/Overleaf derivative and a journal-specific bibliography adaptation.
+
+### Changed
+
+- Generalized registered article-type selection and shared manuscript resources while preserving schema 1, NAR profiles and legacy projects.
+- Retained the pinned Wiley class and CC BY 4.0 notices; maintained compatibility fixes under a separate class name without changing the original source.
+
+### Documentation
+
+- Explained the English journal layout and default Chinese-writing support in the short guide, with consistent README and paper workflow notes clarifying that language profiles do not translate content or convert existing projects.
+
+### Validation
+
+- Passed all 152 regression tests without skips, including grouped catalog queries without TeX, legacy flat output, NAR compatibility, and bibliography author-count boundaries.
+- Strictly compiled the four Angew types in bilingual and English modes, corresponding supplements and shared examples; reran all eight Angew tests after the final biography pagination adjustment.
+- Visually checked Chinese title and author rendering, the complete biography and portrait block, chemical figure/scheme/table examples, supplementary pagination and the final TOC page.
+- Verified all 15 upstream file hashes, audited the code export, and kept research files and original Git history outside the public boundary. No commit, push or global skill change was made.
+
+## 2026.11.06.2
+
+### Added
+
+- Added three offline NAR content profiles under one journal identifier: research, Database and Web Server, with independent graphical abstracts and supplementary material.
+- Added article-type selection and compatible project metadata, plus a renamed bibliography adaptation preserving upstream terms with LPPL Prism modifications, citation-order numbering and DOI/PMC/PubMed links.
+
+### Changed
+
+- Documented the short NAR workflow, current proposal requirements and the distinction between initial PDF submission and editable revision sources.
+
+### Validation
+
+- Passed all 138 regression tests with no skips, including three NAR article types in bilingual and English modes, bibliography links, metadata compatibility and failure preservation.
+- Strictly compiled the NAR manuscripts, independent supplements, graphical abstracts and shared examples; visually checked main pages, references and continuing tables.
+- Verified upstream file checksums and audited the public code boundary without exporting research files or original Git history. No commit, push or global skill change was made.
+
+## 2026.11.06.1
+
+### Added
+
+- Added an offline Journal of Cheminformatics research-article draft with bilingual and English modes, synthetic examples, and a concise source and usage guide.
+
+### Validation
+
+- Passed 126 regression tests; compiled and visually reviewed the synthetic bilingual and English research drafts and supplementary materials.
+
 ## 2026.11.06
 
 ### Added

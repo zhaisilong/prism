@@ -1,0 +1,141 @@
+% Original Prism Database Issue skeleton for Nucleic Acids Research.
+% Uses the unmodified OUP 1.5 class and its Modern Large page design.
+% The sections below are writing suggestions, not an official fixed outline.
+\documentclass[unnumsec,webpdf,modern,large]{oup-authoring-template}
+\usepackage{booktabs,tabularx,siunitx}
+\newcommand{\societylogo}{}
+\sisetup{uncertainty-mode=separate}
+
+\begin{document}
+\journaltitle{Nucleic Acids Research}
+\DOI{}
+\copyrightyear{}
+\pubyear{}
+\access{Draft manuscript}
+\appnotes{Database Issue}
+\firstpage{1}
+
+\title[Database name and short title]{Database name: concise description of the resource}
+\author[1,$\ast$]{First Author}
+\author[1,2]{Second Author}
+\address[1]{\orgdiv{Department}, \orgname{First institution},
+  \orgaddress{\state{City}, \postcode{Postal code}, \country{Country}}}
+\address[2]{\orgdiv{Department}, \orgname{Second institution},
+  \orgaddress{\state{City}, \postcode{Postal code}, \country{Country}}}
+\corresp[$\ast$]{Corresponding author.
+  \href{mailto:first.author@example.org}{first.author@example.org}}
+
+% One English paragraph, at most 200 words; include the actual database URL.
+% example.org is reserved demonstration content, not a functioning database.
+\abstract{Replace this paragraph with a factual description of the
+database, its biological scope, data coverage, curation and access
+functions. Explain the verified benefit to users or the substantive
+changes in an updated release. State the actual resource URL in the
+abstract. The URL \url{https://example.org/database} is a reserved example
+that must be replaced; it does not identify a database. This starter
+reports no collected data, functionality or scientific result.}
+\maketitle
+\thispagestyle{plain}
+\pagestyle{plain}
+
+\section{Introduction}\label{sec:introduction}
+Explain the biological need, intended users and relationship to existing
+resources. For an update, identify the previous publication and describe
+the substantive new content or capabilities. The public reference below
+tests citation mechanics and should be retained only if relevant to the
+resource~\cite{wilkinson2016fair}.
+
+\section{Materials and Methods}\label{sec:methods}
+\subsection{Data sources and provenance}
+Describe actual data sources, accessions, release dates, inclusion rules
+and permissions. Distinguish imported records, manual curation and
+derived annotations. Give the versions used in the reported release.
+
+\subsection{Database construction and quality control}
+Explain the data model, identifier mapping, curation workflow, validation,
+quality-control procedures and update process. Keep methods needed to
+reproduce the work in the main manuscript.
+
+Equation~\eqref{eq:coverage} is a notation example only. Replace it with a
+justified definition and identify every term, or remove it.
+\begin{equation}
+ c=\frac{n_{\mathrm{included}}}{n_{\mathrm{eligible}}}.
+ \label{eq:coverage}
+\end{equation}
+
+\section{Database Content}\label{sec:content}
+Describe verified record types, scope and relationships. Separate measured
+coverage from claims about completeness. Table~\ref{tab:content} uses
+invented values to illustrate a compact inventory.
+
+\begin{table}[t]
+\centering\small
+\caption{Synthetic database inventory for layout only.}
+\label{tab:content}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=3.0] >{\raggedright\arraybackslash}X@{}}
+\toprule
+Record group & {Count} & Provenance\\
+\midrule
+Example A & 120 & Synthetic source A\\
+Example B & 240 & Synthetic source B\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+These counts and source labels are invented. Replace them with the verified
+content and release used in the manuscript.
+\end{table}
+
+\section{Access and Use Cases}\label{sec:access}
+Give the working database URL in the body as well as the abstract.
+The reserved example \url{https://example.org/database} must be replaced.
+Describe querying, browsing, downloads, file formats, identifiers and any
+documented programmatic access actually provided. Show a concrete use
+case with interpretable results rather than only the landing page.
+Figure~\ref{fig:database} is a synthetic slot for that example.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][33mm][c]{0.87\linewidth}{\centering
+Database use-case graphic\\[5pt]Replace this synthetic slot}}
+\caption{Synthetic query or use-case slot. Describe the actual query,
+returned information and biological interpretation when replacing it.}
+\label{fig:database}
+\par\smallskip\small\raggedright
+\textbf{Alt text:} Replace with a description of the actual use-case graphic.
+\end{figure}
+
+\section{Discussion and Future Maintenance}\label{sec:discussion}
+Discuss verified strengths, coverage limitations, comparison with relevant
+resources and the actual maintenance plan. Describe future intentions as
+plans rather than completed work. Cite any supporting Supplementary
+Figure~S1, Supplementary Table~S1 or Supplementary Equation~(S1) from
+the separate supplement where relevant.
+
+\section*{Data Availability}
+Replace with the working resource URL, release identifier, downloadable
+data and code access routes, applicable licences and any justified
+restrictions. State maintenance and archiving arrangements only after
+confirming them with the responsible authors.
+
+\section*{Supplementary Data}
+Describe the supplied supplementary files and replace this instruction
+with the journal's required availability statement when applicable.
+
+\section*{Author Contributions}
+Replace with the contributions agreed by every author, using appropriate
+CRediT roles where applicable.
+
+\section*{Acknowledgements}
+Replace with confirmed acknowledgements, or remove if not applicable.
+
+\section*{Funding}
+Replace with confirmed funder names, grant identifiers and the source of
+open-access funding where applicable.
+
+\section*{Conflict of Interest}
+Replace with the authors' confirmed competing-interest disclosure.
+
+\bibliographystyle{prism-nar}
+\bibliography{references}
+\end{document}

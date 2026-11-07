@@ -12,8 +12,11 @@
 | `bib` | Briefings in Bioinformatics 论文、双栏图表与公式 | XeLaTeX / BibTeX | Prism 原创启动文件 + 仓库维护的 OUP 1.5 class |
 | `ddt` | Drug Discovery Today 单栏叙述性综述草稿 | XeLaTeX / BibTeX，数字上标 | Prism 原创启动文件 + TeX Live 安装的 Elsevier `elsarticle` |
 | `jcim` | Journal of Chemical Information and Modeling 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
+| `jcheminformatics` | Journal of Cheminformatics 研究论文草稿 | XeLaTeX / BibTeX | Prism 基于标准 `article` 维护的原创草稿 |
 | `jacs` | Journal of the American Chemical Society 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创启动文件 + TeX Live 安装的 ACS `achemso` 宏包 |
 | `bioinformatics` | Bioinformatics 原始论文草稿 | XeLaTeX / BibTeX，作者—年份 | Prism 原创启动文件 + 仓库维护的 OUP 1.5 class 和样式 |
+| `nar` | NAR 研究、Database 和 Web Server 稿件 | XeLaTeX / BibTeX，顺序编号 | Prism 三类骨架 + OUP 1.5 Modern Large + Prism 适配的引用样式 |
+| `angew` | Angew 研究、Communication、Review、Minireview 草稿 | XeLaTeX / BibTeX，顺序编号 | Prism 维护的 Wiley／Overleaf 衍生 class 与原创四类骨架 |
 | `science-advances` | Science Advances 研究论文草稿 | XeLaTeX / BibTeX | Prism 原创启动文件 + 仓库维护的 Science-family v1.0 样式 |
 
 全部默认模板均可离线初始化，新项目默认支持中英混排；期刊模板用 XeLaTeX，通用 `prism` 可用 XeLaTeX 或 LuaLaTeX。期刊项目创建时可用 `--language english` 选择原 pdfLaTeX 模式。参考文献使用英文条目。编译依赖由 TeX 发行版提供。
@@ -37,11 +40,41 @@ DDT 使用发行版中的 [Elsevier 官方 `elsarticle` 类](https://www.elsevie
 
 JCIM 使用 [ACS 官方示例](https://www.overleaf.com/latex/templates/latex-template-for-american-chemical-society-acs-journal-submissions/swszwgfqsshj)支持的 `article` + `achemso` / BibTeX 组合（官方示例默认使用 `biblatex` / Biber）；只依赖已安装的 TeX Live 宏包，不复制第三方代码。请替换目录图占位，并依照 [JCIM 作者指南](https://researcher-resources.acs.org/publish/author_guidelines?coden=jcisd8)核对投稿要求；本模板用于初稿，不自动整理最终投稿文件。
 
+`jcheminformatics` 是 Prism 为 Journal of Cheminformatics 研究论文维护的原创草稿，不是期刊官方模板。按[期刊研究论文要求](https://link.springer.com/journal/13321/submission-guidelines/research)，摘要不超过 350 词，其中 Scientific Contribution 不超过 3 句；提供 3–10 个关键词，并说明数据和代码可用性。模板示例仅作排版占位，数据、代码和结论由作者提供。期刊的[格式说明](https://link.springer.com/journal/13321/submission-guidelines)要求双倍行距、行号和页码，并建议官方 Springer Nature LaTeX 模板；上传 TeX 时由期刊系统使用 pdfLaTeX 和 TeX Live 2021 编译，提交前应核查兼容性。可用 `--language english` 初始化英文 pdfLaTeX 草稿；中文模式用于写作。
+
 JACS 复用相同 ACS 构建，提供 Research Article 草稿、目录图占位和独立补充材料；提交前请查阅 [JACS 作者指南](https://researcher-resources.acs.org/publish/author_guidelines?coden=jacsat)。
 
 Bioinformatics 原始论文草稿与 BIB 共享仓库内的固定 OUP 1.5 class，使用 `oup-abbrvnat.bst`，使用 `namedate` 作者—年份引用，并提供结构化摘要。`contemporary,large` 实测单栏约 89.5 mm，[期刊指南](https://academic.oup.com/bioinformatics/pages/author-guidelines)列出 86 mm；初稿不承诺满足最终列宽或投稿格式。上游 class 可能报告 `Unused global option(s)`，但实测双栏和作者—年份引用生效。默认离线创建；`--template-source` 仅供显式导入相同官方 ZIP。
 
 Science Advances 使用 [AAAS Science-family 官方模板](https://www.overleaf.com/latex/templates/latex-template-for-science-family-journals/kjytmmfyxthd) v1.0（2024-07）的 `scicite.sty` 和 `sciencemag.bst`。初始化从仓库复制已校验的原样式及版权说明，无需用户提供目录或 ZIP；本地导入仍作为高级选项保留。正文与补充材料使用一份连续编号的文献表。文件哈希用于版本一致性检查，不单独证明包的来源；修订稿要求以期刊最新说明为准，本模板不自动嵌入 `.bbl`。
+
+## NAR
+
+2026-11-06 核对：[Nucleic Acids Research 作者指南](https://academic.oup.com/nar/pages/author-guidelines)推荐 OUP **Modern Large**。`nar` 的三种原创正文共用仓库内的 OUP 1.5 class，不修改官方 class，不需要在线下载。省略 `--article-type` 时创建 research；`database` 侧重数据内容、整理、查询与更新，`web-server` 侧重输入输出、方法、验证和应用实例。这些小节是 Prism 的写作骨架，作者按实际研究调整。
+
+英文摘要为单段、至多 200 词：常规稿不放 URL，Database/Web Server 稿必须给资源 URL。Methods 放在 Results 前；正文嵌入图表，提供页码，不启用行号。保留数据与代码可用性及其他声明占位，替换所有示例。中英混排用于写作；英文投稿稿可用 `--language english` 创建。
+
+三类都提供独立 `graphical_abstract.tex`：5:2 横向合成占位，无图注，须换成作者自己的图。初投需单独上传图文摘要和补充材料；完整主文可提交 PDF，修回需可编辑源文件。`supplementary.tex` 使用 S 编号，这是 Prism 的约定。正文包含补充材料引用和声明；没有补充材料时应一并删去。
+
+`prism-nar.bst` 从 OUP 包内的 `oup-plain.bst` 改名维护，并非官方 NAR 专用样式；完整保留原作者的改名修改授权，Prism 修改部分采用 LPPL 1.3c 或更新版本。它按首次引用顺序编号，保留文章标题，四人及以上列前三名加 et al.；`doi` 生成 DOI 链接，`pmcid` 优先生成 PMC 链接，没有 `pmcid` 时使用 `pmid`。请提供准确的英文元数据和期刊缩写；系统不自动查补文献。Web Server 稿按其指南提供可用的 DOI 与 PMC／PubMed 链接。
+
+[Database 指南](https://academic.oup.com/nar/pages/Ms_Prep_Database)要求先提供可访问的资源和提案，取得邀请后投稿；更新稿说明实质变化。[Web Server 指南](https://academic.oup.com/nar/pages/Submission_Webserver)同样要求先提案并获得邀请，需说明输入输出、比较和验证。从 2026 年 11 月起全年接收提案，获准后两个月内交稿；不沿用旧年度截止日。这里提供写作和编译支持，不自动生成提案、投稿包或提交稿件。
+
+## Angew
+
+`angew` / `journal/angewandte-chemie-international-edition` 是 Prism 维护的四类写作草稿，不是 Angew 当前指定的官方模板。底稿来自 [Wiley／Overleaf 2019 通用模板](https://www.overleaf.com/latex/templates/wiley-journal-template/nnjcnfyhzcqp)，发布页标明 CC BY 4.0，也明确它已停止官方支持。原始 `wiley-article.cls` v1.5（2018-07-05）按[固定公开提交](https://github.com/ihrke/markdown-paper/blob/9d58a2550e43b1f6f797417fe4c5fc82d6e0e0bf/templates/dependencies/wiley-article.cls)和 SHA-256 保存于上游资源区，保留原字节；镜像仓库自身的许可不替代原作者授权。
+
+改名的 `prism-wiley-article.cls` 保留署名及 CC BY 4.0，说明 Prism 的维护修改：按 TeX 字体文件名加载原有 Termes、XITS Math、Lato，修复摘要重复构造产生的未解析标签和段首溢出，并采用不拉伸短页的双栏预览。中英混排仅叠加中文字体，不替换该 class 的英文与数学字体。默认 XeLaTeX；创建时加 `--language english` 使用 pdfLaTeX。两种模式均不翻译正文。
+
+2026-11-07 核对[Angew 作者指南](https://onlinelibrary.wiley.com/page/journal/15213773/homepage/notice-to-authors)：Research Article 使用 Introduction、Results and Discussion、Conclusion；Communication 正文连续叙述，不划分研究章节。两类通常分别约 5000／2500 词。Review 和 Minireview 使用编号主题章节并以 Summary and Outlook 结束，正文上限分别为 12000／5000 词；摘要最多 200 词。字数在占位说明中提示，不由 `--strict` 自动判断。
+
+Review／Minireview 应先通过官网提交综述提案。本模板不提交提案或生成官方申请表。作者简介与肖像仅为占位，不引用任何真实个人照片；按官网快捷清单与详细 Review 段的交集，提示简介 70–84 词且不超过 560 字符（含空格），投稿前复核最新要求。综述补充材料仅提供额外比较与资料说明，不预填实验或宣称做过系统检索。
+
+四类主文末页包含 TOC 图文占位：文本不超过 50 词且不超过 450 字符（含空格），最多五个字母序关键词，其中至少两个选自官方关键词目录。横图采用 11.0×2.5 cm，以同时满足作者指南及[图形指南](https://onlinelibrary.wiley.com/page/journal/15213773/homepage/graphics-guidelines)的尺寸说明。图表、Scheme、化学式和单位演示都是合成排版示例，应替换为实际研究内容。
+
+独立 `supplementary.tex` 首页提供目录，按稿型组织实验、计算、表征或额外比较资料；图、表、Scheme、公式使用 S 编号。补充材料文献可独立从 1 编号，主文 Supporting Information 段演示如何纳入补充文献。`prism-angew.bst` 沿用 Prism 已有引用适配的授权基础，保留原始条款与 Prism 修改的 LPPL 声明；按引用顺序列完整文章标题和期刊名称，六人以内全列，超过六人列前三名加 et al.，支持 DOI 与文章编号。文内使用指南第 3.5 节说明的顺序方括号；出版前由期刊转换排版，不声称精确复刻最终成刊样式。
+
+所有初始化资源已随仓库提供，创建时不下载或检查更新。保留英文参考文献和声明占位，替换作者、头像及示例后再准备投稿材料；本轮不进行 Word／RTF 转换、最终投稿打包或上传。
 
 ## 其他高质量官方模板
 

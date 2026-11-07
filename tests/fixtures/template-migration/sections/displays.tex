@@ -1,0 +1,49 @@
+\section{Results}\label{sec:results}
+Figure~\ref{fig:panels} contains panels (a) and (b), which identify the same
+two groups as Table~\ref{tab:measurements}. No comparison is a research result.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{146mm}{!}{\input{figures/panels}}
+\caption{\textbf{Synthetic two-panel comparison.}
+(a) Invented point positions for group A. The horizontal axis is a made-up
+index and the vertical axis is a made-up response in arbitrary units.
+(b) The corresponding invented positions for group B, shown only to exercise
+panel identity and axis annotation. The diagram has no statistical meaning.
+Both panels use the same displayed axis limits so that differences in figure
+size cannot be mistaken for differences in scale. Letters identify panels;
+they do not designate methods, cohorts or experimental conditions. The dashed
+horizontal segment in each panel is a visual key only. No fitted line,
+uncertainty interval, sample-size inference or significance test is implied.
+The Chinese explanation describes the same display: 图中点位均为合成占位，
+坐标轴与图例仅用于测试最终阅读尺寸下的可读性。}
+\label{fig:panels}
+\end{figure}
+
+Table~\ref{tab:measurements} includes count, estimate, uncertainty and missing
+entries. Displayed digits, units and the distinction between zero and a dash
+are deliberate parts of the synthetic content.
+\begin{table}[htbp]
+\centering
+\caption{Invented values for a display-only comparison.}
+\label{tab:measurements}
+\syntheticTableStyle
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ r r r r r@{}}
+\toprule
+Configuration & Observation count & Estimate (mmol L$^{-1}$) & SD (mmol L$^{-1}$)
+  & Score before adjustment & Score after adjustment\\
+\midrule
+A: baseline configuration & 120 & 0.385 & 0.006 & 0.759 & 0.781\\
+B: alternative configuration & 98 & 0.608 & 0.051 & 0.206 & 0.240\\
+C: missing-response configuration & 0 & --- & --- & 0.000 & 0.000\\
+\bottomrule
+\end{tabularx}
+\syntheticTableNote{All values are invented. SD means an illustrative standard
+deviation; it was not estimated from observations. A dash means unavailable.
+The displayed unit is mmol L$^{-1}$.}
+\end{table}
+
+The label \texttt{tab:measurements}, the panel identities (a) and (b), and
+Equations~\eqref{eq:weighted} and~\eqref{eq:difference} connect this text to its
+displays. The supporting material has an independent reference list.

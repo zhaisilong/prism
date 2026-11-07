@@ -1,0 +1,111 @@
+% Original Prism draft for Journal of Cheminformatics research articles.
+% Writing aid only: confirm current requirements before submission.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,amsmath,amssymb,array,booktabs,tabularx,siunitx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{setspace,lineno}
+\usepackage[hidelinks]{hyperref}
+\sisetup{uncertainty-mode=separate}
+\doublespacing
+
+\title{Research manuscript title}
+\author{First Author\textsuperscript{1,*} and Second Author\textsuperscript{1}\\
+  \small \textsuperscript{1}Department, Institution, City, Country\\
+  \small \textsuperscript{*}Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\linenumbers
+\maketitle
+\begin{abstract}
+% The journal currently requests a maximum of 350 words.
+\noindent\textbf{Background:} State the context and question.\\
+\textbf{Results:} Summarize only verified findings.\\
+\textbf{Conclusions:} State conclusions supported by the results.\\
+\textbf{Scientific Contribution:} In at most three sentences, explain the
+specific contribution using the authors' verified information.
+\end{abstract}
+\noindent\textbf{Keywords:} Replace with three to ten relevant keywords.
+
+\section{Introduction}\label{sec:introduction}
+Describe the scientific context, prior work, motivation and the contribution of
+this study. The citation tests bibliography mechanics only; retain it only when
+relevant~\cite{wilkinson2016fair}. Replace all instructional content and sample
+values before submitting a manuscript.
+
+\section{Results}\label{sec:results}
+Present verified results and relate each display to the text. The following
+placeholder figure and table demonstrate layout; they report no study findings.
+Figure~\ref{fig:overview} illustrates related panels and
+Table~\ref{tab:example} illustrates aligned uncertainty.
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.46\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][30mm][c]{0.85\linewidth}{\centering Replace with a figure}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.46\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][30mm][c]{0.85\linewidth}{\centering Replace with a figure}}
+\end{minipage}
+\caption{Synthetic placeholders for a two-panel figure. Describe the actual
+panels, units and uncertainty when replacing them.}\label{fig:overview}
+\end{figure}
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic values for table layout only.}\label{tab:example}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule Example & {Count} & {Estimate $\pm$ SD}\\\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Discussion}\label{sec:discussion}
+Interpret confirmed findings in the context of prior work, including limitations
+and alternative interpretations supported by the evidence.
+
+\section{Conclusions}\label{sec:conclusions}
+Summarize only conclusions justified by the results and their scope.
+
+\section{Methods}\label{sec:methods}
+Describe the actual data, chemical representations, software, analysis,
+validation, parameters and reproducibility details used in the study. Define
+all variables and units. The equation below is a formatting example only:
+\begin{equation}\label{eq:example}
+s = \sum_{i=1}^{n} w_i x_i.
+\end{equation}
+Replace Equation~\eqref{eq:example} with a justified expression or remove it.
+
+\section*{Abbreviations}
+Define abbreviations used in the manuscript, or state the authors' appropriate
+response when none apply.
+
+\section*{Supplementary Information}
+Additional file 1: Supplementary information. Replace this title and brief
+description with the actual contents of the supplementary file, or remove
+this entry if no additional file is supplied.
+
+\section*{Declarations}
+\subsection*{Availability of data and materials}
+Provide the authors' accurate data and materials availability statement,
+including relevant persistent links, access conditions and software where applicable.
+\subsection*{Competing interests}
+Provide the authors' confirmed competing interests statement.
+\subsection*{Funding}
+Identify verified funding sources and their roles, if applicable.
+\subsection*{Authors' contributions}
+Describe the contributions agreed by the authors.
+\subsection*{Acknowledgements}
+Provide confirmed acknowledgements, if applicable.
+\subsection*{Ethics approval and consent to participate}
+Provide the authors' statement when applicable.
+\subsection*{Consent for publication}
+Provide the authors' statement when applicable.
+% Optional: Authors' information, when appropriate and agreed by the authors.
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+\end{document}

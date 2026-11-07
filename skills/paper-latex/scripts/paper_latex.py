@@ -22,7 +22,6 @@ from build_support import (
 )
 from build_script import write_build_script
 from prism_latex.templates import (
-    TEMPLATES,
     initialize,
     resolve_template,
     template_choices,
@@ -34,6 +33,10 @@ from prism_latex.templates import (
     template_packages,
     template_profile,
     template_resources,
+    template_article_type,
+    template_article_type_for_project,
+    article_type_choices,
+    format_template_catalog,
 )
 
 
@@ -43,7 +46,9 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("paper_dir", nargs="?", type=Path, help="Directory containing the manuscript")
     result.add_argument("--init", metavar="TARGET_DIR", type=Path, help="Create a new manuscript project")
     result.add_argument("--list-templates", action="store_true", help="List available manuscript templates")
+    result.add_argument("--group-by", choices=("none", "publisher"), help="Group --list-templates output (default: none)")
     result.add_argument("--template", choices=template_choices(), help="Template alias or stable ID for --init or --check-deps (default: prism)")
+    result.add_argument("--article-type", choices=article_type_choices(), help="Content profile for multi-type templates, with --init or --check-deps; defaults are shown in the catalog")
     result.add_argument("--template-source", metavar="PATH", type=Path, help="Explicit local official package/folder override; default initialization is offline")
     result.add_argument("--language", choices=("bilingual", "english"), help="Language profile for initialization or dependency preview (default for new projects: bilingual)")
     result.add_argument("--main", default="main.tex", help="Main TeX path relative to PAPER_DIR")
@@ -73,12 +78,12 @@ def resolve_main(paper_dir: Path, relative: str) -> Path:
 def main(argv: list[str] | None = None) -> int:
     argument_parser = parser()
     args = argument_parser.parse_args(argv)
+    if args.group_by is not None and not args.list_templates:
+        argument_parser.error("--group-by requires --list-templates.")
     if args.list_templates:
-        if args.paper_dir or args.init or args.check_deps or args.template or args.template_source or args.force or args.language:
+        if args.paper_dir or args.init or args.check_deps or args.template or args.template_source or args.force or args.language or args.article_type:
             argument_parser.error("--list-templates must be used without a project, initialization, or dependency options.")
-        for name, details in TEMPLATES.items():
-            publisher = details["publisher"] or "Prism"
-            print(f"{name}: {details['description']} [ID: {details['id']}; type: {details['kind']}; publisher: {publisher}]")
+        print(format_template_catalog(args.group_by or "none"))
         return 0
     if args.init and (args.paper_dir or args.check_deps):
         argument_parser.error("Use --init TARGET_DIR without PAPER_DIR or --check-deps.")
@@ -86,6 +91,8 @@ def main(argv: list[str] | None = None) -> int:
         argument_parser.error("--template is only supported with --init or --check-deps.")
     if args.language and not (args.init or args.check_deps):
         argument_parser.error("--language is only supported with --init or --check-deps.")
+    if args.article_type and not (args.init or args.check_deps):
+        argument_parser.error("--article-type is only supported with --init or --check-deps.")
     selected_template = resolve_template(args.template) if args.template else None
     if args.template_source and not (args.init and selected_template and template_profile(selected_template)["source"]):
         argument_parser.error("--template-source requires --init and a template that accepts an official source package.")
@@ -98,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
         default = template_engine(init_template, "auto", language)
         if args.engine != "auto" and default != "auto" and requested != default:
             argument_parser.error("--init selects its engine from --language; use --engine when building an existing project.")
-        return initialize(args.init, args.force, init_template, args.template_source, language)
+        return initialize(args.init, args.force, init_template, args.template_source, language, args.article_type)
 
     paper_dir = args.paper_dir.expanduser().resolve() if args.paper_dir else None
     if paper_dir is not None and not paper_dir.is_dir():
@@ -106,6 +113,13 @@ def main(argv: list[str] | None = None) -> int:
     template = selected_template or (template_for_project(paper_dir) if paper_dir else None)
     if args.check_deps and paper_dir is None and template is None:
         template = "prism"
+    try:
+        if args.article_type:
+            template_article_type(template or "prism", args.article_type)
+        elif paper_dir and not selected_template:
+            template_article_type_for_project(paper_dir)
+    except ValueError as exc:
+        argument_parser.error(str(exc))
     variant = template_variant_for_project(paper_dir) if paper_dir and not selected_template else None
     if args.language:
         language = args.language

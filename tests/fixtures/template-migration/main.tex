@@ -1,0 +1,44 @@
+% Synthetic migration case; not a scientific manuscript or submission.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{prism-cjk}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx}
+\usepackage[articletitle=true]{achemso}
+\usepackage{manuscript-support}
+\usepackage[hidelinks]{hyperref}
+\sisetup{uncertainty-mode=separate}
+
+\title{Synthetic display study / 合成排版示例}
+\author{Example Author and Sample Author\\
+  \small Example Laboratory, Example Institution\\
+  \small Correspondence: \texttt{author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+This invented document exercises manuscript presentation only. Its tables,
+diagram and equations make no scientific claim. 中文与英文在同一份草稿中显示，
+并保留相同的数学符号与计量单位。
+\end{abstract}
+
+\noindent\textbf{Keywords:} synthetic example; layout; 中英混排
+
+\input{sections/introduction}
+\input{sections/displays}
+
+\section{Discussion}\label{sec:discussion}
+The differences in Table~\ref{tab:measurements} are invented. Neither their
+magnitude nor the diagram in Figure~\ref{fig:panels} should be interpreted as
+evidence. The independent supporting document includes additional layout
+examples, with its own figure, table and equation numbering.
+
+\section*{Supporting Information}
+The independent \texttt{si.tex} contains supplementary synthetic displays.
+\section*{Data and Code Availability}
+All examples are synthetic and exist solely for layout testing.
+\section*{Conflict of Interest}
+This fixture does not represent actual authors or a scientific study.
+
+\bibliography{references}
+\end{document}

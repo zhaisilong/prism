@@ -1,0 +1,58 @@
+% Independent synthetic SI; --main si.tex --no-build-script.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{prism-cjk}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable}
+\usepackage[articletitle=true]{achemso}
+\usepackage{manuscript-support}
+\usepackage[hidelinks]{hyperref}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\title{Supporting Information: Synthetic display study / 补充材料}
+\author{Example Author and Sample Author\\
+  \small Example Laboratory, Example Institution}
+\date{}
+
+\begin{document}
+\maketitle
+This supporting document contains synthetic layout content only. It is
+compiled independently and uses S-prefixed display counters.
+
+\section{Supporting display}
+Figure~\ref{fig:si-panels} repeats the editable invented diagram for an
+independent pagination check. Equation~\eqref{eq:si} is a typesetting example:
+\begin{equation}
+\Delta x = x_{\mathrm{A}}-x_{\mathrm{B}}.
+\label{eq:si}
+\end{equation}
+\begin{figure}[htbp]
+\centering
+\resizebox{132mm}{!}{\input{figures/panels}}
+\caption{\textbf{Supporting synthetic diagram.} Panel (a) identifies group A;
+panel (b) identifies group B. Every position is invented and conveys no
+scientific evidence. 图例与坐标轴只用于排版测试。}
+\label{fig:si-panels}
+\end{figure}
+
+\section{Supporting inventory}
+Table~\ref{tab:si-inventory} preserves a small table with concise entries.
+The reference list tests an independent citation\cite{wilkinson2016fair}.
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic supporting inventory.}
+\label{tab:si-inventory}
+\begin{tabularx}{0.80\linewidth}{@{}lXr@{}}
+\toprule Item & Description & Count\\
+\midrule
+A & Invented first display & 12\\
+B & Invented second display & 8\\
+C & Unavailable display & ---\\
+\bottomrule
+\end{tabularx}
+\syntheticTableNote{Counts are invented; a dash means unavailable.}
+\end{table}
+
+\section{Supplementary references}
+\bibliography{references}
+\end{document}

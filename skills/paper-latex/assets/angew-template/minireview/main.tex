@@ -1,0 +1,164 @@
+% Original Prism Minireview starter for Angewandte Chemie International Edition.
+% This is a Prism-maintained Wiley-derived writing preview, not a current
+% official Angew template or a final submission package.
+\documentclass[serif,twocolumn]{prism-wiley-article}
+\usepackage{booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,square,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{1em}
+\raggedbottom
+
+\papertype{Minireview}
+\title{Minireview Title}
+\author[1]{First Author}
+\author[1,2]{Second Author}
+\affil[1]{Department, First institution, City, Postal code, Country}
+\affil[2]{Department, Second institution, City, Postal code, Country}
+\corraddress{Corresponding author, Department, Institution, City, Country}
+\corremail{first.author@example.org}
+\fundinginfo{Replace with confirmed funding information.}
+\runningauthor{First Author et al.}
+
+\begin{document}
+\begin{frontmatter}
+\maketitle
+\begin{abstract}
+% Maximum 200 English words without references. A Minireview proposal should
+% be considered by the editorial office before the full manuscript is submitted.
+Replace this paragraph with the focused subject, current motivation and
+critical perspective. Explain what the concise treatment adds and which
+open questions remain. This starter reports no literature search or
+scientific result; its graphical and numerical examples are synthetic.
+\keywords{Keyword A; Keyword B; Keyword C}
+\end{abstract}
+\end{frontmatter}
+% Replace the alphabetized keyword slots with at most five actual keywords;
+% choose at least two from the journal's current keyword catalogue.
+
+% Minireview length: at most 5000 words from abstract through conclusion,
+% excluding references. Use a narrower topic than a full Review.
+\section{Introduction}
+Introduce the focused topic and explain why a concise critical treatment
+is timely. Define the scope and keep only the context needed by a broad
+chemistry readership. This public citation tests bibliography
+mechanics~\cite{wilkinson2016fair}.
+
+\section{Current Approaches}
+Compare a small number of well-chosen approaches and their underlying
+evidence. State assumptions, limits and meaningful differences. Do not
+claim exhaustive or systematic coverage unless the corresponding work
+has actually been performed.
+
+Figure~\ref{fig:slot}, Scheme~\ref{sch:slot}, Table~\ref{tab:synthetic}
+and Equation~\eqref{eq:metric} are synthetic examples; replace these slots
+with verified material.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][24mm][c]{0.85\linewidth}{\centering
+Original graphic slot\\[4pt]Synthetic layout only}}
+\caption{Synthetic graphic slot. Replace with an original figure and explain
+the actual panels, units, sample sizes and uncertainty.}
+\label{fig:slot}
+\end{figure}
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][18mm][c]{0.85\linewidth}{\centering
+Chemical scheme slot\\[4pt]Insert original artwork}}
+\caption{Synthetic scheme slot, not an experimental transformation.
+Keep compound labels consistent with the Supporting Information.}
+\label{sch:slot}
+\end{scheme}
+
+\begin{table}[htbp]
+\centering
+\caption{Invented values for typesetting only.}
+\label{tab:synthetic}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.2(2)]@{}}
+\toprule
+Setting & {Count} & {Value $\pm$ SD}\\
+\midrule
+Example A & 12 & 0.32 +- 0.02\\
+Example B & 18 & 0.41 +- 0.03\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{equation}
+ E=\frac{1}{n}\sum_{i=1}^{n}(y_i-\widehat y_i)^2.
+ \label{eq:metric}
+\end{equation}
+The chemical formula \ce{CO2} and the unit \qty{298}{\kelvin}
+demonstrate notation only; they report no measurement.
+
+\section{Challenges and Opportunities}
+Discuss the most important gaps in knowledge and the evidence needed to
+resolve them. Distinguish practical limitations from speculative future
+directions.
+
+\section{Summary and Outlook}
+Give a concise synthesis of the perspective and identify the main open
+questions. Do not repeat the introduction or promise unperformed work.
+
+\section*{Supporting Information}
+Describe the supplied files, or remove this paragraph if none are needed.
+Supporting Figure~S1, Scheme~S1, Table~S1 and Equation~(S1) are synthetic
+slots. Additional supporting literature is included in this main reference
+list~\cite{peng2011reproducible}.
+
+\section*{Acknowledgements}
+Replace with confirmed acknowledgements and funding details. Keep grant
+identifiers consistent with the front matter and submission form.
+
+\section*{Conflict of Interest}
+Replace with the authors' confirmed disclosure; do not infer a declaration.
+
+\section*{Data Availability}
+Give verified data and code access routes, identifiers, versions and
+restrictions; do not promise unestablished arrangements.
+
+\bibliographystyle{prism-angew}
+\bibliography{references}
+
+% For each author requested by the journal, replace the visible portrait slot
+% and the instructional paragraph with approved information. The detailed
+% Review guidance limits a biography to 84 words and 560 characters including
+% spaces; targeting 70--84 words also fits the quick checklist. Check current
+% instructions before submission. Do not infer personal history.
+\noindent\begin{minipage}{\linewidth}
+\section*{Author Biographies}
+\begin{biography}{First Author}
+\fbox{\parbox[c][18mm][c]{15mm}{\centering\scriptsize Portrait\\slot}}
+\par\smallskip
+Replace with an author-approved biography and portrait. Target 70--84 English
+words and at most 560 characters including spaces. Confirm the author's
+consent and check the current journal instructions.
+\end{biography}
+\end{minipage}
+
+% TOC entry belongs on the last manuscript page. The wide graphic slot is
+% 110 x 25 mm including its border, within both current published size guides.
+\clearpage
+\onecolumn
+\section*{Table of Contents}
+\begin{center}
+\begingroup
+\setlength{\fboxsep}{0pt}
+\fbox{\parbox[c][\dimexpr25mm-2\fboxrule\relax][c]%
+ {\dimexpr110mm-2\fboxrule\relax}{\centering
+Original TOC graphic\\Synthetic slot: replace before submission}}
+\endgroup
+\end{center}
+Replace this text with a concise description of the verified central
+finding or perspective. Use at most 50 words and at most 450 characters
+including spaces. Avoid repeating the title or detailed methods.
+
+\medskip
+\noindent\textbf{Keywords:} Keyword A; Keyword B; Keyword C.
+% Replace keyword slots as described near the abstract.
+\end{document}

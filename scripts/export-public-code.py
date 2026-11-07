@@ -5,12 +5,13 @@ from __future__ import annotations
 
 import argparse
 import collections
+from contextlib import contextmanager
 import ctypes
 import errno
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import stat
 import sys
@@ -35,6 +36,7 @@ GENERATED_SUFFIXES = frozenset({
 })
 METADATA_NAMES = frozenset({".git", ".hg", ".svn"})
 MAX_TEXT_BYTES = 5 * 1024 * 1024
+PUBLIC_FILE_LIST = "scripts/public-export-files.txt"
 
 # Match concrete paths and credentials, not their regex definitions in this file.
 PRIVATE_PATTERNS = (
@@ -86,6 +88,14 @@ class Inventory:
     exclusions: collections.Counter
 
 
+@dataclass(frozen=True)
+class ProtectedFile:
+    # Local paths and hashes are deliberately absent from public records.
+    path: Path
+    sha256: str
+    signature: tuple[int, ...]
+
+
 def _signature(info):
     return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns, stat.S_IMODE(info.st_mode))
 
@@ -129,17 +139,120 @@ def _privacy_rules(text: str, *, upstream_attribution: bool = False):
     return sorted(rules)
 
 
-def inventory(source: Path) -> Inventory:
+def _read_protected(path: Path) -> ProtectedFile:
+    """Hash a private regular file without following any symbolic links."""
+    path = path.absolute()
+    descriptors = []
+    try:
+        current = os.open(path.anchor, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        descriptors.append(current)
+        for part in path.parts[1:-1]:
+            current = os.open(part, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+                              | getattr(os, "O_NOFOLLOW", 0), dir_fd=current)
+            descriptors.append(current)
+        handle = os.open(path.name, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                         | getattr(os, "O_NONBLOCK", 0), dir_fd=current)
+        descriptors.append(handle)
+        before = os.fstat(handle)
+        if not stat.S_ISREG(before.st_mode):
+            raise ExportError("protected-file-not-regular")
+        checksum = hashlib.sha256()
+        total = 0
+        with os.fdopen(os.dup(handle), "rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                checksum.update(chunk)
+                total += len(chunk)
+        after = os.fstat(handle)
+        if _signature(before) != _signature(after) or total != before.st_size:
+            raise ExportError("protected-file-changed")
+        return ProtectedFile(path, checksum.hexdigest(), _signature(after))
+    except (OSError, ValueError):
+        # Never include a private path, file name, contents, or hash in errors.
+        raise ExportError("protected-file-unsafe-or-unreadable") from None
+    finally:
+        for descriptor in reversed(descriptors):
+            os.close(descriptor)
+
+
+def _protected_inventory(paths):
+    return tuple(_read_protected(Path(path)) for path in paths)
+
+
+def _verify_protected(protected):
+    for entry in protected:
+        if _read_protected(entry.path) != entry:
+            raise ExportError("protected-file-changed")
+
+
+def _public_paths(source: Path):
+    try:
+        data, info = _read_regular(source, PUBLIC_FILE_LIST)
+    except ExportError:
+        raise ExportError(f"{PUBLIC_FILE_LIST}: unsafe-or-unreadable-file-list") from None
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        raise ExportError(f"{PUBLIC_FILE_LIST}: invalid-file-list-encoding") from None
+    paths = set()
+    for number, row in enumerate(text.splitlines(), 1):
+        if not row.strip() or row.startswith("#"):
+            continue
+        path = PurePosixPath(row)
+        if (row != row.strip() or path.is_absolute() or path.as_posix() != row
+                or any(part in (".", "..") for part in path.parts)
+                or any(char in row for char in "\\:*?[]{}")
+                or any(ord(char) < 32 for char in row)
+                or not (row in ROOT_FILES or row == "projects/.gitkeep"
+                        or (len(path.parts) > 1 and path.parts[0] in SOURCE_DIRS))):
+            raise ExportError(f"{PUBLIC_FILE_LIST}:{number}: invalid-public-file-path")
+        if row in paths:
+            raise ExportError(f"{PUBLIC_FILE_LIST}:{number}: duplicate-public-file-path")
+        paths.add(row)
+    if PUBLIC_FILE_LIST not in paths:
+        raise ExportError(f"{PUBLIC_FILE_LIST}: file-list-must-include-itself")
+    return paths, hashlib.sha256(data).hexdigest(), _signature(info)
+
+
+@contextmanager
+def _checked_directory(name, relative, *, parent_fd=None, expected=None):
+    """Keep enumeration anchored to the checked directory, never its replacement."""
+    descriptor = None
+    try:
+        if expected is None:
+            expected = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        descriptor = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                             dir_fd=parent_fd)
+        if _signature(os.fstat(descriptor)) != _signature(expected):
+            raise ExportError(f"{relative}: source-changed")
+        yield descriptor
+        if (_signature(os.fstat(descriptor)) != _signature(expected)
+                or _signature(os.stat(name, dir_fd=parent_fd, follow_symlinks=False))
+                != _signature(expected)):
+            raise ExportError(f"{relative}: source-changed")
+    except OSError as exc:
+        raise ExportError(f"{relative}: unsafe-or-unreadable-directory ({exc.errno})") from None
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
+def _directory_names(descriptor, relative, expected):
+    before = _signature(expected)
+    if _signature(os.fstat(descriptor)) != before:
+        raise ExportError(f"{relative}: source-changed")
+    names = sorted(os.listdir(descriptor))
+    if _signature(os.fstat(descriptor)) != before:
+        raise ExportError(f"{relative}: source-changed")
+    return names
+
+
+def _inventory(source: Path, protected_hashes) -> Inventory:
     entries = []
     exclusions = collections.Counter()
     findings = []
 
-    def inspect(path: Path):
-        relative = path.relative_to(source).as_posix()
-        try:
-            info = path.lstat()
-        except OSError as exc:
-            raise ExportError(f"{relative}: unreadable-source ({exc.errno})") from None
+    def inspect(parent_fd, name, relative, info):
+        path = PurePosixPath(relative)
         if stat.S_ISLNK(info.st_mode):
             findings.append(f"{relative}: symlink")
             return
@@ -153,12 +266,14 @@ def inventory(source: Path) -> Inventory:
             if path.name.startswith("."):
                 findings.append(f"{relative}: unrecognized-hidden-directory")
                 return
-            try:
-                children = sorted(path.iterdir(), key=lambda child: child.name)
-            except OSError as exc:
-                raise ExportError(f"{relative}: unreadable-directory ({exc.errno})") from None
-            for child in children:
-                inspect(child)
+            with _checked_directory(name, relative, parent_fd=parent_fd, expected=info) as descriptor:
+                for child in _directory_names(descriptor, relative, info):
+                    child_relative = f"{relative}/{child}"
+                    try:
+                        child_info = os.stat(child, dir_fd=descriptor, follow_symlinks=False)
+                    except OSError as exc:
+                        raise ExportError(f"{child_relative}: unreadable-source ({exc.errno})") from None
+                    inspect(descriptor, child, child_relative, child_info)
             return
         if not stat.S_ISREG(info.st_mode):
             findings.append(f"{relative}: non-regular-file")
@@ -167,6 +282,9 @@ def inventory(source: Path) -> Inventory:
                 or path.name.endswith((".run.xml", ".synctex.gz"))):
             exclusions["generated-files"] += 1
             return
+        if relative not in public_paths:
+            findings.append(f"{relative}: unreviewed-public-path")
+            return
         if path.name not in ROOT_FILES | TEXT_NAMES and path.suffix.lower() not in TEXT_SUFFIXES:
             findings.append(f"{relative}: unrecognized-file-type")
             return
@@ -174,6 +292,12 @@ def inventory(source: Path) -> Inventory:
             findings.append(f"{relative}: unrecognized-hidden-file")
             return
         data, opened = _read_regular(source, relative)
+        digest = hashlib.sha256(data).hexdigest()
+        if digest in protected_hashes:
+            findings.append(f"{relative}: protected-content-match")
+            return
+        if relative == PUBLIC_FILE_LIST and (digest != list_hash or _signature(opened) != list_signature):
+            raise ExportError(f"{PUBLIC_FILE_LIST}: source-changed")
         try:
             text = data.decode("utf-8")
         except UnicodeDecodeError:
@@ -182,7 +306,6 @@ def inventory(source: Path) -> Inventory:
         if any(ord(char) < 32 and char not in "\t\r\n\f" for char in text):
             findings.append(f"{relative}: binary-control-characters")
             return
-        digest = hashlib.sha256(data).hexdigest()
         approved_notice = UPSTREAM_NOTICE_SHA256.get(relative)
         if approved_notice and digest != approved_notice:
             findings.append(f"{relative}: upstream-notice-changed")
@@ -192,35 +315,58 @@ def inventory(source: Path) -> Inventory:
         entries.append(Entry(relative, len(data), digest,
                              0o755 if opened.st_mode & 0o111 else 0o644, _signature(opened)))
 
-    if not source.is_dir():
-        raise ExportError("Source must be an existing directory.")
-    for path in sorted(source.iterdir(), key=lambda item: item.name):
-        if path.name in ROOT_FILES or path.name in SOURCE_DIRS:
-            if path.name in ROOT_FILES and path.is_dir() and not path.is_symlink():
-                findings.append(f"{path.name}: expected-root-file")
-            elif path.name in SOURCE_DIRS and not path.is_dir() and not path.is_symlink():
-                findings.append(f"{path.name}: expected-source-directory")
-            else:
-                inspect(path)
-        elif path.name == "projects":
-            if path.is_symlink():
+    with _checked_directory(source, ".") as root_fd:
+        root_info = os.fstat(root_fd)
+        public_paths, list_hash, list_signature = _public_paths(source)
+        for name in _directory_names(root_fd, ".", root_info):
+            if name not in ROOT_FILES | SOURCE_DIRS | {"projects"}:
+                # Do not stat or traverse ignored or unrecognized root entries.
+                exclusions["outside-allowlist-roots"] += 1
+                continue
+            try:
+                info = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+            except OSError as exc:
+                raise ExportError(f"{name}: unreadable-source ({exc.errno})") from None
+            is_directory = stat.S_ISDIR(info.st_mode)
+            is_link = stat.S_ISLNK(info.st_mode)
+            if name in ROOT_FILES or name in SOURCE_DIRS:
+                if name in ROOT_FILES and is_directory:
+                    findings.append(f"{name}: expected-root-file")
+                elif name in SOURCE_DIRS and not is_directory and not is_link:
+                    findings.append(f"{name}: expected-source-directory")
+                else:
+                    inspect(root_fd, name, name, info)
+            elif is_link:
                 findings.append("projects: symlink")
-            elif path.is_dir():
-                placeholder = path / ".gitkeep"
-                if placeholder.exists() or placeholder.is_symlink():
-                    if placeholder.is_dir():
-                        findings.append("projects/.gitkeep: expected-placeholder-file")
-                    else:
-                        inspect(placeholder)
+            elif is_directory:
+                with _checked_directory(name, "projects", parent_fd=root_fd, expected=info) as projects_fd:
+                    try:
+                        placeholder_info = os.stat(".gitkeep", dir_fd=projects_fd, follow_symlinks=False)
+                    except FileNotFoundError:
+                        placeholder_info = None
+                    if placeholder_info is not None:
+                        if stat.S_ISDIR(placeholder_info.st_mode):
+                            findings.append("projects/.gitkeep: expected-placeholder-file")
+                        else:
+                            inspect(projects_fd, ".gitkeep", "projects/.gitkeep", placeholder_info)
                 exclusions["local-data-roots"] += 1
-        else:
-            # Deliberately do not traverse ignored or unrecognized root entries.
-            exclusions["outside-allowlist-roots"] += 1
+    missing = public_paths - {entry.path for entry in entries}
+    findings.extend(f"{path}: reviewed-file-missing-or-rejected" for path in sorted(missing))
+    data, info = _read_regular(source, PUBLIC_FILE_LIST)
+    if hashlib.sha256(data).hexdigest() != list_hash or _signature(info) != list_signature:
+        raise ExportError(f"{PUBLIC_FILE_LIST}: source-changed")
     if findings:
         raise ExportError("Audit failed:\n" + "\n".join(findings))
     if not entries:
         raise ExportError("No allowlisted source files found.")
     return Inventory(sorted(entries, key=lambda entry: entry.path), exclusions)
+
+
+def inventory(source: Path, protect_files=()) -> Inventory:
+    protected = _protected_inventory(protect_files)
+    result = _inventory(source, {entry.sha256 for entry in protected})
+    _verify_protected(protected)
+    return result
 
 
 def _inside(path: Path, parent: Path):
@@ -258,7 +404,7 @@ def _publish_directory(staged: Path, destination: Path):
         raise ExportError(f"Atomic publication failed ({code}).")
 
 
-def export(source: Path, destination: Path, manifest: Path | None = None):
+def export(source: Path, destination: Path, manifest: Path | None = None, protect_files=()):
     source = source.resolve()
     destination = destination.absolute()
     if destination.exists() or destination.is_symlink():
@@ -281,7 +427,10 @@ def export(source: Path, destination: Path, manifest: Path | None = None):
             raise ExportError("Manifest parent must already exist.")
         if _inside(manifest, destination) or _in_export_boundary(manifest, source):
             raise ExportError("Manifest must be outside the snapshot and exported source boundaries.")
-    initial = inventory(source)
+    protected = _protected_inventory(protect_files)
+    protected_hashes = {entry.sha256 for entry in protected}
+    initial = _inventory(source, protected_hashes)
+    _verify_protected(protected)
     with tempfile.TemporaryDirectory(prefix=".prism-export-", dir=destination.parent) as temporary:
         staged = Path(temporary) / "snapshot"
         staged.mkdir()
@@ -295,9 +444,10 @@ def export(source: Path, destination: Path, manifest: Path | None = None):
             target.chmod(entry.mode)
             if target.stat().st_size != entry.size or hashlib.sha256(target.read_bytes()).hexdigest() != entry.sha256:
                 raise ExportError(f"{entry.path}: copy-verification-failed")
-        final = inventory(source)
+        final = _inventory(source, protected_hashes)
         if initial.entries != final.entries:
             raise ExportError("Source changed during export; no snapshot was published.")
+        _verify_protected(protected)
         manifest_data = {
             "format": 1,
             "file_count": len(initial.entries),
@@ -319,6 +469,7 @@ def export(source: Path, destination: Path, manifest: Path | None = None):
                 except OSError as exc:
                     raise ExportError(f"Manifest publication failed ({exc.errno}); no snapshot was published.") from None
         try:
+            _verify_protected(protected)
             _publish_directory(staged, destination)
         except Exception:
             if manifest is not None and manifest_identity is not None:
@@ -338,12 +489,15 @@ def main(argv=None):
     action.add_argument("--check", action="store_true", help="Audit only; write no files.")
     action.add_argument("--out", type=Path, help="New snapshot directory; its parent must exist. Existing directories are never replaced.")
     parser.add_argument("--manifest", type=Path, help="Optional new local JSON manifest outside the snapshot; contains relative paths, sizes, and SHA-256 hashes.")
+    parser.add_argument("--protect-file", type=Path, action="append", default=[],
+                        help="Local private regular file whose complete contents must not be exported; repeatable. Paths and hashes are not recorded.")
     arguments = parser.parse_args(argv)
     if arguments.check and arguments.manifest is not None:
         parser.error("--manifest requires --out")
     try:
         source = arguments.source.resolve()
-        result = inventory(source) if arguments.check else export(source, arguments.out, arguments.manifest)
+        result = (inventory(source, arguments.protect_file) if arguments.check
+                  else export(source, arguments.out, arguments.manifest, arguments.protect_file))
     except (ExportError, OSError) as exc:
         message = str(exc) if isinstance(exc, ExportError) else f"Filesystem operation failed ({exc.errno})."
         print(message, file=sys.stderr)

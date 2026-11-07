@@ -1,0 +1,27 @@
+% Original Prism graphical-abstract slot; compile this document separately.
+% Replace the synthetic workflow with an original, study-specific diagram.
+% The output page is 127 x 50.8 mm (5:2), with no caption or page number.
+\documentclass[12pt]{article}
+\usepackage[paperwidth=127mm,paperheight=50.8mm,margin=3mm]{geometry}
+\usepackage{xcolor}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\fboxsep}{2mm}
+\setlength{\fboxrule}{0.5pt}
+
+\begin{document}
+\centering\sffamily
+\vspace*{1mm}
+Resource or study name\par
+\vspace{3mm}
+\fcolorbox{blue!60!black}{blue!8}{%
+  \parbox[c][16mm][c]{28mm}{\centering Input\\or data}}%
+\hspace{1mm}$\longrightarrow$\hspace{1mm}%
+\fcolorbox{teal!60!black}{teal!8}{%
+  \parbox[c][16mm][c]{28mm}{\centering Method\\or process}}%
+\hspace{1mm}$\longrightarrow$\hspace{1mm}%
+\fcolorbox{orange!65!black}{orange!10}{%
+  \parbox[c][16mm][c]{28mm}{\centering Result\\or resource}}
+\par\vspace{3mm}
+Synthetic layout: replace before submission.
+\end{document}
