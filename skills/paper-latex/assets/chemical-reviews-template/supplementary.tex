@@ -1,0 +1,118 @@
+% Original Prism independent Review supplement, provided under MIT.
+% Compile with --main supplementary.tex --no-build-script.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable}
+\usepackage[articletitle=true,doi=true,super=true,biblabel=brackets,
+  maxauthors=10,etalmode=truncate]{achemso}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\sisetup{uncertainty-mode=separate}
+\setcounter{tocdepth}{2}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\title{Supporting Information: Review manuscript title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent Replace this overview with the actual contents of the supplement.
+This independent document provides synthetic formatting demonstrations only;
+it does not report a literature search, a real evidence inventory or findings.
+
+\tableofcontents
+\clearpage
+
+\section{Extended comparison notes}\label{sec:si-comparison}
+Provide additional comparisons that support the review, together with their
+verified sources, assumptions and limitations. Do not duplicate figures or
+tables intended for the main article. Clearly distinguish unavailable
+information from negative or zero results.
+
+\section{Supplementary displays}\label{sec:si-displays}
+Figure~\ref{fig:si-overview}, Table~\ref{tab:si-comparison} and
+Equation~\eqref{eq:si-comparison} illustrate independent S numbering.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][40mm][c]{0.82\linewidth}{\centering
+Supporting comparison slot\\[8pt]
+Replace with an original figure}}
+\caption{\textbf{Synthetic supporting layout.} Replace this slot and caption
+with an actual supplementary display and its explanatory information.}
+\label{fig:si-overview}
+\end{figure}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic values illustrating a supporting comparison.}
+\label{tab:si-comparison}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Example & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All numbers are invented for typesetting. Replace them with verified
+information and define the actual units, sources and uncertainty.
+\end{table}
+
+\begin{equation}
+\begin{split}
+ q_{\mathrm{A}} &= \sum_{i=1}^{n} v_i y_i,\\
+ \Delta q &= q_{\mathrm{A}}-q_{\mathrm{B}}.
+\end{split}\label{eq:si-comparison}
+\end{equation}
+This equation demonstrates line breaking only and makes no scientific claim.
+
+\clearpage
+\section{Source documentation}\label{sec:si-sources}
+Replace the instructional inventory below with documented information if it
+is relevant. Do not describe a search, screening decision, extraction or
+analysis unless it actually occurred. A longer inventory can use repeated
+headings as demonstrated in Table~\ref{tab:si-documentation}.
+
+{\small
+\begin{longtable}{@{}p{0.15\linewidth}p{0.27\linewidth}p{0.48\linewidth}@{}}
+\caption{Instructional source-documentation layout.}
+\label{tab:si-documentation}\\
+\toprule Item & Topic & Instruction\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Instruction\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Example A & Citation & Record complete and verified bibliographic details.\\
+Example B & Scope & Describe the subject and period actually covered.\\
+Example C & Context & Explain the context of a cited comparison.\\
+Example D & Conditions & Preserve conditions needed to interpret a result.\\
+Example E & Units & Retain the reported measurement units.\\
+Example F & Uncertainty & State the meaning of reported uncertainty.\\
+Example G & Missing entries & Mark unavailable information explicitly.\\
+Example H & Limitations & Attribute limitations to the correct source.\\
+Example I & Precision & Preserve the precision justified by the source.\\
+Example J & Interpretation & Distinguish observation from interpretation.\\
+Example K & Graphics & Retain editable sources and original panel labels.\\
+Example L & Permissions & Record attribution and permissions where needed.\\
+\end{longtable}}
+
+This public citation tests the independent bibliography only and does not
+support the synthetic displays\cite{wilkinson2016fair}.
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\bibliography{references}
+\end{document}

@@ -1,0 +1,183 @@
+% Original Prism Review starter for Chemical Reviews, provided under MIT.
+% This is a writing draft, not an official Chemical Reviews class or a
+% reproduction of the published journal. The installed TeX distribution
+% provides achemso and its BibTeX style; no publisher source is copied here.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx}
+% Package mode does not apply journal-specific class configuration. Set the
+% review's bibliography requirements explicitly; achemso supplies natbib.
+\usepackage[articletitle=true,doi=true,super=true,biblabel=brackets,
+  maxauthors=10,etalmode=truncate]{achemso}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\sisetup{uncertainty-mode=separate}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\setlength{\emergencystretch}{2em}
+
+\title{Review manuscript title}
+\author{First Author\textsuperscript{*} and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small \textsuperscript{*}Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Replace this paragraph with a self-contained, single-paragraph English
+abstract of 100--200 words. State the subject, scope and objectives of the
+review, and identify the major topics it covers. Describe only the content
+actually developed in the manuscript. This starter provides a structure for
+writing and synthetic demonstrations of figures, tables, equations and
+references; it does not summarize a literature search or make a scientific
+claim. Establish the review's boundaries and balance before drafting its
+summary. Remove these instructions and replace every demonstration before
+submission. Follow the current journal guidance and the scope approved by
+the editors. An invitation or an approved proposal is required before a
+Chemical Reviews manuscript is submitted.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+\section{Introduction}\label{sec:introduction}
+Define the purpose, intended readership, scope and limitations of the review,
+including the years of literature covered. Explain its relation to earlier
+reviews and define any special terminology. Do not claim a literature search,
+screening process or coverage period that the authors have not established.
+This public citation demonstrates reference handling only; retain it only if
+relevant to the actual review\cite{wilkinson2016fair}.
+
+\section{Conceptual foundations}\label{sec:foundations}
+\subsection{Terminology and organizing principles}\label{sec:terminology}
+Introduce the concepts needed to understand the topic. Replace these example
+headings with the review's own logical organization. Explain important
+distinctions without assuming that readers already know the specialized field.
+
+\subsection{Scope of the evidence}\label{sec:evidence}
+Describe the kinds of published evidence considered and the boundaries of the
+comparison. Identify missing or incompatible information accurately; do not
+replace missing observations with invented values.
+
+\section{Thematic developments}\label{sec:themes}
+\subsection{First theme}\label{sec:first-theme}
+Discuss the significant contributions relevant to this theme, including work
+from different groups. Distinguish what the cited studies demonstrate from
+the review authors' interpretation.
+
+\subsection{Second theme}\label{sec:second-theme}
+Organize this section around a useful scientific question or conceptual
+connection. Compare the conditions, assumptions and limitations of the cited
+work rather than presenting an uncritical sequence of paper summaries.
+
+\subsubsection{A narrower comparison}\label{sec:narrower-comparison}
+Use a third-level heading only when it helps readers follow a substantial
+discussion. The automatic contents above lists the first two heading levels;
+adjust its depth deliberately if a longer review requires more detail.
+
+\section{Critical comparison}\label{sec:comparison}
+Synthesize the published evidence and explain agreements, disagreements and
+the limits of comparisons. Figure~\ref{fig:comparison} is a two-panel layout
+slot. Its boxes and Table~\ref{tab:comparison} contain no scientific finding.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][32mm][c]{0.90\linewidth}{\centering
+Conceptual comparison\\[5pt]Replace with an original figure}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][32mm][c]{0.90\linewidth}{\centering
+Relationship or framework\\[5pt]Keep panel labels readable}}
+\end{minipage}
+\caption{\textbf{Synthetic comparison layout.} (a) First conceptual slot.
+(b) Related conceptual slot. Replace both panels and this description with
+the actual display. Preserve the meaning, labels and units of original
+graphics; document attribution and permission when reusing published work.}
+\label{fig:comparison}
+\end{figure}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic values illustrating a comparison table.}
+\label{tab:comparison}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=3.0] S[table-format=1.3(3)] S[table-format=1.3]@{}}
+\toprule
+Example & {Count} & {Estimate $\pm$ SD} & {Score}\\
+\midrule
+Example A & 120 & 0.385 +- 0.006 & 0.759\\
+Example B & 98 & 0.608 +- 0.051 & 0.206\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented for typesetting. Replace them with verified
+information, identify its sources, and define units and uncertainty.
+\end{table}
+
+Equation~\eqref{eq:comparison} demonstrates one numbered multiline expression
+only. Adopt an equation only when it is relevant and its symbols, assumptions
+and source can be explained accurately.
+\begin{equation}
+\begin{split}
+ s_{\mathrm{A}} &= \sum_{i=1}^{n} w_i x_i,\\
+ \Delta s &= s_{\mathrm{A}}-s_{\mathrm{B}}.
+\end{split}\label{eq:comparison}
+\end{equation}
+
+\section{Challenges and open questions}\label{sec:challenges}
+Identify unresolved issues and limitations supported by the literature.
+Separate missing evidence, disagreement between studies and questions that
+remain speculative. Discuss relevant risks accurately where applicable.
+
+\section{Conclusions and outlook}\label{sec:outlook}
+Explain the insights justified by the review and the remaining challenges.
+State future directions as questions or proposals rather than completed
+experiments or established findings.
+
+\section*{Supporting Information}
+% Supply a brief nonsentence contents description, including the file type;
+% keep this paragraph before Acknowledgments and References. Remove if absent.
+Replace with the actual contents and file type of the supplied material.
+The included independent \texttt{supplementary.tex} demonstrates extended
+comparison notes and source documentation (PDF).
+
+\section*{Author Information}
+\noindent\textbf{Corresponding author:} replace with confirmed contact details.
+
+\subsection*{Author Biographies}
+\noindent\textbf{First Author.} Replace with this author's own short biography.
+Do not invent positions, qualifications or achievements.
+
+\medskip\noindent\textbf{Second Author.} Replace with this author's own short
+biography. Include a biography for every author of the actual review.
+
+\section*{Acknowledgments}
+Replace with confirmed acknowledgments and funding, or remove if inapplicable.
+\section*{Conflict of Interest}
+Replace with the authors' confirmed disclosure.
+\section*{Abbreviations}
+Replace with an accurate list of abbreviations used in the review, or remove
+this section if no list is needed.
+
+% Supply complete, verified English entries, Title Case article titles and
+% accurate CASSI journal abbreviations; the style does not create these fields.
+\bibliography{references}
+
+\clearpage
+\section*{For Table of Contents Only}
+% The outside of this placeholder, including padding and rule, is 5 x 5 cm.
+% Replace it with the authors' original graphic. The final submission may
+% require a separate image file; this starter does not package submission files.
+\begin{center}
+\fbox{\parbox[c][\dimexpr50mm-2\fboxsep-2\fboxrule\relax][c]
+  {\dimexpr50mm-2\fboxsep-2\fboxrule\relax}{\centering
+  \sffamily\fontsize{8}{10}\selectfont
+  TOC graphic placeholder\par\medskip
+  Replace with original artwork\par\medskip
+  5 cm $\times$ 5 cm}}
+\end{center}
+\end{document}

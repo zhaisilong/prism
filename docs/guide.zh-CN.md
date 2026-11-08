@@ -31,6 +31,7 @@ scripts/latex-templates.sh
 | `jcim` | Journal of Chemical Information and Modeling 研究论文 |
 | `jcheminformatics` | Journal of Cheminformatics 研究论文 |
 | `jacs` | Journal of the American Chemical Society 研究论文 |
+| `chemrev` | Chemical Reviews 常规综述 |
 | `bioinformatics` | Bioinformatics 研究论文 |
 | `nar` | NAR 研究论文、Database 或 Web Server 稿件 |
 | `angew` | Angew 研究论文、Communication、Review、Minireview |
@@ -52,6 +53,14 @@ scripts/latex-paper.sh --init projects/Papers/nar-web-server --template nar --ar
 ```
 
 NAR 初投提供完整 PDF，补充材料和图文摘要单独提供；修回需要可编辑源文件。Database 和 Web Server 均须先获得邀请；具体要求见[模板说明](templates.md#nar)。
+
+Chemical Reviews 常规综述示例：
+
+```bash
+scripts/latex-paper.sh --init projects/Papers/chemrev-review --template chemrev
+```
+
+投稿须先受邀或通过提案。模板提供目录、作者简介及末页 TOC 图占位，按实际内容替换；详见[模板说明](templates.md#chemical-reviews)。
 
 Angew 综述示例：
 

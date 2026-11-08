@@ -147,6 +147,12 @@ TEMPLATES: dict[str, TemplateRecord] = {
         "directory": "jacs-template", "engine": "pdflatex",
         "description": "Journal of the American Chemical Society research article (ACS); bilingual / English",
     },
+    "chemrev": {
+        "id": "journal/chemical-reviews", "kind": "journal", "venue": "Chemical Reviews",
+        "publisher": "ACS", "article_type": "review", "backend": "acs",
+        "directory": "chemical-reviews-template", "engine": "pdflatex",
+        "description": "Chemical Reviews regular Review; Prism-maintained ACS draft; bilingual / English",
+    },
     "bioinformatics": {
         "id": "journal/bioinformatics", "kind": "journal", "venue": "Bioinformatics",
         "publisher": "Oxford University Press", "article_type": "original", "backend": "oup-authoryear",

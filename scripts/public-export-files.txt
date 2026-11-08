@@ -48,6 +48,9 @@ skills/paper-latex/assets/bib-template/supplementary.tex
 skills/paper-latex/assets/bioinformatics-template/main.tex
 skills/paper-latex/assets/bioinformatics-template/references.bib
 skills/paper-latex/assets/bioinformatics-template/supplementary.tex
+skills/paper-latex/assets/chemical-reviews-template/main.tex
+skills/paper-latex/assets/chemical-reviews-template/references.bib
+skills/paper-latex/assets/chemical-reviews-template/supplementary.tex
 skills/paper-latex/assets/ddt-template/highlights.txt
 skills/paper-latex/assets/ddt-template/main.tex
 skills/paper-latex/assets/ddt-template/references.bib
@@ -137,6 +140,7 @@ tests/test_angew_bibliography.py
 tests/test_bilingual.py
 tests/test_build_scripts.py
 tests/test_catalog.py
+tests/test_chemical_reviews.py
 tests/test_nar.py
 tests/test_nar_bibliography.py
 tests/test_public_export.py

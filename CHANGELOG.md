@@ -4,6 +4,23 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.11.08
+
+### Added
+
+- Added an offline Chemical Reviews regular Review starter using the shared ACS build profile, with a numbered contents page, critical-review structure, author-biography placeholders, a last-page TOC graphic and independent supporting information.
+- Configured complete titles, citation-order superscripts, ten-author truncation and DOI links through the installed ACS bibliography package without forking its class or style.
+
+### Maintenance
+
+- Recorded the previously audited maintenance code as a local baseline using the exact public-file list; kept research data and the independent public repository unchanged.
+
+### Validation
+
+- Passed all 172 regression tests without skips, including six Chemical Reviews tests for bilingual and English initialization, strict builds, citation order, ten-author boundaries, DOI links and failed-build PDF preservation.
+- Strictly compiled both language modes of the main text, independent supplement and shared examples; visually checked contents pages, figures, tables, biographies, references, the last-page TOC graphic and S-prefixed supplementary pagination.
+- Audited all 149 public files, checked wrapper help, versions and dependencies, and preserved clean source directories. Kept all commits local, with no push, global skill change or update to the independent public checkout.
+
 ## 2026.11.07.1
 
 ### Changed

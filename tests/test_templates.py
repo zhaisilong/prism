@@ -51,7 +51,7 @@ class TemplateTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.asset_dir = self.root / "assets"
-        for name in ("paper-template", "nature-template", "nature-official-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template", "jcheminformatics-template"):
+        for name in ("paper-template", "nature-template", "nature-official-template", "nature-communications-template", "bib-template", "ddt-template", "jcim-template", "science-advances-template", "jacs-template", "bioinformatics-template", "jcheminformatics-template", "chemical-reviews-template"):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
