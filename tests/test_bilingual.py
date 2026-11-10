@@ -17,11 +17,11 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "lib"))
 from prism_latex import templates
+from prism_test_support import pdf_text, require_tex, intermediates
 
 PAPER = ROOT / "scripts" / "latex-paper.sh"
 NOTE = ROOT / "scripts" / "latex-note.sh"
 REVIEW = ROOT / "scripts" / "latex-review.sh"
-INTERMEDIATES = {".aux", ".bbl", ".blg", ".fdb_latexmk", ".fls", ".log", ".out", ".spl", ".toc"}
 
 
 class BilingualTests(unittest.TestCase):
@@ -47,25 +47,14 @@ class BilingualTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def assert_clean(self, project):
-        self.assertEqual(
-            [str(path.relative_to(project)) for path in project.rglob("*")
-             if path.is_file() and path.suffix.lower() in INTERMEDIATES],
-            [],
-        )
+        self.assertEqual(intermediates(project), [])
 
     def require_real_tex(self):
-        for command in ("xelatex", "pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
-            if not shutil.which(command):
-                self.skipTest(f"Real bilingual tests require {command}")
-        for resource in ("xeCJK.sty", "FandolSong-Regular.otf", "FandolHei-Regular.otf",
-                         "achemso.sty", "elsarticle.cls"):
-            probe = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
-            if probe.returncode or not probe.stdout.strip():
-                self.skipTest(f"Real bilingual tests require {resource}")
+        require_tex(self, ("xeCJK.sty", "FandolSong-Regular.otf", "FandolHei-Regular.otf",
+                           "achemso.sty", "elsarticle.cls"))
 
     def text_of(self, pdf):
-        return subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True,
-                              text=True, check=True, timeout=30).stdout
+        return pdf_text(pdf)
 
     def test_all_defaults_are_offline_bilingual_and_support_aliases(self):
         with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("network")) as fetch:

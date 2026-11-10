@@ -9,7 +9,11 @@ Compile one note without changing its research claims or adding sources. This sk
 
 Markdown, TXT and lightweight TeX notes support mixed Chinese and English in titles and body text. Complete TeX documents keep their own preamble and font configuration.
 
-## Workflow
+## Select the task
+
+Use this workflow for one `.md`, `.txt` or `.tex` note. Preserve a complete TeX document's preamble and dates; lightweight TeX fragments use the note template. Route a manuscript project to `paper-latex` and an existing peer-review draft to `reviewer-latex`.
+
+## Execute
 
 1. Run the root wrapper from the Prism repository; from another directory, use its absolute path:
 
@@ -18,9 +22,11 @@ Markdown, TXT and lightweight TeX notes support mixed Chinese and English in tit
    ```
 
 2. Keep the source in place. Write the PDF beside it unless `--out` is supplied.
-3. After a successful wrapper build, retain and link the PDF and generated `prism-build.sh`. Show `cd "SOURCE_DIR" && ./prism-build.sh` to rebuild.
-4. Inspect warnings and render representative pages when layout matters. Use `--strict` for delivery checks.
-5. Use `--keep-work` only to diagnose a failed build.
+3. Use `--keep-work` only to diagnose a failed build and report its retained path. An explicitly supplied working directory belongs to the caller and is retained.
+
+## Verify and deliver
+
+Inspect warnings and render representative pages when layout matters; use `--strict` for delivery checks. Link the PDF. Recommend `cd "SOURCE_DIR" && ./prism-build.sh` only if it was generated or verified for this output. When no script was created, give the actual `scripts/latex-note.sh SOURCE` command with its output, engine and date options.
 
 ## Inputs and options
 
@@ -44,4 +50,4 @@ When creating or editing TeX and the desktop editor is available, follow the hos
 - Do not parse DOCX, PDF, webpages, arbitrary Pandoc extensions, complex HTML, or nested tables.
 - Route directories containing manuscript sections, figures, and bibliography files to `paper-latex`.
 
-The build occurs in a temporary directory and copies back the final PDF plus the project-local reproducible build script.
+Automatic builds use a temporary directory and publish the final PDF, with an optional project-local rebuild script. Existing PDFs survive a failed compile.

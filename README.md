@@ -6,7 +6,9 @@ Prism 是面向 Codex 和命令行的本地 LaTeX 工作流：选择模板、写
 
 ## 项目特色
 
-- **13 套离线模板**：覆盖化学、生物信息学与综合期刊，按出版社分组查询；NAR、Angew 可进一步选择稿型，模板资源随仓库提供。
+<!-- prism:template-count:start -->
+- **16 套离线模板**：覆盖化学、生物信息学与综合期刊，按出版社分组查询；可选稿型由目录统一列出，模板资源随仓库提供。
+<!-- prism:template-count:end -->
 - **先用中文写，再整理英文稿**：以英文期刊结构和版式为基础，默认支持中文及中英混排，保留英文与数学排版；系统不自动翻译。
 - **让图表适应目标模板**：辅助检查并纠正迁移遗留的字体、图注、表格宽度与图片尺寸，保留科研内容、数值和面板标识；图内字体需要可编辑绘图源配合调整。
 - **构建干净、方便重建**：统一命令在临时目录编译，提供严格检查和重建入口；编译失败保留已有 PDF。
@@ -51,19 +53,27 @@ scripts/latex-paper.sh projects/Papers/my-paper
 
 ## 模板一览
 
-| 出版社 / 类别 | 模板短名称 | 适用方向 |
-| --- | --- | --- |
-| Springer Nature | `nature`、`nature-communications`、`jcheminformatics` | Nature / NMI、Nature Communications、Journal of Cheminformatics 初稿 |
-| ACS | `jacs`、`jcim`、`chemrev` | 化学与化学信息学研究论文；Chemical Reviews 常规综述 |
-| Oxford University Press | `bib`、`bioinformatics`、`nar` | 生物信息学；NAR 研究、Database、Web Server 稿件 |
-| Wiley-VCH | `angew` | Research、Communication、Review、Minireview |
-| Elsevier | `ddt` | Drug Discovery Today 单栏综述 |
-| AAAS | `science-advances` | Science Advances 研究论文及合并补充材料 |
-| 通用 | `prism` | 通用科研草稿 |
+<!-- prism:template-catalog:start -->
+| 出版社 / 类别 | 模板短名称 |
+| --- | --- |
+| AAAS | [`science-advances`](docs/templates/science-advances.md) |
+| ACS | [`chemrev`](docs/templates/chemrev.md)、[`jcim`](docs/templates/jcim.md)、[`jmc`](docs/templates/jmc.md)、[`jacs`](docs/templates/jacs.md) |
+| Elsevier | [`ddt`](docs/templates/ddt.md)、[`ejmc`](docs/templates/ejmc.md) |
+| Oxford University Press | [`bioinformatics`](docs/templates/bioinformatics.md)、[`bib`](docs/templates/bib.md)、[`nar`](docs/templates/nar.md) |
+| Springer Nature | [`jcheminformatics`](docs/templates/jcheminformatics.md)、[`nature`](docs/templates/nature.md)、[`nature-communications`](docs/templates/nature-communications.md) |
+| Wiley-VCH | [`advanced-science`](docs/templates/advanced-science.md)、[`angew`](docs/templates/angew.md) |
+| 通用 | [`prism`](docs/templates/prism.md) |
+<!-- prism:template-catalog:end -->
 
 将创建命令中的 `nature` 换成相应短名称即可。多稿型模板可加 `--article-type`，例如 `--template angew --article-type review`。完整名称、规范 ID 和默认稿型以 `scripts/latex-templates.sh` 输出为准；原有 `scripts/latex-paper.sh --list-templates` 保留平铺输出。
 
+想看一个模板的引擎、文档和来源，运行 `scripts/latex-templates.sh --show advanced-science`；维护者可用 `--validate` 离线检查全部模板资源。详细规则只需阅读所选模板的说明。
+
+JMC 使用 `--template jmc`，综述型稿件选 `--article-type perspective`；EJMC 使用 `--template ejmc`，综述选 `--article-type review`。两刊均默认研究论文，详见 [JMC](docs/templates/jmc.md) 与 [EJMC](docs/templates/ejmc.md) 说明。
+
 Chemical Reviews 常规综述可直接用 `--template chemrev` 创建；提案要求、目录和 TOC 图说明见[模板说明](docs/templates.md#chemical-reviews)。
+
+Advanced Science 使用 `--template advanced-science`，默认研究论文；可加 `--article-type review` 或 `--article-type perspective`，见[三类模板说明](docs/templates.md#advanced-science)。它属于 Wiley-VCH；表中的 `science-advances` 属于 AAAS。
 
 新建项目默认支持中英混排，期刊模板使用 XeLaTeX；期刊项目创建时加 `--language english` 可选择英文 pdfLaTeX 模式，不执行翻译。已有项目保留原编译模式，参考文献目前使用英文条目。Nature 默认采用 Prism 维护的 `article` 初稿；各模板的官方来源、衍生关系和适用范围见[模板来源说明](docs/templates.md)。
 

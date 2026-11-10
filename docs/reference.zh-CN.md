@@ -100,14 +100,14 @@ review 支持中英文“总体意见”“主要问题”“次要问题”和�
 
 ## 7. 重建、排错和在 Codex 中使用
 
-主文成功构建后：
+主文成功构建并生成了对应的 `prism-build.sh` 后，可以运行：
 
 ```bash
 cd projects/Papers/my-paper
 ./prism-build.sh
 ```
 
-脚本记录输入、输出和有效参数，并在本地查找 Prism。仓库移动后可用 `PRISM_PROJECT_DIR` 指向新位置，或重新运行安装器；不要从全局 skill 寻找本项目的实现。
+脚本记录输入、输出和有效参数，并在本地查找 Prism。若使用了 `--no-build-script`，或同名的其他脚本被保留，直接重用实际 wrapper 命令，例如 `scripts/latex-paper.sh projects/Papers/my-paper --strict`；不要把保留的无关脚本当作当前输出的入口。仓库移动后可用 `PRISM_PROJECT_DIR` 指向新位置，或重新运行安装器；不要从全局 skill 寻找本项目的实现。
 
 | 遇到的问题 | 处理方式 |
 | --- | --- |

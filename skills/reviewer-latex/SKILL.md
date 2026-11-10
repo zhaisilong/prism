@@ -7,7 +7,11 @@ description: Format an existing academic peer-review draft from Markdown, TXT, D
 
 Format an existing review while preserving its scientific wording. This skill depends on the complete Prism repository and its shared implementation under `scripts/`.
 
-## Workflow
+## Select the task
+
+Format the supplied review; do not create a new scientific assessment. Accept `.md`, `.txt`, `.docx` or text-based `.pdf`. Read [template notes](references/template-notes.md) when mapping metadata and headings; they support Chinese, English and mixed-language labels. Separate author-facing comments from confidential editor material before rendering.
+
+## Execute
 
 1. Identify journal, manuscript ID, title, recommendation, Overall Comments, Major Concerns, Minor Concerns, and optional editor-only notes.
 2. Run the root wrapper from the Prism repository; from another directory, use its absolute path:
@@ -19,8 +23,12 @@ Format an existing review while preserving its scientific wording. This skill de
    ```
 
 3. Recognize Chinese and English section headings and metadata. Confirm confidential notes appear only in the `_editor_notes.pdf` output; if a confidential heading is ambiguous, clarify its intended audience before publishing anything.
-4. Retain and link the PDF outputs and generated `prism-build.sh` beside the input. Show `cd "INPUT_DIR" && ./prism-build.sh` to rebuild.
-5. Inspect warnings and rendered pages. Use `--strict` for delivery checks.
+
+## Verify and deliver
+
+Inspect warnings and representative rendered pages; use `--strict` for delivery checks. Verify confidential text is absent from the author-facing artifact and present only in the separately named editor artifact. Both PDFs must compile before publication; a failed output publication restores previous outputs.
+
+Link each output with its intended audience. Recommend `cd "INPUT_DIR" && ./prism-build.sh` only if the script was generated or verified for this report. Otherwise give the actual wrapper command with its metadata and output options. `--no-compile` delivers TeX files and creates no rebuild script.
 
 ## Inputs and behavior
 
@@ -45,4 +53,4 @@ When editing a TeX report in Codex desktop, open the saved source or local proje
 - Do not upload to submission systems, send messages, or decide anonymity policy.
 - Route manuscript projects to `paper-latex` and ordinary notes to `notes-latex`.
 
-The build occurs in a temporary directory and copies back final PDFs plus the project-local reproducible build script.
+PDF builds use a temporary directory and publish an explicit author/editor file list, with an optional project-local rebuild script. Use `--keep-work` only for failure diagnosis and report its retained path.

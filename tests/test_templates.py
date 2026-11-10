@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import replace
 import io
 import json
 import os
@@ -55,6 +56,10 @@ class TemplateTests(unittest.TestCase):
             asset = self.asset_dir / name
             asset.mkdir(parents=True)
             (asset / "main.tex").write_text(f"% {name}\n", encoding="utf-8")
+        for name in templates.TEMPLATES["prism"].required_assets:
+            path = self.asset_dir / "paper-template" / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("% synthetic Prism dependency\n")
         (self.asset_dir / "paper-template" / "examples.tex").write_text("% shared standalone examples\n")
         nar = self.asset_dir / "nar-template"
         (nar / "common").mkdir(parents=True)
@@ -71,6 +76,26 @@ class TemplateTests(unittest.TestCase):
             (angew / article_type).mkdir()
             (angew / article_type / "main.tex").write_text(f"% Angew {article_type}\n")
         (self.asset_dir / "prism-wiley-article.cls").write_text("% maintained Wiley fixture\n")
+        advanced = self.asset_dir / "advanced-science-template"
+        (advanced / "common").mkdir(parents=True)
+        for name in ("supplementary.tex", "references.bib", "NOTICE.md"):
+            (advanced / "common" / name).write_text(f"% Advanced Science fixture {name}\n")
+        for article_type in ("research", "review", "perspective"):
+            (advanced / article_type).mkdir()
+            (advanced / article_type / "main.tex").write_text(f"% Advanced Science {article_type}\n")
+        (self.asset_dir / "prism-wiley-numeric.bst").write_text("% shared Wiley numeric fixture\n")
+        for alias, kinds in (("jmc", ("research", "perspective")),
+                             ("ejmc", ("research", "review"))):
+            medicinal = self.asset_dir / (alias + "-template")
+            (medicinal / "common").mkdir(parents=True)
+            resources = ["supplementary.tex", "references.bib", "NOTICE.md"]
+            if alias == "ejmc":
+                resources.extend(("graphical_abstract.tex", "highlights.txt"))
+            for name in resources:
+                (medicinal / "common" / name).write_text(f"% {alias} synthetic fixture {name}\n")
+            for kind in kinds:
+                (medicinal / kind).mkdir()
+                (medicinal / kind / "main.tex").write_text(f"% {alias} {kind}\n")
         shutil.copytree(ROOT / "skills/paper-latex/assets/upstream", self.asset_dir / "upstream")
         self.addCleanup(mock.patch.stopall)
         mock.patch.object(templates, "ASSET_DIR", self.asset_dir).start()
@@ -490,8 +515,8 @@ class TemplateTests(unittest.TestCase):
         destination = self.root / "existing"
         destination.mkdir()
         (destination / "original").write_text("keep")
-        for operation in ("copytree", "replace"):
-            module = templates.shutil if operation == "copytree" else templates.os
+        for operation in ("write_bytes", "replace"):
+            module = Path if operation == "write_bytes" else templates.os
             with self.subTest(operation=operation), mock.patch.object(module, operation, side_effect=OSError("deliberate failure")):
                 with self.assertRaisesRegex(SystemExit, "Could not initialize"):
                     templates.initialize(destination, True, language="english")
@@ -532,6 +557,7 @@ class TemplateTests(unittest.TestCase):
             "journal/journal-of-cheminformatics": "jcheminformatics",
             "journal/nucleic-acids-research": "nar",
             "journal/angewandte-chemie-international-edition": "angew",
+            "journal/advanced-science": "advanced-science",
         }
         for canonical, alias in names.items():
             with self.subTest(canonical=canonical):
@@ -544,12 +570,13 @@ class TemplateTests(unittest.TestCase):
                 templates.resolve_template(unsupported)
 
     def test_registry_rejects_alias_and_canonical_collisions(self):
-        with mock.patch.dict(templates.TEMPLATES, {"duplicate": dict(templates.TEMPLATES["jcim"])}):
-            with self.assertRaisesRegex(ValueError, "Duplicate"):
-                templates.template_choices()
-        with mock.patch.dict(templates.TEMPLATES, {"journal/jcim": dict(templates.TEMPLATES["jacs"])}):
-            with self.assertRaisesRegex(ValueError, "Duplicate"):
-                templates.template_choices()
+        records = dict(templates.CATALOG.templates)
+        records["duplicate"] = replace(records["jcim"], alias="duplicate")
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            templates.TemplateCatalog(records, templates.CATALOG.profiles)
+        # Canonical IDs contain a slash and cannot masquerade as short aliases.
+        with self.assertRaisesRegex(ValueError, "alias"):
+            replace(records["jacs"], alias="journal/jcim")
 
     def test_legacy_and_versioned_metadata_resolve_without_rewriting(self):
         path = self.root / templates.METADATA_NAME

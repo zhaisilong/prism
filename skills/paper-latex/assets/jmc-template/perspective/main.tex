@@ -1,0 +1,197 @@
+% Original Prism Journal of Medicinal Chemistry Perspective draft (MIT).
+% This is an interpretive writing skeleton, not a final journal layout.
+\documentclass[letterpaper,12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage{setspace}
+% Select package-mode settings explicitly rather than assuming a journal cfg.
+\usepackage[articletitle=true,doi=true,super=true,biblabel=brackets,
+  maxauthors=15,etalmode=firstonly]{achemso}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\DeclareSIUnit{\molar}{M}
+\sisetup{uncertainty-mode=separate}
+\setcounter{secnumdepth}{0}
+\setlength{\emergencystretch}{2em}
+\doublespacing
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\raggedbottom
+
+\title{Perspective manuscript title}
+\author{First Author\textsuperscript{*} and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small \textsuperscript{*}Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Replace this paragraph with a self-contained English abstract of
+approximately 150 words. Introduce the medicinal chemistry subject, state
+the central interpretation and explain the educational value of the
+Perspective. Summarize only the themes and conclusions developed from
+verified evidence in the manuscript. Approximately 150 words is a drafting
+prompt; confirm the current guidance rather than treating this template as
+an automatic compliance check. This starter contains synthetic displays
+and writing instructions only. It does not document a literature search,
+experimental study or author achievement. A Perspective offers critical
+insight and teaching moments rather than claiming exhaustive coverage.
+Replace all placeholders before submission and discuss an unsolicited topic
+with the journal's editor.
+\end{abstract}
+
+\section{Introduction}
+Define the question, intended readership and boundaries of the Perspective.
+Explain why the topic matters and identify the central insight or position
+to be developed. Perspectives are usually invited; prospective authors
+should contact the editor to discuss suitability before submitting an
+unsolicited manuscript. The references here demonstrate citation handling
+only, not evidence for the synthetic displays\cite{peng2011reproducible,wilkinson2016fair}.
+
+\section{Conceptual framework and teaching moments}
+\subsection{Explain the organizing principle}
+Introduce the concepts needed to follow the argument. Develop concrete
+teaching moments from verified examples, explaining what the reader should
+learn and where a principle ceases to apply. Chemical notation such as
+\ce{CH3}, \ce{OH} and \ce{C=O} is demonstrated here without assigning it to
+a synthesized, tested or literature-reported compound.
+
+Scheme~\ref{sch:concept} is a synthetic conceptual slot. Replace it with
+original artwork that supports the Perspective's actual argument, with
+appropriate source attribution where needed.
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][21mm][c]{0.76\linewidth}{\centering
+\ce{A -> B}\\[4pt]
+Conceptual scheme slot: original artwork}}
+\caption{Synthetic scheme for formatting only. A and B are placeholder
+labels, not identified molecules or an established transformation. Supply
+an accurate explanation when replacing the illustration.}
+\label{sch:concept}
+\end{scheme}
+
+\subsection{Distinguish observation and interpretation}
+Identify the evidence for each teaching point. Separate reported
+observations, computational predictions, the authors' interpretation and
+open questions. Do not describe a comparison or screening procedure unless
+the authors actually performed it and can explain its scope.
+
+\section{Evidence, comparisons and limitations}
+\subsection{Compare like with like}
+Table~\ref{tab:comparison} demonstrates an SAR-style comparison layout.
+Its rows were invented for typesetting and are not extracted from papers.
+Real comparisons must identify their sources and account for assay
+conditions, units, endpoints, uncertainty and missing information.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic comparative values, not a literature-derived SAR.}
+\label{tab:comparison}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ c S[table-format=2.1(2)] S[table-format=1.0]@{}}
+\toprule
+Placeholder & {Example group} & {$\mathrm{IC}_{50}$ / \unit{\nano\molar}} & {$n$}\\
+\midrule
+\textbf{1} & \ce{H}   & 12.4 +- 1.2 & 3\\
+\textbf{2} & \ce{CH3} & 28.6 +- 2.4 & 3\\
+\textbf{3} & \ce{F}   & \multicolumn{1}{c}{$>1000$} & 3\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+\textsuperscript{a}All entries, compound labels and counts are invented.
+The uncertainties illustrate mean $\pm$ SD only. Cite the actual evidence,
+define its conditions and uncertainty, and preserve censored or unavailable
+values without treating them as zero.
+\end{table}
+
+\subsection{Connect claims to graphics}
+Figure~\ref{fig:comparison} provides two related panel slots. An effective
+Perspective graphic makes the argument easier to understand while keeping
+the boundaries of the evidence visible.
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][28mm][c]{0.89\linewidth}{\centering
+Conceptual graphic slot\\[4pt]Original vector artwork}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][28mm][c]{0.89\linewidth}{\centering
+Evidence graphic slot\\[4pt]Readable final labels}}
+\end{minipage}
+\caption{Synthetic comparison layout. (a) Conceptual illustration slot.
+(b) Evidence illustration slot. Neither panel reports a molecule,
+measurement or scientific conclusion. Replace each slot with relevant
+original artwork and explain actual symbols, sources, conditions and
+limitations. Preserve readable labels and vector quality at final size.
+Plan the page using the full caption height, and keep panel letters
+consistent with references in the text.}
+\label{fig:comparison}
+\end{figure}
+
+\subsection{Make quantitative reasoning explicit}
+If quantitative expressions help the argument, define their variables,
+dimensions and assumptions. Equations~\eqref{eq:pic50} and~\eqref{eq:delta}
+demonstrate aligned notation only:
+\begin{align}
+ p\mathrm{IC}_{50} &= -\log_{10}\!\left(
+ \frac{\mathrm{IC}_{50}}{\qty{1}{\mole\per\litre}}\right),\label{eq:pic50}\\
+ \Delta p\mathrm{IC}_{50} &= p\mathrm{IC}_{50,\mathrm{A}}
+                         -p\mathrm{IC}_{50,\mathrm{B}}.\label{eq:delta}
+\end{align}
+The concentration ratio is dimensionless. These expressions do not turn
+the synthetic table into evidence. Explain relevant comparability limits
+before interpreting a difference between published measurements.
+
+\section{Critical discussion and strategic directions}
+Develop the authors' reasoned assessment of the evidence. Explain
+agreements, contradictions, limitations and competing interpretations.
+Identify useful strategic directions and what evidence would be needed to
+distinguish them, without reporting proposed work as a completed result.
+
+\section{Conclusions and outlook}
+State the principal teaching points and the perspective justified by the
+discussion. Keep recommendations proportional to the evidence, acknowledge
+the limits of the coverage and identify consequential open questions.
+
+\section*{Supporting Information}
+Describe the actual supporting files, if any. The neutral independent
+\texttt{supplementary.tex} provides S-numbered display and documentation
+slots; it does not assume that experiments or a literature search occurred.
+\section*{Data and Code Availability}
+Provide an accurate statement appropriate to the actual content and any
+data or code supplied by the authors.
+\section*{Author Contributions}
+Provide the authors' confirmed contributions.
+\section*{Acknowledgments}
+Provide confirmed funding and acknowledgments, or remove if not applicable.
+\section*{Conflict of Interest}
+Provide the authors' confirmed statement.
+
+% Keep each author's factual biography immediately before the references.
+\section*{Author Biographies}
+\noindent\textbf{First Author.} Replace this instruction with a factual
+biography of fewer than 125 words, supplied or approved by the author.
+Do not invent qualifications, positions, achievements or research history.
+
+\noindent\textbf{Second Author.} Supply an accurate biography of fewer
+than 125 words. Repeat the author-provided format for additional authors.
+
+% achemso provides the bibliography style; retain only relevant references.
+\bibliography{references}
+
+\clearpage
+\section*{Table of Contents graphic}
+\noindent For Table of Contents Only
+\begin{center}
+% The 80 by 42 mm interior leaves room for the frame within the ACS area.
+\fbox{\parbox[c][42mm][c]{80mm}{\centering
+Original TOC graphic slot\\[6pt]
+Replace with the authors' artwork}}
+\end{center}
+\end{document}

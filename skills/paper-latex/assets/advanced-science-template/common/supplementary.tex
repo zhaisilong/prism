@@ -1,0 +1,124 @@
+% Original Prism Advanced Science writing draft, provided under MIT.
+% This is not an official publisher class or a final submission package.
+% The current official ZIP has not been verified or redistributed by Prism.
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,square,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+
+\setcounter{tocdepth}{2}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thescheme}{S\arabic{scheme}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\title{Supporting Information: Manuscript Title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small E-mail: \texttt{first.author@example.org}}
+\date{}
+\begin{document}
+\maketitle
+This independent supplement contains synthetic formatting examples only.
+Replace this overview with the actual contents and retain verified source
+information. It reports no experiment, literature search or finding.
+\tableofcontents
+\clearpage
+\section{Experimental and Computational Details}\label{sec:si-details}
+Provide additional documented procedures, parameters, controls and
+reproducibility information where applicable. Distinguish experimental
+replicates from repeated analyses and describe the actual work only.
+
+\section{Supplementary Displays}\label{sec:si-displays}
+Figure~\ref{fig:si-slot}, Scheme~\ref{sch:si-slot}, Table~\ref{tab:si-values}
+and Equation~\eqref{eq:si-example} demonstrate independent S numbering.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][25mm][c]{0.78\linewidth}{\centering
+Supporting graphic slot\\[5pt]Insert original artwork}}
+\caption{Synthetic supporting display. Replace the slot and its explanation
+with verified material; preserve source meaning and readable panel labels.}
+\label{fig:si-slot}
+\end{figure}
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][16mm][c]{0.72\linewidth}{\centering
+Supporting scheme slot}}
+\caption{Synthetic scheme placeholder, not a reported transformation.}
+\label{sch:si-slot}
+\end{scheme}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Invented supporting values for typesetting only.}
+\label{tab:si-values}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Example & {Count} & {Value $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+Example C & 48 & 0.385 +- 0.006\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+\textsuperscript{a)}All values are invented. Supply actual sources, units
+and uncertainty definitions before using this table.
+\end{table}
+
+\begin{equation}
+\begin{split}
+ q_{\mathrm{A}} &= \sum_{i=1}^{n} v_i y_i,\\
+ \Delta q &= q_{\mathrm{A}}-q_{\mathrm{B}}.
+\end{split}\label{eq:si-example}
+\end{equation}
+This editable equation is a layout example only. Explain symbols and
+assumptions if an actual expression is adopted.
+
+\clearpage
+\section{Additional Documentation}\label{sec:si-documentation}
+Replace the instructions in Table~\ref{tab:si-documentation} with verified
+information where relevant. A longer inventory can retain repeated table
+headers and continuation notes without shrinking all its text.
+
+{\small
+\begin{longtable}{@{}p{0.15\linewidth}p{0.25\linewidth}p{0.49\linewidth}@{}}
+\caption{Instructional documentation layout.}\label{tab:si-documentation}\\
+\toprule Item & Topic & Instruction\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Instruction\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Example A & Sources & Record complete, verified source details.\\
+Example B & Scope & Describe the subject and limits actually covered.\\
+Example C & Context & State the context needed to assess a comparison.\\
+Example D & Conditions & Preserve conditions that affect interpretation.\\
+Example E & Units & Retain the source's measurement units.\\
+Example F & Uncertainty & Explain the reported uncertainty.\\
+Example G & Missing data & Distinguish unavailable information from zero.\\
+Example H & Limitations & Attribute limitations accurately.\\
+Example I & Precision & Preserve the precision justified by the source.\\
+Example J & Interpretation & Separate observation and interpretation.\\
+Example K & Graphics & Keep original artwork and editable sources.\\
+Example L & Permissions & Record attribution and permissions if needed.\\
+\end{longtable}}
+
+These public citations exercise the independent bibliography only; they do
+not support the synthetic displays~\cite{wilkinson2016fair,peng2011reproducible}.
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{prism-wiley-numeric}
+\bibliography{references}
+\end{document}

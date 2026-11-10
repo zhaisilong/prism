@@ -14,9 +14,10 @@ import zlib
 from pathlib import Path
 
 
+from prism_test_support import install_fake_compiler, intermediates
+
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ("notes-latex", "reviewer-latex", "paper-latex")
-INTERMEDIATES = {".aux", ".log", ".fls", ".fdb_latexmk", ".out", ".bbl", ".blg", ".toc", ".spl"}
 
 
 class WorkflowTests(unittest.TestCase):
@@ -53,32 +54,7 @@ class WorkflowTests(unittest.TestCase):
         )
 
     def install_compiler(self):
-        # The stub exercises CLI control flow and publication without requiring
-        # TeX or rebuilding any user document. Real PDF smoke checks are separate.
-        engine = self.bin / "xelatex"
-        engine.write_text(f"#!{sys.executable}\n", encoding="utf-8")
-        engine.chmod(0o755)
-        compiler = self.bin / "latexmk"
-        compiler.write_text(
-            f"#!{sys.executable}\n"
-            "import json, os, sys\n"
-            "from pathlib import Path\n"
-            "source = Path(sys.argv[-1])\n"
-            "outdir = next((Path(arg.split('=', 1)[1]) for arg in sys.argv if arg.startswith('-outdir=')), Path.cwd())\n"
-            "outdir.mkdir(parents=True, exist_ok=True)\n"
-            "with open(os.environ['PRISM_TEST_LATEX_TRACE'], 'a', encoding='utf-8') as trace:\n"
-            "    trace.write(json.dumps({'source': str(source), 'cwd': str(Path.cwd()), 'outdir': str(outdir), 'arguments': sys.argv[1:]}) + '\\n')\n"
-            "(outdir / (source.stem + '.aux')).write_text('intermediate')\n"
-            "mode = os.environ.get('PRISM_TEST_LATEX_MODE', 'success')\n"
-            "if mode == 'failure' or (mode == 'editor-failure' and source.stem.endswith('_editor_notes')):\n"
-            "    print('deliberate compiler failure')\n"
-            "    sys.exit(42)\n"
-            "log = 'Overfull \\\\hbox (5.0pt too wide)' if mode == 'strict-failure' else ''\n"
-            "(outdir / (source.stem + '.log')).write_text(log)\n"
-            "(outdir / (source.stem + '.pdf')).write_bytes(b'new PDF from stub')\n",
-            encoding="utf-8",
-        )
-        compiler.chmod(0o755)
+        install_fake_compiler(self.bin)
 
     def make_source(self, workflow: str, *, suffix: str = ".md"):
         project = self.root / workflow
@@ -93,10 +69,7 @@ class WorkflowTests(unittest.TestCase):
         return source, source, project / "draft.pdf"
 
     def assert_no_intermediates(self, directory: Path):
-        self.assertEqual(
-            [path for path in directory.rglob("*") if path.is_file() and path.suffix in INTERMEDIATES],
-            [],
-        )
+        self.assertEqual(intermediates(directory), [])
 
     def compiler_calls(self):
         if not self.trace.exists():

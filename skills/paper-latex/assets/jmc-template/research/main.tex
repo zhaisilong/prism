@@ -1,0 +1,194 @@
+% Original Prism Journal of Medicinal Chemistry research writing draft (MIT).
+% This single-column draft does not reproduce a final typeset journal issue.
+% The installed TeX distribution supplies achemso and its BibTeX style.
+\documentclass[letterpaper,12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage{setspace}
+% Package mode does not apply the journal-specific achemso class settings.
+% Select the draft's citation and author-list policy explicitly.
+\usepackage[articletitle=true,doi=true,super=true,biblabel=brackets,
+  maxauthors=15,etalmode=firstonly]{achemso}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\DeclareSIUnit{\molar}{M}
+\sisetup{uncertainty-mode=separate}
+\setcounter{secnumdepth}{0}
+\setlength{\emergencystretch}{2em}
+\doublespacing
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\raggedbottom
+
+\title{Research manuscript title}
+\author{First Author\textsuperscript{*} and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small \textsuperscript{*}Correspondence: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Replace this paragraph with a self-contained, findings-oriented English
+abstract of approximately 150 words. Describe the medicinal chemistry
+question, the approach actually used, the verified findings and the
+conclusions supported by those findings. Approximately 150 words is a
+drafting prompt, not an automatically enforced word limit. Avoid describing
+planned work as completed work or computational predictions as experimental
+observations. This starter supplies instructions and synthetic layout
+demonstrations only; it reports no compound synthesis, assay, activity or
+research result. Replace every example with the authors' own verified
+content and consult the current journal guidelines before submission.
+\end{abstract}
+
+\section{Introduction}
+Explain the research question, the rationale for the molecular design and
+the relationship to prior medicinal chemistry. State the study's scope and
+the specific contribution supported by the work. These public references
+exercise bibliography mechanics only; they do not support the synthetic
+chemical or numerical examples below\cite{peng2011reproducible,wilkinson2016fair}.
+Retain only references relevant to the actual manuscript.
+
+\section{Results and Discussion}
+\subsection{Design and chemistry}
+Present the design rationale and the chemistry actually performed, with
+compound identifiers that remain consistent across structures, tables and
+text. Scheme~\ref{sch:design} is an editable placeholder only. Chemical
+expressions such as \ce{CH3}, \ce{OH} and \ce{C=O} demonstrate typography,
+without assigning them to a synthesized or tested molecule.
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][21mm][c]{0.76\linewidth}{\centering
+\ce{A -> B}\\[4pt]
+Synthetic scheme slot: replace with original vector artwork}}
+\caption{Synthetic chemical layout only. A and B are placeholder labels,
+not identified compounds or a reported transformation. Replace the drawing,
+reagents, conditions, identifiers and explanatory text with verified content.}
+\label{sch:design}
+\end{scheme}
+
+\subsection{Biological evaluation and structure--activity relationships}
+Describe only the assays, controls and validation actually performed.
+Table~\ref{tab:sar} demonstrates aligned uncertainties and a censored value;
+it does not document activity or a structure--activity relationship. Keep
+units, precision, uncertainty definitions and compound labels consistent.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Invented SAR-style values used solely for typesetting.}
+\label{tab:sar}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ c S[table-format=2.1(2)] S[table-format=1.0]@{}}
+\toprule
+Placeholder & {Example group} & {$\mathrm{IC}_{50}$ / \unit{\nano\molar}} & {$n$}\\
+\midrule
+\textbf{1} & \ce{H}   & 12.4 +- 1.2 & 3\\
+\textbf{2} & \ce{CH3} & 28.6 +- 2.4 & 3\\
+\textbf{3} & \ce{F}   & \multicolumn{1}{c}{$>1000$} & 3\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+\textsuperscript{a}All entries, identifiers and replicate counts are invented.
+The displayed uncertainties illustrate mean $\pm$ SD only. Supply the actual
+assay conditions, sources and uncertainty definition; a missing or censored
+value must not be treated as zero.
+\end{table}
+
+Figure~\ref{fig:overview} provides a multipanel slot with a longer caption.
+At final size, check labels within the artwork as well as the caption.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][28mm][c]{0.89\linewidth}{\centering
+Design graphic slot\\[4pt]Original vector artwork}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][28mm][c]{0.89\linewidth}{\centering
+Evaluation graphic slot\\[4pt]Readable final labels}}
+\end{minipage}
+\caption{Synthetic multipanel layout. (a) Design illustration slot.
+(b) Evaluation illustration slot. These boxes depict no molecules,
+measurements or experimental result. When replacing the panels, explain
+the actual symbols, conditions, units, controls and uncertainty where
+relevant. Keep panel letters consistent with the discussion. Include the
+full caption in page-fit decisions, preserve editable or vector artwork,
+and check figure-internal text at its final size.}
+\label{fig:overview}
+\end{figure}
+
+\subsection{Quantitative interpretation and limitations}
+Define measured quantities, units and the analysis used before interpreting
+them. Equations~\eqref{eq:pic50} and~\eqref{eq:delta} demonstrate aligned
+expressions and cross-references only:
+\begin{align}
+ p\mathrm{IC}_{50} &= -\log_{10}\!\left(
+ \frac{\mathrm{IC}_{50}}{\qty{1}{\mole\per\litre}}\right),\label{eq:pic50}\\
+ \Delta p\mathrm{IC}_{50} &= p\mathrm{IC}_{50,\mathrm{A}}
+                         -p\mathrm{IC}_{50,\mathrm{B}}.\label{eq:delta}
+\end{align}
+The concentration ratio is dimensionless. No value is calculated from the
+invented table. Distinguish supported observations, model predictions and
+hypotheses, and discuss assay limitations without overstating the evidence.
+
+\section{Conclusion}
+Summarize the conclusions justified by the actual chemical and biological
+evidence. Identify the limitations and remaining questions relevant to the
+study, without presenting proposed experiments as completed validation.
+
+\section{Experimental}
+\subsection{General procedures and analytical information}
+Replace this text with the actual procedures, materials, instruments and
+analysis conditions. Report verified purity, the analytical method and
+compound-specific exceptions where relevant; this template does not assert
+that any compound satisfies a purity threshold. Supply characterization,
+controls, assay-interference assessments and any applicable ethics approvals
+using information established by the authors.
+
+\subsection{Synthesis and characterization}
+Include the experimental procedures for every step in the synthesis of all
+tested target compounds in this main Experimental section, not solely in
+supporting information. Use consistent identifiers, stoichiometry, yields
+and characterization. No route, yield, spectrum, purity measurement or
+hazard assessment has been supplied by this placeholder.
+
+\subsection{Biological and computational methods}
+Describe the actual models, protocols, software versions, controls,
+replicates and statistical analyses needed to reproduce the reported work.
+State relevant experimental hazards and safeguards accurately. Remove
+subsections that do not apply rather than implying that work was performed.
+
+\section*{Supporting Information}
+Describe the actual accompanying files and their contents. The supplied
+\texttt{supplementary.tex} is a neutral, independent S-numbered layout;
+replace its placeholders with relevant supporting material.
+\section*{Data and Code Availability}
+Provide the authors' accurate availability statement, identifiers and any
+restrictions. Supply molecular identifiers and associated data when required
+by the current journal instructions; no data attachment is generated here.
+\section*{Author Contributions}
+Provide the authors' confirmed contributions.
+\section*{Acknowledgments}
+Provide confirmed funding and acknowledgments, or remove if not applicable.
+\section*{Conflict of Interest}
+Provide the authors' confirmed statement.
+
+% achemso provides the bibliography style; retain only relevant references.
+\bibliography{references}
+
+\clearpage
+\section*{Table of Contents graphic}
+\noindent For Table of Contents Only
+\begin{center}
+% The 80 by 42 mm interior leaves room for the frame within the ACS area.
+\fbox{\parbox[c][42mm][c]{80mm}{\centering
+Original TOC graphic slot\\[6pt]
+Replace with the authors' artwork}}
+\end{center}
+\end{document}

@@ -1,0 +1,178 @@
+% Original Prism writing draft for European Journal of Medicinal Chemistry.
+% Distribution-provided elsarticle and elsarticle-num remain unchanged.
+% All demonstration values and graphics are synthetic, not research findings.
+\documentclass[a4paper,preprint,12pt]{elsarticle}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\biboptions{numbers,sort&compress}
+\setcitestyle{square}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.8}
+% Keep draft float pages compact instead of stretching space between graphics.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{18pt plus 2pt minus 2pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+\journal{European Journal of Medicinal Chemistry}
+
+\begin{document}
+\begin{frontmatter}
+\title{Manuscript title}
+\author[inst1]{First Author}
+\author[inst1,inst2]{Second Author\texorpdfstring{\corref{corresponding}}{}}
+\cortext[corresponding]{Corresponding author.}
+\ead{second.author@example.org}
+\address[inst1]{Department, First Institution, City, Country}
+\address[inst2]{Department, Second Institution, City, Country}
+
+\begin{abstract}
+Replace this paragraph with a concise, self-contained statement of the
+review's subject, scope, principal themes and supported implications.
+Summarize only the review actually written. Follow the current journal
+instructions; this starter sets no unverified word limit. The figures,
+values and equations below are synthetic formatting examples, not claims
+about published evidence or an account of a literature search.
+\end{abstract}
+\begin{keyword}
+keyword one \sep keyword two \sep keyword three
+\end{keyword}
+\end{frontmatter}
+
+\section{Introduction}\label{sec:introduction}
+Define the review's scope, purpose and organizing question. Explain its
+relation to the actual literature supplied by the authors and identify
+boundaries of coverage. Do not claim a literature search, screening process
+or coverage period that the authors have not established. The public
+citations here demonstrate bibliography mechanics only; retain them only
+if relevant~\cite{wilkinson2016fair,peng2011reproducible}.
+
+\section{Conceptual framework}\label{sec:framework}
+Explain the concepts required by the intended readership. Distinguish
+established observations, interpretations and open questions, and replace
+these thematic headings with those appropriate to the review.
+
+\section{Strategies and evidence}\label{sec:evidence}
+\subsection{Chemical strategies}
+Organize actual published approaches around the review's question. Attribute
+structures and findings accurately, and obtain permissions when necessary.
+This public placeholder supplies no conclusion about a drug or target.
+
+Scheme~\ref{sch:sequence} demonstrates an editable vector reaction-layout
+placeholder. Use the authors' original structures and preserve compound
+identities consistently in the text, schemes and tables.
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][24mm][c]{0.86\linewidth}{\centering
+\ce{A ->[step 1] B ->[step 2] C}\\[7pt]
+Replace A, B and C with original structures and verified conditions.}}
+\caption{\textbf{Synthetic scheme layout.} Letters stand for layout slots,
+not chemical substances. No reaction, yield, synthesis route or experiment
+is reported. Replace the drawing, conditions and legend with the authors'
+verified work, or remove this demonstration.}
+\label{sch:sequence}
+\end{scheme}
+
+Figure~\ref{fig:overview} demonstrates a two-panel layout. Long legends
+belong to the page layout: preserve readable panel labels and account for
+the full caption height when choosing the graphic size.
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][27mm][c]{0.90\linewidth}{\centering
+Original structure slot\\[5pt]Replace with a vector graphic}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][27mm][c]{0.90\linewidth}{\centering
+Evidence graphic slot\\[5pt]Keep final-size text readable}}
+\end{minipage}
+\caption{\textbf{Synthetic two-panel example with an extended legend.}
+(a) An original structure or concept diagram may occupy this slot.
+(b) An independently prepared evidence display may occupy the second slot.
+These framed regions contain no data. Define the actual symbols, units,
+uncertainty and relevant conditions in the replacement legend. Preserve
+panel identities across text references and graphic labels; keep axes,
+legends and chemical labels readable at the final printed size. Remove
+instructions and unused panels before submission.}
+\label{fig:overview}
+\end{figure}
+
+Table~\ref{tab:sar} illustrates a structure--activity relationship (SAR)
+table with bold compound identifiers, chemical formulae and aligned errors.
+The entries are invented formatting values, not assay observations.
+\begin{table}[htbp]
+\centering\small
+\caption{Synthetic SAR-style values for column-alignment practice only.}
+\label{tab:sar}
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X
+ S[table-format=2.1(2)] S[table-format=2.1(2)]@{}}
+\toprule
+Compound & Substituent slot & {\shortstack{Illustrative endpoint 1\\/ nM}}
+ & {\shortstack{Illustrative endpoint 2\\/ nM}}\\
+\midrule
+\textbf{1} & \ce{CH3} & 12.4 +- 0.6 & 31.0 +- 1.4\\
+\textbf{2} & \ce{C2H5} & 8.1 +- 0.4 & 27.6 +- 1.2\\
+\textbf{3} & \ce{F} & 15.2 +- 0.8 & 19.4 +- 0.9\\
+\textbf{4} & Replace with an actual group & \multicolumn{1}{c}{---}
+ & \multicolumn{1}{c}{---}\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+No assay was performed. Replace all values and define the actual endpoint,
+units, error measure and replicate counts. A dash is a missing-value slot,
+not a zero. Formulae such as \ce{CO2} demonstrate chemical typography only.
+\end{table}
+
+Equations~\eqref{eq:ratio} and~\eqref{eq:difference} demonstrate alignment
+and cross-references. Define actual quantities before using any equation.
+\begin{align}
+ q_i &= \frac{x_i}{x_{\mathrm{ref}}},\label{eq:ratio}\\
+ \Delta q &= q_{\mathrm{A}}-q_{\mathrm{B}}.\label{eq:difference}
+\end{align}
+These expressions are layout examples, not a validated medicinal chemistry
+metric or evidence of a scientific result.
+
+\section{Critical comparison}\label{sec:comparison}
+Compare the actual evidence and explain meaningful agreements, differences
+and limitations. Account for incompatible assay conditions and uncertainty
+before comparing numerical findings. Avoid treating illustrative numbers
+or a graphic slot as evidence of a literature conclusion.
+
+\section{Challenges and Outlook}\label{sec:outlook}
+Identify evidence gaps, limitations and future directions grounded in the
+review's cited sources. Separate feasible proposals from established facts.
+The review skeleton does not imply that a systematic search, experimental
+study or validation was performed.
+
+\section*{Data availability}
+Replace with the authors' accurate availability statement, repository
+identifiers where applicable, and any access restrictions.
+\section*{Author contributions}
+Describe actual contributions using the journal's current requirements.
+\section*{Declaration of competing interest}
+Replace with the authors' confirmed declaration.
+\section*{Acknowledgements and funding}
+List confirmed acknowledgements and funding, or remove if not applicable.
+\section*{Supplementary material}
+Describe the actual supporting files. The included \texttt{supplementary.tex}
+compiles independently with S-numbered pages and displays. A separate
+\texttt{graphical\_abstract.tex} and editable \texttt{highlights.txt} are
+optional drafting aids; confirm their submission requirements with the
+journal before using them.
+
+% The two public references test mechanics only; replace as appropriate.
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+\end{document}

@@ -4,26 +4,26 @@ Use these notes to map an existing review to the maintained parser. Preserve sci
 
 ## Metadata
 
-Metadata lines use an English label followed by `:` and a value. Markdown heading markers and common bold label formatting are accepted. Labels are case-insensitive:
+Metadata lines use a recognized Chinese or English label followed by `:` or `：` and a value. Markdown heading markers and common bold label formatting are accepted. English labels are case-insensitive; bilingual labels are also recognized:
 
 | Field | Recognized labels |
 | --- | --- |
-| Journal | `Journal` |
-| Header abbreviation | `Journal abbreviation`, `Journal short`, `Journal short name` |
-| Manuscript/review ID | `Review ID`, `Reviewer ID`, `Review number`, `Manuscript number`, `Manuscript ID`, `MS number` |
-| Title | `Paper title`, `Manuscript title`, `Manuscript`, `Title` |
-| Recommendation | `Decision`, `Recommendation` |
+| Journal | `Journal`, `期刊`, `期刊名称` |
+| Header abbreviation | `Journal abbreviation`, `Journal short`, `Journal short name`, `期刊简称`, `期刊缩写` |
+| Manuscript/review ID | `Review ID`, `Reviewer ID`, `Review number`, `Manuscript number`, `Manuscript ID`, `MS number`, `稿件编号`, `审稿编号` |
+| Title | `Paper title`, `Manuscript title`, `Manuscript`, `Title`, `论文标题`, `稿件标题`, `标题` |
+| Recommendation | `Decision`, `Recommendation`, `建议`, `处理建议`, `审稿建议` |
 
 The first non-empty recognized value is used. Explicit command-line metadata options override parsed values. Missing fields retain visible unspecified placeholders; do not invent a journal, title, identifier, or recommendation. `--date` sets the printed date independently of source metadata.
 
 ## Heading Aliases
 
-- Overall: `Overall`, `Overall Assessment`, `Overall Comments`, `Summary`, `General Comments`, `Comments to Authors`
-- Major: `Major`, `Major Concerns`, `Major Comments`, `Major Issues`, `Major Revision Concerns`, `Critical Concerns`
-- Minor: `Minor`, `Minor Concerns`, `Minor Comments`, `Minor Issues`
-- Editor only: `Notes`, `Note to Editor`, `Notes to Editor`, `Confidential Comments`, `Confidential Comments to Editor`, `Editor Notes`
+- Overall: `Overall`, `Overall Assessment`, `Overall Comments`, `Summary`, `General Comments`, `Comments to Authors`, `总体评价`, `总体意见`, `给作者的意见`
+- Major: `Major`, `Major Concerns`, `Major Comments`, `Major Issues`, `Major Revision Concerns`, `Critical Concerns`, `主要问题`, `主要意见`
+- Minor: `Minor`, `Minor Concerns`, `Minor Comments`, `Minor Issues`, `次要问题`, `次要意见`
+- Editor only: `Notes`, `Note to Editor`, `Notes to Editor`, `Confidential Comments`, `Confidential Comments to Editor`, `Editor Notes`, `给编辑的保密意见`, `致编辑保密意见`
 
-Matching is case-insensitive, ignores common heading markers and punctuation, and also supports the singular comment/concern/issue variants in the parser. These are English heading aliases even when the review body contains Chinese. An unrecognized heading stays in the current section; check ambiguous labels in a working copy before exporting. In particular, a section titled `Notes` is treated as confidential editor material.
+Matching ignores common heading markers and punctuation, and also supports singular comment/concern/issue variants and mixed Chinese-English headings. An ordinary unrecognized heading remains in the current section; check its placement before delivery. Unrecognized confidential/editor-only labels or ambiguous confidential metadata stop export. Clarify their intended audience before changing such labels. In particular, a section titled `Notes` is confidential editor material.
 
 Major and Minor point numbers are continuous. Editor-only comments are excluded from the author-facing report and written to a separate `_editor_notes` artifact.
 

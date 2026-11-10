@@ -4,6 +4,75 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.11.10
+
+### Changed
+
+- Refined the original Prism single-column starter for clearer title metadata, section hierarchy, floats and pagination, while retaining the established manuscript interfaces and mixed Chinese-English support.
+- Organized the standalone supplement with a contents page and S-prefixed pages, and added removable code availability and author contribution placeholders. Existing initialized manuscripts are not changed.
+- Updated the generic template guide and added focused checks for the revised starter; journal starters and the shared examples remain unchanged.
+- Added `placeins` to the Prism dependency profile so supplementary floats stay before their references without forcing a separate page.
+
+### Validation
+
+- Passed the 224-test regression suite; final supplementary pagination and compatibility baselines were rechecked separately after the float refinement.
+- Strictly compiled synthetic main texts, supplements and examples with XeLaTeX and LuaLaTeX; inspected long bilingual titles, multiple authors, dense displays, references and supplement pagination. Verified the main rebuild entrypoint and clean source directories.
+- Audited the public-file allowlist and verified that research files and the pre-existing untracked PDF remained outside the commit.
+
+## 2026.11.08.3
+
+### Added
+
+- Added offline Journal of Medicinal Chemistry Research/Perspective and European Journal of Medicinal Chemistry Research/Review drafts, bringing the catalog to 16 templates. Both use schema 1, default bilingual XeLaTeX and optional English pdfLaTeX with BibTeX.
+- Added synthetic chemistry Scheme, SAR/uncertainty table, multipanel figure and equation demonstrations, independent S-numbered supporting information, JMC last-page TOC graphics and Perspective biographies, and optional EJMC graphical abstract/highlights aids.
+- Added dedicated ACS medicinal-chemistry and Elsevier numeric build profiles, retaining ACS control-file isolation and the existing ACS/DDT configurations. JMC uses explicit 15-author first-only truncation; EJMC uses inline square numerical citations, with article titles and DOI links in both.
+- Added per-template Chinese guides, source and drafting-policy notices, query/detail roles and synchronized catalog/count blocks. The EJMC guide records the inaccessible author-guide page without inventing journal-specific limits.
+
+### Validation
+
+- Passed all 222 tests without skips, retaining the previous 214 cases and all 42 pre-refactor starter-file contracts. Added eight tests covering aliases, content types, languages, offline initialization, Chinese paths, legacy metadata, backups, missing resources, author/citation boundaries, DOI links, ACS isolation and failed-build PDF preservation.
+- Strictly compiled 22 retained synthetic PDFs covering all four new content profiles in both languages, their supplements, shared examples and EJMC graphical abstracts. Rechecked the four JMC main texts after the final widow/orphan controls; normal-scale page review covered Chinese typography, dense Scheme/SAR displays, long captions, biographies, TOC, references and supporting pagination. Verified both new main rebuild scripts and clean source directories.
+- Passed offline catalog validation, documentation synchronization checks and all nine wrapper help/version/dependency checks. Audited the exact 209-file public boundary; all 92 prior assets and the compatibility fixture remained byte-identical. Research files stayed untracked, the independent public checkout and global skills stayed unchanged, and no push or remote release was made.
+
+## 2026.11.08.2
+
+### Added
+
+- Added versioned template details (`latex-templates.sh --show NAME --json`) and offline validation of definitions, every content recipe, local resources, licensed upstream hashes and guide links.
+- Added explicit documentation synchronization with `sync-template-docs.py --check` and `--write`; generated blocks share the catalog, while submission guidance remains manually maintained.
+- Recorded fixed-date renderer and all 42 template/content/language initialization contracts before the refactor.
+
+### Changed
+
+- Split immutable catalog models, build profiles, project configuration, source verification and safe initialization plans into shared modules. Metadata is read once per paper command; schema 1, aliases, legacy Nature variants and ACS isolation remain compatible.
+- Moved all three workflow implementations into the shared library, retaining the skill-local compatibility entrypoints. Shared jobs compile without publishing; explicit artifact batches roll back ordinary publication failures, including author/editor PDF and TeX pairs.
+- Preserved owned/manual workspace lifetimes, no-compiler TeX export, existing PDF protection and actual rebuild entrypoints.
+- Organized all three skills by task, execution, verification and delivery; split venue guidance into 14 pages with legacy anchors preserved. Clarified bilingual review handling and reuse source discovery/UI metadata in the installer.
+- Shared temporary environments, fake compilers, PDF extraction and source inventories in tests; registered content profiles drive generic build contracts. Existing template assets and layout bytes remain unchanged.
+
+### Validation
+
+- Passed all 214 tests without skips, retaining all 180 original test cases. Strictly compiled every registered content profile in both languages, its standalone supplement and shared examples, plus NAR graphical abstracts and Prism LuaLaTeX; retained citation-boundary, Science bibliography, ACS isolation and legacy-project checks.
+- Verified all 42 starter-file contracts and fixed-date rendered TeX against the pre-refactor baseline. Seven representative PDF pages retained identical geometry, extracted text and page-image hashes. Independently checked bilingual notes, Chinese confidential review outputs and a temporary synthetic manuscript adaptation, including content preservation, pagination, working rebuild scripts and clean sources.
+- Audited the exact 194-file public boundary and all 92 unchanged template assets. Verified the independent public checkout, research tracking boundary and global skills remained unchanged. Created only local commits on `codex/refactor-skills` with noreply identity; no push or remote release.
+
+## 2026.11.08.1
+
+### Added
+
+- Added three offline Advanced Science content profiles: Research Article, Review and Perspective, using original single-column article drafts and a shared numeric bibliography adaptation.
+- Added journal-specific TOC graphic and text placeholders, independent supporting information, and optional review/perspective biography and portrait slots.
+
+### Changed
+
+- Kept Advanced Science separate from the historical Wiley/Angew rendering profile and from AAAS Science Advances, while reusing schema 1, language profiles and safe initialization.
+
+### Validation
+
+- Passed all 180 regression tests without skips, including eight Advanced Science tests covering three article types, both languages, metadata compatibility, resource checks, bibliography boundaries and failed-build PDF preservation.
+- Strictly compiled all six main texts and their independent supplements, plus shared examples in both languages; visually checked first pages, dense displays, biographies, TOC graphics and supplementary pagination. Reinitialized and rechecked four Review/Perspective main texts after the final portrait-slot adjustment.
+- Audited the 159-file public boundary, verified all 15 upstream hashes and kept the existing Angew style byte-identical. Used only synthetic temporary projects, preserved clean sources and kept the independent public checkout and global skills unchanged; no push or remote release was made.
+
 ## 2026.11.08
 
 ### Added

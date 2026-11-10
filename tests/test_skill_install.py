@@ -38,6 +38,13 @@ class PaperSkillInstallTests(unittest.TestCase):
             path = root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("synthetic fixture\n")
+        (root / "skills/paper-latex/SKILL.md").write_text(
+            "---\nname: paper-latex\ndescription: Adapt and compile a synthetic manuscript.\n"
+            "metadata:\n  short-description: Synthetic entry\n---\n\n# Source entry\n")
+        interface = root / "skills/paper-latex/agents/openai.yaml"
+        interface.parent.mkdir(parents=True, exist_ok=True)
+        interface.write_text('interface:\n  display_name: "Synthetic Paper"\n'
+                             'policy:\n  allow_implicit_invocation: true\n')
         wrapper = root / "scripts/latex-paper.sh"
         wrapper.write_text("#!/bin/sh\nprintf '%s\\n' '" + message + "'\n")
         wrapper.chmod(0o755)
@@ -53,6 +60,21 @@ class PaperSkillInstallTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256((target / name).read_bytes()).hexdigest(), digest)
         self.assertFalse((target / "scripts").exists())
         self.assertFalse((target / "assets").exists())
+
+    def test_router_reuses_source_frontmatter_and_interface_without_new_dependencies(self):
+        target, _ = installer.install(self.repo, self.skills)
+        source = self.repo / "skills/paper-latex"
+        expected = (source / "SKILL.md").read_text().split("\n---\n", 1)[0] + "\n---\n"
+        self.assertTrue((target / "SKILL.md").read_text().startswith(expected))
+        self.assertEqual((target / "agents/openai.yaml").read_bytes(),
+                         (source / "agents/openai.yaml").read_bytes())
+        self.assertNotIn("# Source entry", (target / "SKILL.md").read_text())
+
+    def test_incomplete_entry_metadata_fails_before_creating_destination(self):
+        (self.repo / "skills/paper-latex/SKILL.md").write_text("# No metadata\n")
+        with self.assertRaisesRegex(installer.InstallError, "frontmatter"):
+            installer.install(self.repo, self.skills)
+        self.assertFalse(self.skills.exists())
 
     def test_router_shell_quoting_and_project_override(self):
         repo = self.root / "Prism 中文 ' $(touch injected-file)"

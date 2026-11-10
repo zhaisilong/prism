@@ -20,43 +20,15 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "lib"))
 from prism_latex import templates
+from prism_test_support import TemplateSupport, require_tex
 
 PAPER = ROOT / "scripts" / "latex-paper.sh"
 ENTRYPOINT = ROOT / "skills" / "paper-latex" / "scripts" / "paper_latex.py"
 ARTICLE_TYPES = ("research", "communication", "review", "minireview")
-INTERMEDIATES = {".aux", ".bbl", ".blg", ".fdb_latexmk", ".fls", ".log", ".out", ".spl", ".toc"}
 
 
-class AngewSupport:
-    def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="prism-angew-test-")
-        self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name).resolve()
-        self.env = os.environ.copy()
-        self.env.update(PYTHONDONTWRITEBYTECODE="1", TMPDIR=str(self.root))
-        for key in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
-            self.env.pop(key, None)
-
-    def cli(self, *args, env=None, timeout=180):
-        command = [str(PAPER)] if env is None else [sys.executable, "-B", str(ENTRYPOINT)]
-        return subprocess.run([*command, *map(str, args)], env=self.env if env is None else env,
-                              capture_output=True, text=True, timeout=timeout)
-
-    def initialize(self, project, *, article_type=None, language="bilingual", force=False,
-                   template="angew"):
-        with contextlib.redirect_stdout(io.StringIO()):
-            templates.initialize(project, force, template, language=language, article_type=article_type)
-
-    def assert_success(self, result, context=""):
-        self.assertEqual(result.returncode, 0, context + "\n" + result.stdout + result.stderr)
-
-    def inventory(self, root):
-        return {path.relative_to(root).as_posix(): path.read_bytes()
-                for path in root.rglob("*") if path.is_file()}
-
-    def assert_clean(self, project):
-        self.assertEqual([str(path.relative_to(project)) for path in project.rglob("*")
-                          if path.is_file() and path.suffix.lower() in INTERMEDIATES], [])
+class AngewSupport(TemplateSupport):
+    default_template = "angew"
 
 
 class AngewTests(AngewSupport, unittest.TestCase):
@@ -205,18 +177,7 @@ class AngewTests(AngewSupport, unittest.TestCase):
 
 class AngewCompilationTests(AngewSupport, unittest.TestCase):
     def require_real_tex(self):
-        for command in ("xelatex", "pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
-            if not shutil.which(command):
-                self.skipTest(f"Angew compilation tests require {command}")
-        for resource in ("FandolSong-Regular.otf", "FandolHei-Regular.otf", "XITSMath-Regular.otf",
-                         "mdframed.sty", "authblk.sty", "mhchem.sty"):
-            result = subprocess.run(["kpsewhich", resource], capture_output=True, text=True)
-            if result.returncode or not result.stdout.strip():
-                self.skipTest(f"Angew compilation tests require {resource}")
-
-    def text_of(self, pdf):
-        return subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True,
-                              text=True, check=True, timeout=30).stdout
+        require_tex(self, ('FandolSong-Regular.otf', 'FandolHei-Regular.otf', 'XITSMath-Regular.otf', 'mdframed.sty', 'authblk.sty', 'mhchem.sty'))
 
     def add_chinese(self, path):
         text = path.read_text(encoding="utf-8")

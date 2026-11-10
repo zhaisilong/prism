@@ -22,43 +22,15 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "lib"))
 from prism_latex import templates
+from prism_test_support import TemplateSupport, require_tex
 
 PAPER = ROOT / "scripts" / "latex-paper.sh"
 ENTRYPOINT = ROOT / "skills/paper-latex/scripts/paper_latex.py"
 CANONICAL = "journal/chemical-reviews"
-INTERMEDIATES = {".aux", ".bbl", ".blg", ".fdb_latexmk", ".fls", ".log", ".out", ".toc"}
 
 
-class ChemicalReviewsSupport:
-    def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="prism-chemrev-test-")
-        self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name).resolve()
-        self.env = os.environ.copy()
-        self.env.update(TMPDIR=str(self.root), PYTHONDONTWRITEBYTECODE="1")
-        for name in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
-            self.env.pop(name, None)
-
-    def cli(self, *arguments, env=None, timeout=180):
-        command = [str(PAPER)] if env is None else [sys.executable, "-B", str(ENTRYPOINT)]
-        return subprocess.run([*command, *map(str, arguments)],
-                              env=self.env if env is None else env, cwd=self.root,
-                              capture_output=True, text=True, check=False, timeout=timeout)
-
-    def initialize(self, project, *, language="bilingual", alias="chemrev", force=False):
-        with contextlib.redirect_stdout(io.StringIO()):
-            templates.initialize(project, force, alias, language=language)
-
-    def assert_success(self, result):
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def inventory(self, project):
-        return {str(path.relative_to(project)): path.read_bytes()
-                for path in project.rglob("*") if path.is_file()}
-
-    def assert_clean(self, project):
-        self.assertEqual([str(path.relative_to(project)) for path in project.rglob("*")
-                          if path.is_file() and path.suffix in INTERMEDIATES], [])
+class ChemicalReviewsSupport(TemplateSupport):
+    default_template = "chemrev"
 
 
 class ChemicalReviewsTests(ChemicalReviewsSupport, unittest.TestCase):
@@ -150,17 +122,7 @@ class ChemicalReviewsCompilationTests(ChemicalReviewsSupport, unittest.TestCase)
         if bilingual:
             commands.append("xelatex")
             resources.extend(("xeCJK.sty", "FandolSong-Regular.otf", "FandolHei-Regular.otf"))
-        for command in commands:
-            if not shutil.which(command):
-                self.skipTest(f"Chemical Reviews compilation tests require {command}")
-        for resource in resources:
-            result = subprocess.run(["kpsewhich", resource], capture_output=True, text=True, check=False)
-            if result.returncode or not result.stdout.strip():
-                self.skipTest(f"Chemical Reviews compilation tests require {resource}")
-
-    def text_of(self, pdf, mode="-layout"):
-        return subprocess.run(["pdftotext", mode, str(pdf), "-"], capture_output=True,
-                              text=True, check=True, timeout=30).stdout
+        require_tex(self, resources, commands)
 
     def add_chinese(self, path):
         source = path.read_text()

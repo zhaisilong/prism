@@ -19,48 +19,15 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "lib"))
 from prism_latex import templates
+from prism_test_support import TemplateSupport, require_tex
 
 PAPER = ROOT / "scripts" / "latex-paper.sh"
 ENTRYPOINT = ROOT / "skills" / "paper-latex" / "scripts" / "paper_latex.py"
 ARTICLE_TYPES = ("research", "database", "web-server")
-INTERMEDIATES = {".aux", ".bbl", ".blg", ".fdb_latexmk", ".fls", ".log", ".out", ".toc"}
 
 
-class NARTestSupport:
-    def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="prism-nar-test-")
-        self.addCleanup(temporary.cleanup)
-        self.root = Path(temporary.name).resolve()
-        self.env = os.environ.copy()
-        self.env["PYTHONDONTWRITEBYTECODE"] = "1"
-        self.env["TMPDIR"] = str(self.root)
-        for name in ("PRISM_PROJECT_DIR", "PRISM_LATEX_SKILLS_DIR"):
-            self.env.pop(name, None)
-
-    def cli(self, *arguments, env=None, timeout=180):
-        # Calling the Python entrypoint also permits dependency previews with
-        # an empty PATH, without requiring a compiler or even shell utilities.
-        command = [str(PAPER)] if env is None else [sys.executable, "-B", str(ENTRYPOINT)]
-        return subprocess.run(
-            [*command, *map(str, arguments)],
-            capture_output=True, text=True, check=False, timeout=timeout,
-            env=self.env if env is None else env,
-        )
-
-    def initialize(self, target, *, language="bilingual", article_type=None, force=False):
-        with contextlib.redirect_stdout(io.StringIO()):
-            templates.initialize(target, force, "nar", language=language, article_type=article_type)
-
-    def assert_success(self, result):
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def inventory(self, project):
-        return {path.relative_to(project).as_posix(): path.read_bytes()
-                for path in project.rglob("*") if path.is_file()}
-
-    def assert_clean(self, project):
-        self.assertEqual([str(path.relative_to(project)) for path in project.rglob("*")
-                          if path.is_file() and path.suffix.lower() in INTERMEDIATES], [])
+class NARTestSupport(TemplateSupport):
+    default_template = "nar"
 
 
 class NARTests(NARTestSupport, unittest.TestCase):
@@ -215,17 +182,7 @@ class NARTests(NARTestSupport, unittest.TestCase):
 class NARCompilationTests(NARTestSupport, unittest.TestCase):
     # Keep expensive coverage in a separate class, while sharing helpers.
     def require_real_tex(self):
-        for command in ("xelatex", "pdflatex", "latexmk", "bibtex", "kpsewhich", "pdftotext"):
-            if not shutil.which(command):
-                self.skipTest(f"NAR compilation tests require {command}")
-        for resource in ("xeCJK.sty", "FandolSong-Regular.otf", "FandolHei-Regular.otf"):
-            probe = subprocess.run(["kpsewhich", resource], capture_output=True, text=True)
-            if probe.returncode or not probe.stdout.strip():
-                self.skipTest(f"NAR compilation tests require {resource}")
-
-    def text_of(self, pdf):
-        return subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True,
-                              text=True, check=True, timeout=30).stdout
+        require_tex(self, ('xeCJK.sty', 'FandolSong-Regular.otf', 'FandolHei-Regular.otf'))
 
     def insert_bilingual_body(self, path):
         text = path.read_text(encoding="utf-8")

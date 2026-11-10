@@ -86,6 +86,16 @@ def inventory(directory: Path) -> tuple | None:
 
 
 def generated_files(repository: Path) -> dict[str, bytes]:
+    source = repository / "skills" / SKILL
+    source_skill = (source / "SKILL.md").read_text(encoding="utf-8")
+    frontmatter = re.match(r"\A---\r?\n.*?\r?\n---(?:\r?\n|$)", source_skill, re.S)
+    if frontmatter is None or not re.search(r"^name:\s*paper-latex\s*$", frontmatter[0], re.M):
+        raise InstallError("The repository paper-latex entry is missing its valid frontmatter.")
+    if not re.search(r"^description:\s*\S", frontmatter[0], re.M):
+        raise InstallError("The repository paper-latex entry is missing its description.")
+    # Reuse the maintained entrypoint's discovery and UI metadata verbatim.
+    # Keep the router body small, without copying the implementation or assets.
+    interface = (source / "agents" / "openai.yaml").read_bytes()
     command = (
         f"PRISM_REPO={shlex.quote(str(repository))}\n"
         'PRISM_REPO="${PRISM_PROJECT_DIR:-$PRISM_REPO}"\n'
@@ -93,10 +103,7 @@ def generated_files(repository: Path) -> dict[str, bytes]:
     )
     longest = max((len(run) for run in re.findall(r"`+", command)), default=0)
     fence = "`" * max(3, longest + 1)
-    skill = f"""---
-name: paper-latex
-description: Initialize or compile academic LaTeX manuscripts with Prism journal templates, bibliography, figures, tables, equations, and supplementary material. Use for manuscript projects; route ordinary single-file notes to notes-latex.
----
+    skill = frontmatter[0].rstrip() + f"""
 
 # Paper LaTeX
 
@@ -110,12 +117,7 @@ Read `skills/paper-latex/SKILL.md` in that repository before working and load it
 
 If the repository or wrapper is unavailable, report the missing location and ask for the current repository path. Do not fall back to old scripts or assets in this installed skill directory. Keep research files local and follow the repository's privacy and build rules.
 """
-    interface = """interface:
-  display_name: "Paper LaTeX"
-  short_description: "Initialize and compile Prism journal manuscripts"
-  default_prompt: "Use $paper-latex to initialize or compile my manuscript with Prism."
-"""
-    files = {"SKILL.md": skill.encode(), "agents/openai.yaml": interface.encode()}
+    files = {"SKILL.md": skill.encode(), "agents/openai.yaml": interface}
     marker = {
         "schema_version": 1,
         "managed_by": MANAGED_BY,
@@ -159,7 +161,8 @@ def backup_group(skills_dir: Path) -> Path:
 
 def install(repository: Path, skills_dir: Path | None = None, force: bool = False) -> tuple[Path, Path | None]:
     repository = repository.expanduser().resolve()
-    required = ("skills/paper-latex/SKILL.md", "scripts/latex-paper.sh", "scripts/lib/prism_latex/templates.py")
+    required = ("skills/paper-latex/SKILL.md", "skills/paper-latex/agents/openai.yaml",
+                "scripts/latex-paper.sh", "scripts/lib/prism_latex/templates.py")
     if any(not (repository / name).is_file() for name in required):
         raise InstallError("Install from a complete Prism checkout containing its skills and shared scripts.")
     skills_dir = choose_skills_dir(skills_dir)

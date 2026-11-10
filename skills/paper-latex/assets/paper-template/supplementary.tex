@@ -2,6 +2,7 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{prism-paper}
+\usepackage{placeins}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true,linkcolor=paperblue,citecolor=paperblue,urlcolor=paperblue}
@@ -9,14 +10,27 @@
 \renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\thetable}{S\arabic{table}}
 \renewcommand{\theequation}{S\arabic{equation}}
-\title{Supplementary information: Manuscript Title}
-\author{First Author and colleagues}
-\date{}
+\renewcommand{\thepage}{S\arabic{page}}
+% Update these independently of the main manuscript.
+\newcommand{\supplementtitle}{Manuscript Title}
+\newcommand{\supplementauthors}{First Author and colleagues}
 \begin{document}
-\maketitle
+\thispagestyle{plain}
+{\RaggedRight
+  {\LARGE\bfseries Supplementary information\par}
+  \vspace{0.6em}
+  {\large\bfseries \supplementtitle\par}
+  \vspace{0.5em}
+  {\large \supplementauthors\par}
+}
+\vspace{0.8em}
+{\color{paperrule}\hrule height 0.35pt}
+\vspace{0.8em}
 \noindent Replace the title, author list and all instructional examples. This
 document compiles independently: its figures, tables, equations and reference
 list do not depend on a previous build of the main manuscript.
+
+\tableofcontents
 
 \section{Supplementary methods}
 Describe supporting procedures without repeating the main Methods. Define
@@ -57,9 +71,12 @@ Example B & 36 & 0.415 +- 0.021\\
 and explain the study's actual uncertainty measure.}
 \end{table}
 
+% Keep the reference heading after the supporting displays, even if they float.
+\FloatBarrier
 \section{Supplementary references}
 This example citation only verifies the independent reference list
 \citep{wilkinson2016fair}. Remove it if it is not cited by the study.
+\renewcommand{\bibsection}{} % The section title above is the bibliography heading.
 \bibliographystyle{unsrtnat}
 \bibliography{references}
 \end{document}

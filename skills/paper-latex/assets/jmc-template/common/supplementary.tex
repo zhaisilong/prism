@@ -1,0 +1,148 @@
+% Original Prism JMC supporting-information writing draft (MIT).
+% Independent build: --main supplementary.tex --no-build-script.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[articletitle=true,doi=true,super=true,biblabel=brackets,
+  maxauthors=15,etalmode=firstonly]{achemso}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\setcounter{tocdepth}{2}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thescheme}{S\arabic{scheme}}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+\title{Supporting Information: Manuscript title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small Correspondence: \texttt{first.author@example.org}}
+\date{}
+\begin{document}
+\maketitle
+Replace the title, authors and overview with the actual supporting contents.
+This neutral document contains synthetic layout demonstrations only. It
+does not establish that experiments, a literature search or any particular
+analysis were performed. Retain only relevant material.
+\tableofcontents
+\clearpage
+
+\section{Supporting scope and provenance}
+Describe the supporting material actually supplied and its relationship to
+the manuscript. Record sources, conditions and limitations accurately. For
+a research article, complete procedures for all synthesis steps of tested
+target compounds belong in the main Experimental section; supporting
+characterization or other attachments do not replace that requirement.
+For a Perspective, include only documented evidence or explanations that
+serve its actual scope. Do not prefill a search or experiment history.
+
+\section{Supporting displays}
+Figure~\ref{fig:si-graphic}, Scheme~\ref{sch:si-concept},
+Table~\ref{tab:si-values} and Equation~\eqref{eq:si-example} demonstrate
+independent S numbering and cross-references.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][29mm][c]{0.78\linewidth}{\centering
+Supporting graphic slot\\[5pt]Replace with original artwork}}
+\caption{Synthetic supporting illustration. Replace this slot with
+relevant material, explain its actual provenance and preserve readable
+labels, units and panel identities.}
+\label{fig:si-graphic}
+\end{figure}
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][16mm][c]{0.74\linewidth}{\centering
+\ce{A -> B}\quad Synthetic scheme slot}}
+\caption{Synthetic scheme layout, not a reported transformation.
+Replace the labels and artwork using verified content.}
+\label{sch:si-concept}
+\end{scheme}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Invented values used solely to demonstrate table alignment.}
+\label{tab:si-values}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Placeholder & {Count} & {Value $\pm$ SD}\\
+\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+Example C & 48 & 0.385 +- 0.006\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All entries are invented. Supply the actual sources, units and uncertainty
+definitions; replace or delete the table when it does not apply.
+\end{table}
+
+\begin{equation}
+\begin{split}
+ q_{\mathrm{A}} &= \sum_{i=1}^{n} v_i y_i,\\
+ \Delta q &= q_{\mathrm{A}}-q_{\mathrm{B}}.
+\end{split}\label{eq:si-example}
+\end{equation}
+These expressions are layout demonstrations only. Define the actual
+symbols and assumptions if an expression is retained.
+
+\clearpage
+\section{Additional documentation}
+Table~\ref{tab:si-documentation} demonstrates a continued table with repeated
+column headers. Each row is an instruction, not a record of work performed.
+Replace or remove the inventory according to the actual supporting contents.
+
+{\small
+\begin{longtable}{@{}p{0.14\linewidth}p{0.24\linewidth}p{0.51\linewidth}@{}}
+\caption{Instructional documentation layout.}\label{tab:si-documentation}\\
+\toprule Item & Topic & Instruction\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Instruction\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Example A & Scope & Define the subject and limits actually covered.\\
+Example B & Sources & Record complete, verified source information.\\
+Example C & Attribution & Attribute reused information accurately.\\
+Example D & Context & Describe the context needed to assess a comparison.\\
+Example E & Conditions & Preserve conditions affecting interpretation.\\
+Example F & Identifiers & Keep compound and panel identifiers consistent.\\
+Example G & Units & Preserve the source's measurement units.\\
+Example H & Precision & Retain precision justified by the source.\\
+Example I & Uncertainty & Explain the reported uncertainty.\\
+Example J & Counts & Define counts and replicates only where applicable.\\
+Example K & Missing data & Distinguish missing information from zero.\\
+Example L & Censoring & Preserve reported bounds and censored values.\\
+Example M & Comparability & Note differences that limit direct comparison.\\
+Example N & Limitations & Attribute actual limitations to their sources.\\
+Example O & Assumptions & State assumptions underlying an interpretation.\\
+Example P & Interpretation & Separate observations from interpretation.\\
+Example Q & Graphics & Retain original artwork and editable sources.\\
+Example R & Labels & Check internal labels at their final display size.\\
+Example S & Captions & Explain the actual display and relevant conditions.\\
+Example T & Tables & Link real entries to their verified provenance.\\
+Example U & Symbols & Define mathematical symbols and dimensions.\\
+Example V & Cross-references & Check all labels and references resolve.\\
+Example W & Bibliography & Verify cited metadata and identifiers.\\
+Example X & Availability & State the actual access conditions.\\
+Example Y & Permissions & Record attribution and permissions if needed.\\
+Example Z & Supporting files & Describe the actual accompanying files.\\
+\end{longtable}}
+
+These public entries exercise the independent bibliography only; they do
+not support the invented displays\cite{peng2011reproducible,wilkinson2016fair}.
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\bibliography{references}
+\end{document}

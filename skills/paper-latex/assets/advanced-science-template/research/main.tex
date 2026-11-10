@@ -1,0 +1,186 @@
+% Original Prism Advanced Science writing draft, provided under MIT.
+% This is not an official publisher class or a final submission package.
+% The current official ZIP has not been verified or redistributed by Prism.
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,square,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+% Manuscript type: Research Article.
+
+\title{Manuscript Title}
+\author{First Author\textsuperscript{*} and Second Author\\
+  \small F. Author, S. Author\\
+  \small Department, Institution, City, Country\\
+  \small \textsuperscript{*}E-mail: \texttt{first.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+\noindent\textbf{Keywords:} Keyword A; Keyword B; Keyword C
+% Replace with 3--7 actual keywords. Associate each affiliation with the
+% relevant author names; use an asterisk for corresponding authors.
+
+\begin{abstract}
+Replace this paragraph with an abstract of at most 200 English words. Use
+present tense and an impersonal style, define abbreviations at first use,
+and do not cite references. Describe the actual question, evidence and
+central message of the manuscript without turning this synthetic layout
+into a scientific finding. Remove these instructions before submission.
+\end{abstract}
+
+% Research Article: a typical length is 3000--8000 words with 3--8 display
+% items; these are guidance, not hard limits or automatic checks.
+\section{Introduction}\label{sec:introduction}
+Introduce the research question, its context and why the verified
+contribution matters to a broad readership. State objectives and the main
+conclusions supported by the actual work. These public citations test
+bibliography mechanics only, and should remain only if relevant to the
+study~\cite{wilkinson2016fair,peng2011reproducible}.
+
+\section{Results and Discussion}\label{sec:results}
+\subsection{Verified observations and comparisons}
+Present the actual observations, controls and comparisons that support the
+claims. Define uncertainty and limitations, and distinguish interpretation
+from measured or computed results. Replace the examples below with the
+authors' own material.
+
+Figure~\ref{fig:comparison}, Scheme~\ref{sch:concept}, Table~\ref{tab:comparison}
+and Equation~\eqref{eq:illustration} are synthetic formatting demonstrations.
+They contain no observation, experimental transformation or research result.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][26mm][c]{0.90\linewidth}{\centering
+Conceptual display\\[5pt]Replace with original artwork}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][26mm][c]{0.90\linewidth}{\centering
+Related comparison\\[5pt]Keep labels readable}}
+\end{minipage}
+\caption{\textbf{Synthetic two-panel layout.} (a) First display slot.
+(b) Related display slot. Replace both with verified material. Preserve
+panel identities, units and original data; explain symbols and uncertainty
+where relevant. Check embedded lettering at the final display size rather
+than assuming that a caption-font change also changes the image.}
+\label{fig:comparison}
+\end{figure}
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][18mm][c]{0.75\linewidth}{\centering
+Original scheme slot\\[4pt]No transformation is reported}}
+\caption{Synthetic scheme placeholder. Replace with original artwork and
+accurate explanatory information; retain consistent labels and attribution.}
+\label{sch:concept}
+\end{scheme}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Invented values illustrating numerical alignment only.}
+\label{tab:comparison}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule
+Example & {Count} & {Estimate $\pm$ SD}\\
+\midrule
+Example A & 12 & 0.320 +- 0.015\\
+Example B & 18 & 0.415 +- 0.021\\
+Example C & 24 & 0.385 +- 0.006\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+\textsuperscript{a)}All values are invented. Define actual units, sources
+and uncertainty when replacing this display. Use lowercase letter notes
+where needed; this note describes the layout only.
+\end{table}
+
+\begin{equation}
+\begin{split}
+ s_{\mathrm{A}} &= \sum_{i=1}^{n} w_i x_i,\\
+ \Delta s &= s_{\mathrm{A}}-s_{\mathrm{B}}.
+\end{split}\label{eq:illustration}
+\end{equation}
+The expression and the notation \ce{CO2} demonstrate editable mathematics
+and chemical typesetting only. Adopt them only when relevant and explain
+the actual symbols, assumptions and source.
+
+\subsection{Interpretation and limitations}
+Relate the verified results to relevant prior work. Address alternative
+explanations and remaining limitations without claiming unperformed
+experiments or unsupported generality.
+
+\section{Conclusion}\label{sec:conclusion}
+Summarize only conclusions justified by the actual evidence and explain
+remaining questions and future directions.
+
+\section{Experimental Section}\label{sec:methods}
+\subsection{Materials, methods and reproducibility}
+Describe the actual experimental or computational procedures, materials,
+software versions, parameters and controls needed to interpret the work.
+Replace this instruction with documented methods; it is not evidence that
+any procedure has been performed.
+
+\subsection{Statistical Analysis}\label{sec:statistics}
+Where applicable, describe data preparation, sample sizes, independent and
+technical replicates, statistical methods, uncertainty and software.
+Explain the analysis actually performed, without inventing tests, sample
+sizes, significance or a power calculation.
+
+\section*{Ethics and Consent, if Applicable}
+For work involving humans, animals, personal data or other regulated
+materials, supply the confirmed approvals, consent and relevant details.
+Remove or adapt this placeholder according to the actual work; do not
+infer that an approval exists or that the topic is inapplicable.
+
+\section*{Supporting Information}
+Describe the actual supporting files and their contents, or remove this
+paragraph when no files are supplied. The independent
+\texttt{supplementary.tex} contains synthetic layout examples only.
+
+\section*{Acknowledgements}
+Replace with confirmed acknowledgements and funding details, including
+funding bodies and grant identifiers where applicable. Do not infer support
+or contributions that the authors have not confirmed.
+
+\section*{Conflict of Interest}
+Replace with the authors' confirmed disclosure.
+
+\section*{Data Availability}
+Give the confirmed availability statement, including accurate identifiers,
+access routes and restrictions where relevant. Distinguish existing source
+materials from newly generated data; do not invent a repository or promise
+an arrangement that has not been established.
+
+\bibliographystyle{prism-wiley-numeric}
+\bibliography{references}
+
+\clearpage
+\section*{Table of Contents}
+% The outer graphic slot, including its rule, is 55 mm wide by 50 mm high.
+% An alternative allowed size is 110 mm wide by 20 mm high: change both
+% dimension expressions below when deliberately selecting that layout.
+\begin{center}
+\begingroup
+\setlength{\fboxsep}{0pt}
+\fbox{\parbox[c][\dimexpr50mm-2\fboxrule\relax][c]%
+ {\dimexpr55mm-2\fboxrule\relax}{\centering\sffamily\small
+ Original TOC artwork\\[5pt]
+ Synthetic graphic slot\\[5pt]
+ Replace before submission}}
+\endgroup
+\end{center}
+Replace this paragraph with a 50--60 word description of the main message
+for a general audience. Use the third person and connect the original
+graphic with the verified central result, synthesis or viewpoint. Define
+unavoidable specialist terms, avoid unexplained abbreviations and remove
+all drafting instructions. This placeholder conveys no scientific finding
+or claim.
+\end{document}

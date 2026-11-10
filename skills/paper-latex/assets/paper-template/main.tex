@@ -13,7 +13,7 @@
 \usepackage[numbers,sort&compress]{natbib}
 
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{5pt plus 1pt}
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
 \newcommand{\codepath}[1]{\begingroup\Urlmuskip=0mu plus 1mu\path{#1}\endgroup}
 
 \newcommand{\papertitle}{Manuscript Title}
@@ -45,9 +45,9 @@
 \pagestyle{fancy}
 \fancyhf{}
 \setlength{\headheight}{14pt}
-\fancyhead[L]{\small\itshape\runningtitle}
-\fancyhead[R]{\small\thepage}
-\renewcommand{\headrulewidth}{0.25pt}
+\fancyhead[L]{\small\sffamily\itshape\runningtitle}
+\fancyhead[R]{\small\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.2pt}
 \fancypagestyle{plain}{%
   \fancyhf{}
   \fancyfoot[C]{\small\thepage}
@@ -56,9 +56,9 @@
 
 \newcommand{\papermetadata}{%
   \begingroup
-  \small
+  \small\linespread{1.05}\selectfont
   \setlength{\tabcolsep}{0pt}
-  \renewcommand{\arraystretch}{1.08}
+  \renewcommand{\arraystretch}{1.15}
   \begin{tabularx}{\linewidth}{@{}r@{\hspace{0.3em}}Y@{}}
     \textsuperscript{1} & \paperinstitutionone \\
     \textsuperscript{2} & \paperinstitutiontwo \\
@@ -72,21 +72,21 @@
 
 \newcommand{\makepapertitle}{%
   \begingroup
-  \raggedright
-    {\LARGE\bfseries \papertitle\par}
-    \vspace{0.7em}
-    {\large \paperauthors\par}
-    \vspace{0.35em}
+  \RaggedRight
+    {\LARGE\bfseries\linespread{1.08}\selectfont \papertitle\par}
+    \vspace{0.8em}
+    {\large\linespread{1.12}\selectfont \paperauthors\par}
+    \vspace{0.55em}
     \papermetadata
   \par\endgroup
-  \vspace{0.55em}
+  \vspace{0.75em}
   {\color{paperrule}\hrule height 0.35pt}
-  \vspace{0.9em}
+  \vspace{1em}
 }
 
 \newenvironment{paperabstract}{%
   \par\vspace{0.2em}
-  {\large\bfseries Abstract\par}
+  {\large\sffamily\bfseries Abstract\par}
   \vspace{0.35em}
   \begingroup
   \normalsize
@@ -121,7 +121,14 @@
 \input{sections/discussion}
 
 \section*{Data availability}
-Describe how readers can access the data, materials, and code supporting the study. Include stable identifiers, versions, and access conditions where applicable. State any restrictions and their reasons accurately.
+Describe how readers can access the data and materials supporting the study. Include stable identifiers, versions, and any actual access conditions or restrictions.
+
+% Remove sections that do not apply; do not assume access or contributions.
+\section*{Code availability}
+Describe access to the relevant code and its version, or remove this section if it does not apply.
+
+\section*{Author contributions}
+Describe contributions agreed by the authors, or remove this section if not needed.
 
 \section*{Acknowledgements}
 Describe non-author contributions and other assistance after confirming the wording with those acknowledged.
