@@ -84,12 +84,27 @@ class TemplateTests(unittest.TestCase):
             (advanced / article_type).mkdir()
             (advanced / article_type / "main.tex").write_text(f"% Advanced Science {article_type}\n")
         (self.asset_dir / "prism-wiley-numeric.bst").write_text("% shared Wiley numeric fixture\n")
+        methods = self.asset_dir / "nature-methods-template"
+        (methods / "common").mkdir(parents=True)
+        for name in ("supplementary.tex", "extended_data.tex", "references.bib", "NOTICE.md"):
+            (methods / "common" / name).write_text(f"% Nature Methods fixture {name}\n")
+        for kind in ("article", "resource", "analysis"):
+            (methods / kind).mkdir()
+            (methods / kind / "main.tex").write_text(f"% Nature Methods {kind}\n")
+        nmi = self.asset_dir / "nmi-template"
+        (nmi / "common").mkdir(parents=True)
+        for name in ("supplementary.tex", "references.bib", "NOTICE.md"):
+            (nmi / "common" / name).write_text(f"% NMI fixture {name}\n")
+        for kind in ("article", "analysis", "review"):
+            (nmi / kind).mkdir()
+            (nmi / kind / "main.tex").write_text(f"% NMI {kind}\n")
         for alias, kinds in (("jmc", ("research", "perspective")),
-                             ("ejmc", ("research", "review"))):
+                             ("ejmc", ("research", "review")),
+                             ("dyes", ("research", "review"))):
             medicinal = self.asset_dir / (alias + "-template")
             (medicinal / "common").mkdir(parents=True)
             resources = ["supplementary.tex", "references.bib", "NOTICE.md"]
-            if alias == "ejmc":
+            if alias in ("ejmc", "dyes"):
                 resources.extend(("graphical_abstract.tex", "highlights.txt"))
             for name in resources:
                 (medicinal / "common" / name).write_text(f"% {alias} synthetic fixture {name}\n")
@@ -373,6 +388,19 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(templates.template_resources("nature", "sn-jnl"),
                          ("sn-jnl.cls", "sn-nature.bst"))
 
+    def test_legacy_nature_cli_id_initializes_current_nature_without_network(self):
+        from prism_latex import paper
+        args = paper.parser().parse_args(["--init", str(self.root / "legacy"),
+                                          "--template", "family/nature-nmi"])
+        self.assertEqual(args.template, "family/nature-nmi")
+        with mock.patch.object(urllib.request, "urlopen", side_effect=AssertionError("network")) as fetch:
+            templates.initialize(self.root / "legacy", False, args.template, language="english")
+        metadata = json.loads((self.root / "legacy" / templates.METADATA_NAME).read_text())
+        self.assertEqual(metadata["template"], "nature")
+        self.assertEqual(metadata["template_id"], "journal/nature")
+        self.assertEqual(metadata["variant"], "prism-article")
+        fetch.assert_not_called()
+
     def test_invalid_metadata_variants_are_rejected_without_rewriting(self):
         metadata_path = self.root / templates.METADATA_NAME
         for metadata in ({"template": "nature", "variant": "unknown"},
@@ -548,7 +576,8 @@ class TemplateTests(unittest.TestCase):
 
     def test_canonical_ids_resolve_to_existing_aliases(self):
         names = {
-            "generic/prism": "prism", "family/nature-nmi": "nature",
+            "generic/prism": "prism", "family/nature-nmi": "nature", "journal/nature": "nature",
+            "journal/nature-machine-intelligence": "nmi",
             "journal/nature-communications": "nature-communications",
             "journal/science-advances": "science-advances",
             "journal/briefings-in-bioinformatics": "bib",
@@ -558,6 +587,8 @@ class TemplateTests(unittest.TestCase):
             "journal/nucleic-acids-research": "nar",
             "journal/angewandte-chemie-international-edition": "angew",
             "journal/advanced-science": "advanced-science",
+            "journal/dyes-and-pigments": "dyes",
+            "journal/nature-methods": "nature-methods",
         }
         for canonical, alias in names.items():
             with self.subTest(canonical=canonical):
@@ -585,6 +616,8 @@ class TemplateTests(unittest.TestCase):
             ({"template": "bib", "prism_version": "2026.10.24"}, "bib"),
             ({"schema_version": 1, "template": "jcim", "template_id": "journal/jcim"}, "jcim"),
             ({"schema_version": 1, "template": "nature", "template_id": "family/nature-nmi"}, "nature"),
+            ({"schema_version": 1, "template": "nature", "template_id": "journal/nature", "variant": "prism-article"}, "nature"),
+            ({"schema_version": 1, "template": "family/nature-nmi", "template_id": "family/nature-nmi", "variant": "sn-jnl"}, "nature"),
             ({"schema_version": 1, "template": "bioinformatics", "template_id": "journal/bioinformatics"}, "bioinformatics"),
         ]
         for metadata, expected in cases:
@@ -595,6 +628,8 @@ class TemplateTests(unittest.TestCase):
                 self.assertEqual(path.read_bytes(), original)
         for metadata in (
             {"schema_version": 1, "template": "jcim", "template_id": "journal/jacs"},
+            {"schema_version": 1, "template": "nmi", "template_id": "family/nature-nmi"},
+            {"schema_version": 1, "template": "nature", "template_id": "journal/nature-machine-intelligence"},
             {"schema_version": 1, "template": "jcim", "template_id": "journal/unknown"},
             {"schema_version": 99, "template": "jcim", "template_id": "journal/jcim"},
             {"schema_version": True, "template": "jcim", "template_id": "journal/jcim"},

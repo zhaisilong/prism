@@ -205,7 +205,7 @@ class CatalogCoreTests(unittest.TestCase):
         self.assertIn("sections/results.tex", prism.required_assets)
 
     def test_real_catalog_has_complete_all_language_recipe_declarations(self):
-        self.assertEqual(len(CATALOG.templates), 16)
+        self.assertEqual(len(CATALOG.templates), 19)
         for alias, definition in CATALOG.templates.items():
             with self.subTest(alias=alias):
                 detail = CATALOG.detail(alias)

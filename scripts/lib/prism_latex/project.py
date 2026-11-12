@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from .catalog import CATALOG, TemplateCatalog
+from .catalog import CATALOG, LEGACY_NATURE_ID, TemplateCatalog
 from .paths import METADATA_NAME
 
 
@@ -25,7 +25,11 @@ def load_project_config(project: Path, *, catalog: TemplateCatalog = CATALOG) ->
         if "schema_version" in metadata or "template_id" in metadata:
             if type(metadata.get("schema_version")) is not int or metadata["schema_version"] != 1:
                 raise ValueError("unsupported template metadata schema version")
-            if metadata.get("template_id") != catalog.templates[template].id:
+            expected_id = catalog.templates[template].id
+            accepted_ids = {expected_id}
+            if template == "nature" and expected_id == "journal/nature":
+                accepted_ids.add(LEGACY_NATURE_ID)
+            if metadata.get("template_id") not in accepted_ids:
                 raise ValueError("template and template_id do not match")
         if "variant" in metadata:
             variant = metadata["variant"]

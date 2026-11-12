@@ -11,6 +11,7 @@ from types import MappingProxyType
 from .paths import PROJECT_DIR, ASSET_DIR
 from .catalog_models import (BuildProfile, DocumentRole, SourceReference, TemplateDefinition, relative_path)
 
+LEGACY_NATURE_ID = 'family/nature-nmi'
 
 @dataclass(frozen=True)
 class TemplateCatalog:
@@ -35,12 +36,18 @@ class TemplateCatalog:
             if record.backend not in self.profiles or not isinstance(self.profiles[record.backend], BuildProfile):
                 raise ValueError("Unknown build profile")
             names.extend((alias, record.id))
+        if self.templates.get('nature') and self.templates['nature'].id == 'journal/nature':
+            if LEGACY_NATURE_ID in names:
+                raise ValueError("Duplicate Prism template name")
+            names.append(LEGACY_NATURE_ID)
         return tuple(names)
 
     def resolve(self, name):
         for alias, record in self.templates.items():
             if name == alias or name == record.id:
                 return alias
+        if name == LEGACY_NATURE_ID and self.templates.get('nature') and self.templates['nature'].id == 'journal/nature':
+            return 'nature'
         raise ValueError(f"unknown template: {name}")
 
     def article_type(self, name, requested=None):
@@ -167,6 +174,18 @@ BUILD_PROFILES = MappingProxyType({
         source=None,
         examples=True,
     ),
+    'nmi': BuildProfile(
+        packages=NATURE_COMMUNICATIONS_PACKAGES + ("geometry.sty", "hyperref.sty", "amsfonts.sty", "array.sty"),
+        source=None,
+        examples=True,
+        required_common=('supplementary.tex', 'references.bib', 'NOTICE.md'),
+    ),
+    'nature-methods': BuildProfile(
+        packages=NATURE_COMMUNICATIONS_PACKAGES,
+        source=None,
+        examples=True,
+        required_common=('supplementary.tex', 'extended_data.tex', 'references.bib', 'NOTICE.md'),
+    ),
     'jcheminformatics': BuildProfile(
         packages=NATURE_COMMUNICATIONS_PACKAGES + ("lineno.sty", "setspace.sty"),
         source=None,
@@ -268,15 +287,15 @@ TEMPLATES = MappingProxyType({
     ),
     'nature': TemplateDefinition(
         alias='nature',
-        id='family/nature-nmi',
-        kind='family',
-        venue='Nature / NMI draft',
+        id='journal/nature',
+        kind='journal',
+        venue='Nature',
         publisher='Springer Nature',
         article_type='research',
         backend='nature',
         directory='nature-template',
         engine='pdflatex',
-        description='Nature / NMI manuscript and supplementary information; bilingual / English',
+        description='Nature manuscript and supplementary information; bilingual / English',
         guide_path='docs/templates/nature.md',
         documents=(
             DocumentRole('main', 'main.tex', True),
@@ -285,6 +304,30 @@ TEMPLATES = MappingProxyType({
         ),
         sources=(
             SourceReference('Springer Nature author support', 'https://www.springernature.com/gp/authors/campaigns/latex-author-support'),
+        ),
+    ),
+    'nmi': TemplateDefinition(
+        alias='nmi',
+        id='journal/nature-machine-intelligence',
+        kind='journal',
+        venue='Nature Machine Intelligence',
+        publisher='Springer Nature',
+        article_type='article',
+        article_types=('article', 'analysis', 'review'),
+        backend='nmi',
+        directory='nmi-template',
+        engine='pdflatex',
+        description='Nature Machine Intelligence article, analysis and review drafts; bilingual / English',
+        guide_path='docs/templates/nmi.md',
+        documents=(
+            DocumentRole('main', 'main.tex', True),
+            DocumentRole('supplementary', 'supplementary.tex', True),
+            DocumentRole('examples', 'examples.tex', True),
+        ),
+        sources=(
+            SourceReference('Content types', 'https://www.nature.com/natmachintell/content'),
+            SourceReference('Initial formatting', 'https://www.nature.com/natmachintell/submission-guidelines/initial-formatting'),
+            SourceReference('AIP and formatting', 'https://www.nature.com/natmachintell/submission-guidelines/aip-and-formatting'),
         ),
     ),
     'nature-communications': TemplateDefinition(
@@ -597,6 +640,57 @@ TEMPLATES = MappingProxyType({
             SourceReference('Elsevier LaTeX', 'https://www.elsevier.com/researcher/author/policies-and-guidelines/latex-instructions'),
         ),
     ),
+    'dyes': TemplateDefinition(
+        alias='dyes',
+        id='journal/dyes-and-pigments',
+        kind='journal',
+        venue='Dyes and Pigments',
+        publisher='Elsevier',
+        article_type='research',
+        article_types=('research', 'review'),
+        backend='elsarticle-numeric',
+        directory='dyes-template',
+        engine='pdflatex',
+        description='Dyes and Pigments research and review drafts; bilingual / English',
+        guide_path='docs/templates/dyes.md',
+        documents=(
+            DocumentRole('main', 'main.tex', True),
+            DocumentRole('supplementary', 'supplementary.tex', True),
+            DocumentRole('examples', 'examples.tex', True),
+            DocumentRole('graphical_abstract', 'graphical_abstract.tex', True),
+        ),
+        sources=(
+            SourceReference('Journal scope', 'https://shop.elsevier.com/journals/dyes-and-pigments/0143-7208'),
+            SourceReference('Author guidelines', 'https://www.sciencedirect.com/journal/dyes-and-pigments/publish/guide-for-authors'),
+            SourceReference('Elsevier on Overleaf', 'https://www.overleaf.com/latex/templates/elsevier-article-elsarticle-template/vdzfjgjbckgz'),
+            SourceReference('Elsevier LaTeX', 'https://www.elsevier.com/researcher/author/policies-and-guidelines/latex-instructions'),
+        ),
+    ),
+    'nature-methods': TemplateDefinition(
+        alias='nature-methods',
+        id='journal/nature-methods',
+        kind='journal',
+        venue='Nature Methods',
+        publisher='Springer Nature',
+        article_type='article',
+        article_types=('article', 'resource', 'analysis'),
+        backend='nature-methods',
+        directory='nature-methods-template',
+        engine='pdflatex',
+        description='Nature Methods article, resource and analysis drafts; bilingual / English',
+        guide_path='docs/templates/nature-methods.md',
+        documents=(
+            DocumentRole('main', 'main.tex', True),
+            DocumentRole('supplementary', 'supplementary.tex', True),
+            DocumentRole('extended_data', 'extended_data.tex', True),
+            DocumentRole('examples', 'examples.tex', True),
+        ),
+        sources=(
+            SourceReference('Content types', 'https://www.nature.com/nmeth/content'),
+            SourceReference('Initial formatting', 'https://www.nature.com/nmeth/submission-guidelines/initial-formatting'),
+            SourceReference('AIP and formatting', 'https://www.nature.com/nmeth/submission-guidelines/aip-and-formatting'),
+        ),
+    ),
 })
 
 CATALOG = TemplateCatalog(TEMPLATES, BUILD_PROFILES)
@@ -621,7 +715,8 @@ def format_template_catalog(group_by: str = "none") -> str:
         for alias, record in TEMPLATES.items():
             publisher = record["publisher"] or "Prism"
             articles = f"; article types: {', '.join(record['article_types'])}" if record.get("article_types") else ""
-            rows.append(f"{alias}: {record['description']} [ID: {record['id']}; type: {record['kind']}; publisher: {publisher}{articles}]")
+            legacy = f"; legacy ID: {LEGACY_NATURE_ID}" if alias == 'nature' and record.id == 'journal/nature' else ""
+            rows.append(f"{alias}: {record['description']} [ID: {record['id']}; type: {record['kind']}; publisher: {publisher}{articles}{legacy}]")
         return "\n".join(rows)
     if group_by != "publisher":
         raise ValueError("Unsupported template grouping; use none or publisher")

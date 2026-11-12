@@ -97,7 +97,7 @@ def _enable_bilingual(files: dict[str, GeneratedFile], template: str, context: A
         raise SystemExit("Bilingual template assets are missing: prism-cjk.sty")
     _add_asset(style, "prism-cjk.sty", files, inventory)
     documents = ("examples.tex",) if template == "prism" else (
-        "main.tex", "supplementary.tex", "examples.tex", "graphical_abstract.tex",
+        "main.tex", "supplementary.tex", "examples.tex", "graphical_abstract.tex", "extended_data.tex",
     )
     for name in documents:
         if name not in files:

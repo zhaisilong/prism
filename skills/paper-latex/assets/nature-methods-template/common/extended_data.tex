@@ -1,0 +1,44 @@
+% Original Prism standalone Extended Data drafting aid.
+% Build with --main extended_data.tex --no-build-script.
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,amsmath,amssymb,booktabs,array,tabularx,siunitx}
+\usepackage[hidelinks]{hyperref}
+\renewcommand{\figurename}{Extended Data Fig.}
+\renewcommand{\tablename}{Extended Data Table}
+\sisetup{uncertainty-mode=separate}
+\title{Extended Data: Manuscript title}
+\author{First Author and Second Author}
+\date{}
+\begin{document}
+\maketitle
+This independent drafting file demonstrates Extended Data numbering. All
+illustrations and values are synthetic. Replace them with the authors' own
+verified material and consult the current journal instructions before use.
+
+Extended Data Fig.~\ref{fig:extended} and Extended Data Table~\ref{tab:extended}
+illustrate independent cross-references. Their numbers do not depend on a main
+manuscript or supplementary build.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][45mm][c]{0.80\linewidth}{\centering
+Extended Data graphic slot\\[8pt]Replace with original artwork}}
+\caption{\textbf{An illustrative Extended Data layout.} This slot contains no
+results. Explain the actual axes, labels, units and uncertainty as applicable.}
+\label{fig:extended}
+\end{figure}
+\begin{table}[htbp]
+\centering\small
+\caption{Invented values for a standalone Extended Data table.}
+\label{tab:extended}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=2.0] S[table-format=1.3(3)]@{}}
+\toprule Example & {Count} & {Estimate $\pm$ SD}\\\midrule
+Example A & 24 & 0.320 +- 0.015\\
+Example B & 36 & 0.415 +- 0.021\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+The values are invented. Replace them and define actual units and uncertainty.
+\end{table}
+\end{document}

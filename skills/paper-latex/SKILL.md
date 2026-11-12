@@ -10,6 +10,7 @@ Use the complete Prism repository as the source of truth. Run its root wrapper b
 ## Select the task
 
 - **Create**: choose an implemented template and, when supported, article type. Read only that template's guide from the catalog's `guide_path`; [template overview](../../docs/templates.md) links all guides.
+- For Nature use `--template nature`; for Nature Machine Intelligence use `--template nmi`. Both create offline drafts; consult the selected venue's guide.
 - **Adapt**: first read [layout guidance](references/layout.md). Identify the actual template, class, styles, overrides and build entrypoint; actively correct confirmed legacy formatting conflicts within scope while preserving scientific content, precision, units, citation keys and panel identities.
 - **Build or diagnose**: inspect the existing project and follow its actual main/supplementary cross-document steps. Keep its engine and language unless a change is requested or required. Use [advanced usage](../../docs/reference.zh-CN.md) for options and troubleshooting.
 

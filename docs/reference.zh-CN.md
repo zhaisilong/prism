@@ -39,23 +39,23 @@ scripts/latex-paper.sh PAPER_DIR --engine xelatex
 ## 2. 使用 Nature / NMI 模板
 
 ```bash
-scripts/latex-paper.sh --init projects/Papers/nmi-paper --template nature
+scripts/latex-paper.sh --init projects/Papers/nmi-paper --template nmi
 scripts/latex-paper.sh projects/Papers/nmi-paper --check-deps
 scripts/latex-paper.sh projects/Papers/nmi-paper --strict
 ```
 
-默认初始化使用 Prism 维护的标准 `article` 初稿，无需联网。主文、参考文献和独立补充材料分别在 `main.tex`、`references.bib`、`supplementary.tex`；默认使用 XeLaTeX 与 BibTeX 支持中英混排。需要原英文期刊模式时，初始化加 `--language english`。已有 `sn-jnl` 项目继续使用原资源和编译引擎，不会自动转换。
+Nature 本刊使用 `--template nature`，Nature Machine Intelligence 使用 `--template nmi`；两者默认离线创建 Prism 维护的标准 `article` 初稿。主文、参考文献和独立补充材料分别在 `main.tex`、`references.bib`、`supplementary.tex`；默认使用 XeLaTeX 与 BibTeX 支持中英混排。需要英文编译模式时，初始化加 `--language english`。旧 `family/nature-nmi` 标识及已有 `sn-jnl` 项目继续受支持，不会自动转换。
 
 需要官方 `sn-jnl` / `sn-nature` 版式时，从[官方作者支持页](https://www.springernature.com/gp/authors/campaigns/latex-author-support)取得[固定版本原始 ZIP](https://cms-resources.apps.public.k8s.springernature.io/springer-cms/rest/v1/content/18782940/data/v12)，显式导入到新目录：
 
 ```bash
-scripts/latex-paper.sh --init projects/Papers/nmi-official --template nature \
+scripts/latex-paper.sh --init projects/Papers/nature-official --template nature \
   --template-source path/to/official-template.zip
 ```
 
 导入只读取本地文件，不自动下载。原始 ZIP 的 SHA-256 必须匹配，重新打包或 Overleaf 导出不等同于该原包；失败不会覆盖目标。官方 ZIP、class 和样式留在生成的本地项目中，保留上游许可。官方 class 已设置 bibliography style，不重复加载 `natbib` 或 Prism 字体版式。
 
-NMI 初稿接受编译后的 PDF，通常无需模仿成刊版面。接收后的 TeX 要求另外整理单一源文件、字体和内嵌参考文献；本版本没有自动完成最终投稿导出。不同文章类型的字数和图表数以当前官方要求为准，额外实验与大表可组织到补充材料。参见 [NMI 初稿要求](https://www.nature.com/natmachintell/submission-guidelines/initial-formatting)、[内容类型](https://www.nature.com/natmachintell/content)及[最终格式要求](https://www.nature.com/natmachintell/submission-guidelines/aip-and-formatting)。核查日期：2026-10-24。
+初稿通常无需模仿成刊版面；最终投稿要求另行核对并整理，本版本没有自动完成最终投稿导出。Nature 见[本刊说明](templates/nature.md)，NMI 见[专用说明](templates/nmi.md)；不同稿型及投稿阶段以当前官方要求为准。
 
 ## 3. Briefings in Bioinformatics（BIB）
 

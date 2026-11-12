@@ -1,0 +1,138 @@
+% Original Prism writing draft for Dyes and Pigments.
+% Distribution-provided elsarticle and elsarticle-num remain unchanged.
+% All demonstration values and graphics are synthetic, not research findings.
+\documentclass[a4paper,preprint,12pt]{elsarticle}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\biboptions{numbers,sort&compress}
+\setcitestyle{square}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.8}
+% Keep draft float pages compact instead of stretching space between graphics.
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{18pt plus 2pt minus 2pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+\journal{Dyes and Pigments}
+
+\begin{document}
+\begin{frontmatter}
+\title{Manuscript title}
+\author[inst1]{First Author}
+\author[inst1,inst2]{Second Author\texorpdfstring{\corref{corresponding}}{}}
+\cortext[corresponding]{Corresponding author.}
+\ead{second.author@example.org}
+\address[inst1]{Department, First Institution, City, Country}
+\address[inst2]{Department, Second Institution, City, Country}
+\begin{abstract}
+Replace with a concise, self-contained account of the actual question,
+approach, verified evidence and conclusions. Follow current journal
+instructions. The figures, values and equations in this draft demonstrate
+layout only; they report no experimental or literature results.
+\end{abstract}
+\begin{keyword}
+keyword one \sep keyword two \sep keyword three
+\end{keyword}
+\end{frontmatter}
+
+\section{Introduction}\label{sec:intro}
+Explain the scope and organizing question, using actual cited literature.
+Do not claim an unperformed literature search or screening process. These
+public citations test bibliography mechanics only
+\cite{wilkinson2016fair,peng2011reproducible}.
+
+\section{Concepts and design strategies}\label{sec:design}
+Organize the reviewed concepts and chemical strategies around actual sources.
+Attribute any reproduced material and obtain permission when appropriate.
+The example below is an editable layout placeholder, not a literature claim.
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][24mm][c]{0.85\linewidth}{\centering
+\ce{A ->[step 1] B ->[step 2] C}\\[6pt]
+Replace with original structures and verified information.}}
+\caption{Synthetic scheme layout. Letters are placeholders, not substances;
+no reaction, condition or synthesis is reported.}
+\label{sch:layout}
+\end{scheme}
+
+\section{Optical properties and comparison}\label{sec:optics}
+Figure~\ref{fig:spectra} and Table~\ref{tab:values} are synthetic layout
+examples only. Replace them with evidence from the actual manuscript; retain
+units and explain conditions, sample sizes and uncertainty when relevant.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][27mm][c]{0.90\linewidth}{\centering
+Absorption spectrum slot\\[5pt]Replace with original graphic}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][27mm][c]{0.90\linewidth}{\centering
+Emission spectrum slot\\[5pt]Keep axis labels readable}}
+\end{minipage}
+\caption{\textbf{Synthetic two-panel layout.} (a) and (b) are framed
+placeholders, not measured spectra. Explain the actual axes, units, sample
+conditions and uncertainty in the replacement caption. Preserve panel
+identities and readable labels at the final figure size.}
+\label{fig:spectra}
+\end{figure}
+\begin{table}[htbp]
+\centering\small
+\caption{Invented optical values for numerical alignment only.}
+\label{tab:values}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+ S[table-format=3.0] S[table-format=1.3(3)]@{}}
+\toprule
+Illustrative sample & {Wavelength / nm} & {Illustrative value $\pm$ SD}\\
+\midrule
+Example A & 420 & 0.385 +- 0.006\\
+Example B & 505 & 0.608 +- 0.051\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+No measurements were made. Replace all values and specify actual quantities,
+units, conditions and uncertainty. SD denotes an illustrative standard deviation.
+\end{table}
+
+Equation~\eqref{eq:layout} is a typesetting example; define the quantities
+and applicability of any equation used in the actual manuscript.
+\begin{equation}
+ r_i = \frac{x_i}{x_{\mathrm{ref}}}.\label{eq:layout}
+\end{equation}
+
+\section{Critical comparison}\label{sec:comparison}
+Compare the actual literature, its methods, evidence and limitations.
+Explain where differences in conditions limit a comparison.
+\section{Challenges and Outlook}\label{sec:outlook}
+Discuss evidence gaps and future directions grounded in verified sources.
+Do not imply an experiment or systematic search was performed.
+
+\section*{Data availability}
+Describe actual data and code availability and any access restrictions.
+\section*{Author contributions}
+Describe confirmed contributions in accordance with current journal guidance.
+\section*{Declaration of competing interest}
+Replace with the authors' confirmed declaration.
+\section*{Acknowledgements and funding}
+List confirmed acknowledgements and funding, or remove if not applicable.
+\section*{Supplementary material}
+Describe supporting files actually supplied. The independent supplement,
+graphical abstract and highlights are editable drafting aids; confirm the
+journal's current submission requirements before use.
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+\end{document}

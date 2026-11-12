@@ -19,13 +19,16 @@ scripts/latex-templates.sh --show advanced-science --json
 | [`jmc`](templates/jmc.md) | Journal of Medicinal Chemistry | ACS | `research`（默认）、`perspective` |
 | [`jacs`](templates/jacs.md) | Journal of the American Chemical Society | ACS | `research` |
 | [`ddt`](templates/ddt.md) | Drug Discovery Today | Elsevier | `review` |
+| [`dyes`](templates/dyes.md) | Dyes and Pigments | Elsevier | `research`（默认）、`review` |
 | [`ejmc`](templates/ejmc.md) | European Journal of Medicinal Chemistry | Elsevier | `research`（默认）、`review` |
 | [`bioinformatics`](templates/bioinformatics.md) | Bioinformatics | Oxford University Press | `original` |
 | [`bib`](templates/bib.md) | Briefings in Bioinformatics | Oxford University Press | `manuscript` |
 | [`nar`](templates/nar.md) | Nucleic Acids Research | Oxford University Press | `research`（默认）、`database`、`web-server` |
 | [`jcheminformatics`](templates/jcheminformatics.md) | Journal of Cheminformatics | Springer Nature | `research` |
-| [`nature`](templates/nature.md) | Nature / NMI draft | Springer Nature | `research` |
+| [`nature`](templates/nature.md) | Nature | Springer Nature | `research` |
 | [`nature-communications`](templates/nature-communications.md) | Nature Communications | Springer Nature | `research` |
+| [`nmi`](templates/nmi.md) | Nature Machine Intelligence | Springer Nature | `article`（默认）、`analysis`、`review` |
+| [`nature-methods`](templates/nature-methods.md) | Nature Methods | Springer Nature | `article`（默认）、`resource`、`analysis` |
 | [`advanced-science`](templates/advanced-science.md) | Advanced Science | Wiley-VCH | `research`（默认）、`review`、`perspective` |
 | [`angew`](templates/angew.md) | Angewandte Chemie International Edition | Wiley-VCH | `research`（默认）、`communication`、`review`、`minireview` |
 | [`prism`](templates/prism.md) | Prism | 通用 | `manuscript` |
@@ -43,7 +46,7 @@ scripts/latex-templates.sh --show advanced-science --json
 
 ## Nature
 
-见[Nature / NMI 模板说明](templates/nature.md)。
+见 [Nature 本刊模板说明](templates/nature.md)和 [Nature Machine Intelligence 模板说明](templates/nmi.md)。
 
 ## Nature Communications
 

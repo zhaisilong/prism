@@ -27,16 +27,19 @@ for the chosen article type.
 \noindent\textbf{Keywords:} replace with the manuscript's own terms
 
 \section{Introduction}\label{sec:introduction}
-Introduce the research question, relevant prior work and the contribution of
-the study. This public reference demonstrates bibliography mechanics only;
+Introduce the chemical information or modelling question, relevant prior
+work and the contribution of the study. This public reference demonstrates bibliography mechanics only;
 retain it only if relevant to the manuscript\cite{wilkinson2016fair}. Replace
 all instructional text, numerical examples and graphics before submission.
 
 \section{Methods}\label{sec:methods}
-Describe the actual data, procedures, software versions and evaluation design.
-State the assumptions, controls and uncertainty measures needed to interpret
-and reproduce the study. Equations~\eqref{eq:score} and~\eqref{eq:difference}
-illustrate aligned expressions and cross-references only.
+\subsection{Data curation and representation}
+Describe actual sources, versions, inclusion criteria, transformations, and
+representations, preserving provenance and relevant access conditions.
+\subsection{Methods, comparison and validation}
+Describe the actual algorithms, software versions, evaluation partitions,
+comparators and validation. Explain limitations and uncertainty as applicable.
+Equations~\eqref{eq:score} and~\eqref{eq:difference} demonstrate notation only.
 \begin{align}
  s &= \sum_{i=1}^{n} w_i x_i,\label{eq:score}\\
  \Delta s &= s_{\mathrm{A}}-s_{\mathrm{B}}.\label{eq:difference}
@@ -45,19 +48,20 @@ Define the actual variables in the manuscript; these equations do not describe
 a study or claim a result.
 
 \section{Results}\label{sec:results}
-Present verified findings and relate each display to the text.
+Present verified results, comparisons and limitations; distinguish evaluation
+on independent material from development wherever applicable.
 Figure~\ref{fig:overview} shows an editable two-panel placeholder.
 \begin{figure}[htbp]
 \centering
 \begin{minipage}[t]{0.47\linewidth}
 \centering\textbf{a}\par\smallskip
 \fbox{\parbox[c][32mm][c]{0.90\linewidth}{\centering
-Overview graphic\\[5pt]Replace with an original PDF or PNG}}
+Data workflow slot\\[5pt]Replace with original artwork}}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.47\linewidth}
 \centering\textbf{b}\par\smallskip
 \fbox{\parbox[c][32mm][c]{0.90\linewidth}{\centering
-Comparison graphic\\[5pt]Keep labels readable at final size}}
+Evaluation graphic slot\\[5pt]Keep labels readable at final size}}
 \end{minipage}
 \caption{\textbf{Two-panel layout example.} (a) Overview slot. (b) Comparison
 slot. Describe the actual figure, units, symbols and uncertainty as needed.
@@ -98,7 +102,8 @@ Describe the files supplied with the manuscript. The included
 and equations with an S prefix.
 
 \section*{Data and Code Availability}
-Replace with the authors' accurate availability statement and any restrictions.
+Describe actual access to datasets, code, versions and dependencies, including
+any restrictions. Do not assert that resources are public unless confirmed.
 \section*{Acknowledgments}
 Replace with confirmed funding and acknowledgments, or remove if not applicable.
 \section*{Conflict of Interest}

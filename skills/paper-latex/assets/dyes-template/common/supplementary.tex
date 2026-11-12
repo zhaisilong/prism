@@ -1,0 +1,144 @@
+% Original Prism supporting-material draft; no experimental content is supplied.
+% Build separately with --main supplementary.tex --no-build-script.
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[numbers,sort&compress,square]{natbib}
+\usepackage[hidelinks]{hyperref}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thescheme}{S\arabic{scheme}}
+\raggedbottom
+
+\title{Supporting Information: Manuscript title}
+\author{First Author and Second Author\\
+  \small Department, Institution, City, Country\\
+  \small Correspondence: \texttt{second.author@example.org}}
+\date{}
+
+\begin{document}
+\maketitle
+This independent file supports either a research manuscript or a review.
+Replace its examples with actual supporting material and remove unused
+sections. No experiment, literature search or scientific result is supplied
+by these resources. All sample values are invented solely for formatting.
+\tableofcontents
+\clearpage
+
+\section{Supporting overview}\label{sec:si-overview}
+Describe the contents and their relation to the main text. For a research
+paper, include only actual supporting evidence and information appropriate
+to this file. For a review, use verified evidence tables or additional
+analysis only when they were actually prepared. The public reference is a
+bibliography demonstration, not evidence for a dye study~\cite{peng2011reproducible}.
+
+Figure~\ref{fig:si-overview}, Scheme~\ref{sch:si-sequence} and
+Equations~\eqref{eq:si-ratio}--\eqref{eq:si-difference} demonstrate independent
+S numbering. Define actual quantities before using the equations.
+\begin{align}
+ q_i &= \frac{x_i}{x_{\mathrm{ref}}},\label{eq:si-ratio}\\
+ \Delta q &= q_{\mathrm{A}}-q_{\mathrm{B}}.\label{eq:si-difference}
+\end{align}
+These expressions are layout examples, not a validated optical quantity or method.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][30mm][c]{0.82\linewidth}{\centering
+Original supporting graphic slot\\[7pt]
+Replace with the authors' verified figure and legend.}}
+\caption{\textbf{Supporting layout example.} No data are shown. Describe the
+replacement figure, symbols, units and uncertainty accurately. Preserve
+compound and panel identifiers from the main manuscript.}
+\label{fig:si-overview}
+\end{figure}
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][18mm][c]{0.82\linewidth}{\centering
+\ce{A ->[replace] B}\\[5pt]Synthetic letter slots, not a reported reaction.}}
+\caption{A synthetic scheme placeholder; supply original structures and
+verified information, or remove it. Formulae such as \ce{CO2} illustrate
+chemical typography only.}
+\label{sch:si-sequence}
+\end{scheme}
+\clearpage
+
+\section{Supporting tables}\label{sec:si-tables}
+Table~\ref{tab:si-values} demonstrates aligned numbers and uncertainty.
+Preserve precision and units when replacing it with actual supporting data.
+\begin{table}[htbp]
+\centering\small
+\caption{Invented values illustrating numerical alignment only.}
+\label{tab:si-values}
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X
+ S[table-format=3.1(2)] S[table-format=1.2(2)]@{}}
+\toprule
+Compound & Substituent slot & {\shortstack{Illustrative wavelength\\/ nm}}
+ & {\shortstack{Illustrative value}}\\
+\midrule
+\textbf{1} & \ce{CH3} & 420.0 +- 0.6 & 0.31 +- 0.04\\
+\textbf{2} & \ce{C2H5} & 505.0 +- 0.4 & 0.28 +- 0.02\\
+\textbf{3} & \ce{F} & 478.0 +- 0.8 & 0.19 +- 0.09\\
+\bottomrule
+\end{tabularx}
+\par\smallskip\footnotesize\raggedright
+All values are invented. Define the actual endpoint, units, uncertainty
+measure and replicate counts; no measurement was performed.
+\end{table}
+
+Table~\ref{tab:si-inventory} demonstrates a long table whose column headings
+repeat if it spans pages. Its entries are writing prompts, not an inventory of completed
+experiments or a review's search process. Replace or delete it as needed.
+\begingroup\small
+\begin{longtable}{@{}p{0.12\linewidth}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.54\linewidth}@{}}
+\caption{Synthetic supporting inventory used to demonstrate continuation.}
+\label{tab:si-inventory}\\
+\toprule Item & Topic & Description\\\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{Table~\thetable\ (continued)}\\[3pt]
+\toprule Item & Topic & Description\\\midrule
+\endhead
+\midrule\multicolumn{3}{r@{}}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+S01 & Scope & Explain which actual material supports the main manuscript.\\
+S02 & Identifiers & Preserve the compound identifiers used in the main text.\\
+S03 & Provenance & Attribute actual data or cited material to its source.\\
+S04 & Structure & Supply verified structural information when applicable.\\
+S05 & Characterization & Link actual characterization evidence to its compound.\\
+S06 & Conditions & State relevant conditions without inventing experiments.\\
+S07 & Controls & Describe controls actually used, where applicable.\\
+S08 & Measurement & Define the endpoint represented by each reported value.\\
+S09 & Units & Preserve original units and explain any actual conversions.\\
+S10 & Precision & Preserve the numerical precision justified by the evidence.\\
+S11 & Uncertainty & Define the meaning and source of any uncertainty values.\\
+S12 & Replicates & State the actual number and nature of replicates.\\
+S13 & Missing values & Distinguish unavailable data from a measured zero.\\
+S14 & Software & Record relevant versions and settings for reproducibility.\\
+S15 & Comparability & Explain differences that limit a comparison.\\
+S16 & References & Verify the identity of cited publications and their links.\\
+S17 & Figures & Keep original editable graphics and readable final-size labels.\\
+S18 & Schemes & Preserve structures, identifiers and verified conditions.\\
+S19 & Tables & Relate supporting entries to the corresponding main-text claim.\\
+S20 & Permissions & Record permissions where material is reused.\\
+S21 & Evidence & Separate observations from interpretation or proposals.\\
+S22 & Limitations & Report actual limitations and unresolved questions.\\
+S23 & Availability & Describe real access conditions for underlying material.\\
+S24 & Consistency & Check labels and terminology against the main manuscript.\\
+\end{longtable}
+\endgroup
+
+\section{Additional information}\label{sec:si-additional}
+Use this section only for supporting information actually prepared by the
+authors. It is not a prefilled experimental protocol or literature-search
+record. Remove unused examples and instructional text before submission.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+\end{document}

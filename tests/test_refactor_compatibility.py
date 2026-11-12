@@ -1,4 +1,4 @@
-"""Fixed starter contracts: the current Prism starter and original journal starters."""
+"""Fixed starter contracts, updated only for intentional template changes."""
 
 from __future__ import annotations
 

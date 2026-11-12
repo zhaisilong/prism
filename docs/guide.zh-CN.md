@@ -33,13 +33,16 @@ scripts/latex-templates.sh
 | [`jmc`](templates/jmc.md) | Journal of Medicinal Chemistry |
 | [`jacs`](templates/jacs.md) | Journal of the American Chemical Society |
 | [`ddt`](templates/ddt.md) | Drug Discovery Today |
+| [`dyes`](templates/dyes.md) | Dyes and Pigments |
 | [`ejmc`](templates/ejmc.md) | European Journal of Medicinal Chemistry |
 | [`bioinformatics`](templates/bioinformatics.md) | Bioinformatics |
 | [`bib`](templates/bib.md) | Briefings in Bioinformatics |
 | [`nar`](templates/nar.md) | Nucleic Acids Research |
 | [`jcheminformatics`](templates/jcheminformatics.md) | Journal of Cheminformatics |
-| [`nature`](templates/nature.md) | Nature / NMI draft |
+| [`nature`](templates/nature.md) | Nature |
 | [`nature-communications`](templates/nature-communications.md) | Nature Communications |
+| [`nmi`](templates/nmi.md) | Nature Machine Intelligence |
+| [`nature-methods`](templates/nature-methods.md) | Nature Methods |
 | [`advanced-science`](templates/advanced-science.md) | Advanced Science |
 | [`angew`](templates/angew.md) | Angewandte Chemie International Edition |
 | [`prism`](templates/prism.md) | Prism |
@@ -60,6 +63,12 @@ scripts/latex-paper.sh --init projects/Papers/my-review --template advanced-scie
 可选值和默认值由查询命令列出；字数、提案及投稿要求集中在表格链接的模板说明中。
 
 JMC 可选 `research`、`perspective`（观点综述）；EJMC 可选 `research`、`review`。例如 `--template jmc --article-type perspective` 或 `--template ejmc --article-type review`。
+
+Dyes and Pigments 默认研究稿；综述使用 `--template dyes --article-type review`，并请先阅读[模板说明](templates/dyes.md)中的提案要求。
+
+Nature Methods 默认 Article；Resource 或 Analysis 可选 `--template nature-methods --article-type resource` 或 `--article-type analysis`，详见[模板说明](templates/nature-methods.md)。
+
+Nature 本刊使用 `--template nature`；Nature Machine Intelligence 使用 `--template nmi`，可选 `article`、`analysis` 和 `review`。
 
 ## 2. 写内容
 

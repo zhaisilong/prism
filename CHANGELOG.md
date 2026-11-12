@@ -4,6 +4,50 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.11.11.1
+
+### Changed
+
+- Separated Nature and Nature Machine Intelligence into distinct offline manuscript starters, retaining legacy Nature project metadata and explicit official-package import compatibility.
+- Distinguished the JACS and JCIM manuscript drafts and guidance while retaining the shared ACS build and citations.
+
+### Validation
+
+- Passed all 243 regression tests, including legacy Nature identifiers, schema-1 variants and local ZIP import, NMI content profiles, overwrite protection and previous-PDF preservation.
+- Strictly compiled synthetic Nature, NMI, JACS and JCIM main texts and supplements in both language modes; checked representative pages, references, source cleanliness and rebuild entrypoints.
+- Validated all 19 catalog entries, synchronized the documentation and audited the 236-file public boundary. Research files and unrelated journal assets were not changed.
+
+## 2026.11.11
+
+### Added
+
+- Added offline Nature Methods Article, Resource and Analysis writing drafts, with bilingual XeLaTeX and English pdfLaTeX support.
+- Added independent supplementary information and Extended Data examples with separate numbering, plus guidance on the journal's initial and acceptance-in-principle requirements.
+
+### Changed
+
+- Enabled Chinese typesetting in standalone Extended Data documents when initializing bilingual projects, without changing existing starters.
+
+### Validation
+
+- Passed all 236 regression tests; the final supplement heading adjustment was also rechecked in six focused Nature Methods tests.
+- Strictly compiled synthetic main texts, supplements and Extended Data for all three content types in both languages, plus shared examples. Checked Chinese text, independent numbering, references, representative pagination, clean source directories and the main rebuild entrypoint.
+- Validated all 18 catalog entries, synchronized the documentation and audited the 228-file public boundary. Existing starter assets and private research directories were unchanged.
+
+## 2026.11.10.1
+
+### Added
+
+- Added offline Dyes and Pigments research and review drafts using the existing Elsevier numeric build profile, with mixed Chinese-English support and an English pdfLaTeX option.
+- Added synthetic Scheme, spectra, table and equation examples, standalone S-numbered supplementary information and optional graphical abstract and highlights writing aids.
+- Documented the Elsevier/Overleaf template source, the journal's review-proposal process and the limits of the currently inaccessible journal-specific author guide.
+
+### Validation
+
+- Passed all 230 regression tests, including six Dyes-specific tests for offline initialization, both article types and languages, protected overwrites, citations, DOI links and failed-build PDF preservation.
+- Strictly compiled synthetic main texts and supplements for both article types and languages, plus graphical abstracts and examples; visually checked Chinese text, figures, tables, references and representative pagination. Verified clean source directories and the main rebuild entrypoint.
+- Validated all 17 catalog entries and synchronized documentation. Audited the 219-file public boundary; existing journal assets and research files remained unchanged.
+
 ## 2026.11.10
 
 ### Changed

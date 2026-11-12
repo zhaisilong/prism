@@ -1,8 +1,16 @@
-# Nature / NMI
+# Nature
 
-Nature 默认使用 Prism 原创标准 `article` 草稿。需要官方 `sn-jnl` / `sn-nature` 时，用 `--template-source` 显式提供原始 3.1 ZIP；已有官方项目继续原样构建。官方包来自 [Springer Nature 作者支持页](https://www.springernature.com/gp/authors/campaigns/latex-author-support)。该 class 在 LPPL 声明外另有与 LaTeX base 一起分发的文字，因此本仓库不单独镜像它；这不影响其他可分发样式。
-NMI 提供[初稿要求](https://www.nature.com/natmachintell/submission-guidelines/initial-formatting)和[接收后格式要求](https://www.nature.com/natmachintell/submission-guidelines/aip-and-formatting)。`sn-jnl` 是官方提供的可选方案；不要把它理解为 NMI 强制 class，或宣称本模板已完成最终投稿整理。
+`nature` / `journal/nature` 是 Prism 维护的 Nature 本刊写作草稿，默认离线创建；Nature Machine Intelligence 使用单独的 [`nmi`](nmi.md) 入口。草稿使用标准 `article` 类，并非出版社的本刊专用 class，也不声称复刻最终成刊版式。
 
-独立示例可用 `scripts/latex-paper.sh PROJECT --main examples.tex --no-build-script` 构建。模板负责写作与编译支持；投稿前由作者核对当前期刊指南，字数、提案和投稿规则不属于自动合规检查。
+```bash
+scripts/latex-paper.sh --init projects/Papers/my-nature --template nature
+scripts/latex-paper.sh projects/Papers/my-nature --strict
+```
+
+默认 XeLaTeX 支持中英混排；初始化时加 `--language english` 使用 pdfLaTeX。两种模式均使用 BibTeX，系统不会自动翻译。图表与示例均为合成占位，正式使用前请替换。独立补充材料和 `examples.tex` 用 `--main 文件名 --no-build-script` 构建，以保留主文重建入口。
+
+[Nature 初投说明](https://www.nature.com/nature/for-authors/initial-submission)允许灵活组织初稿；[最终投稿说明](https://www.nature.com/nature/for-authors/final-submission)对单一 TeX 文件、标准 class 和内嵌数字参考文献另有要求。Prism 草稿不自动整理最终投稿包。
+
+旧 `family/nature-nmi` 标识、已有项目和官方 `sn-jnl` 项目保持兼容；显式本地官方 ZIP 导入的旧用法见[高级用法](../reference.zh-CN.md)。新建 NMI 项目请使用 `--template nmi`。
 
 [返回模板目录](../templates.md) · [日常使用](../guide.zh-CN.md) · [高级用法](../reference.zh-CN.md)
