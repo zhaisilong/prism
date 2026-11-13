@@ -38,6 +38,7 @@ scripts/latex-templates.sh
 | [`bioinformatics`](templates/bioinformatics.md) | Bioinformatics |
 | [`bib`](templates/bib.md) | Briefings in Bioinformatics |
 | [`nar`](templates/nar.md) | Nucleic Acids Research |
+| [`rsc-advances`](templates/rsc-advances.md) | RSC Advances |
 | [`jcheminformatics`](templates/jcheminformatics.md) | Journal of Cheminformatics |
 | [`nature`](templates/nature.md) | Nature |
 | [`nature-communications`](templates/nature-communications.md) | Nature Communications |
@@ -69,6 +70,8 @@ Dyes and Pigments 默认研究稿；综述使用 `--template dyes --article-type
 Nature Methods 默认 Article；Resource 或 Analysis 可选 `--template nature-methods --article-type resource` 或 `--article-type analysis`，详见[模板说明](templates/nature-methods.md)。
 
 Nature 本刊使用 `--template nature`；Nature Machine Intelligence 使用 `--template nmi`，可选 `article`、`analysis` 和 `review`。
+
+RSC Advances 默认研究稿；综述使用 `--template rsc-advances --article-type review`，详见[模板说明](templates/rsc-advances.md)。
 
 ## 2. 写内容
 

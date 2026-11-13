@@ -7,7 +7,7 @@ Prism 是面向 Codex 和命令行的本地 LaTeX 工作流：选择模板、写
 ## 项目特色
 
 <!-- prism:template-count:start -->
-- **19 套离线模板**：覆盖化学、生物信息学与综合期刊，按出版社分组查询；可选稿型由目录统一列出，模板资源随仓库提供。
+- **20 套离线模板**：覆盖化学、生物信息学与综合期刊，按出版社分组查询；可选稿型由目录统一列出，模板资源随仓库提供。
 <!-- prism:template-count:end -->
 - **先用中文写，再整理英文稿**：以英文期刊结构和版式为基础，默认支持中文及中英混排，保留英文与数学排版；系统不自动翻译。
 - **让图表适应目标模板**：辅助检查并纠正迁移遗留的字体、图注、表格宽度与图片尺寸，保留科研内容、数值和面板标识；图内字体需要可编辑绘图源配合调整。
@@ -60,6 +60,7 @@ scripts/latex-paper.sh projects/Papers/my-paper
 | ACS | [`chemrev`](docs/templates/chemrev.md)、[`jcim`](docs/templates/jcim.md)、[`jmc`](docs/templates/jmc.md)、[`jacs`](docs/templates/jacs.md) |
 | Elsevier | [`ddt`](docs/templates/ddt.md)、[`dyes`](docs/templates/dyes.md)、[`ejmc`](docs/templates/ejmc.md) |
 | Oxford University Press | [`bioinformatics`](docs/templates/bioinformatics.md)、[`bib`](docs/templates/bib.md)、[`nar`](docs/templates/nar.md) |
+| Royal Society of Chemistry | [`rsc-advances`](docs/templates/rsc-advances.md) |
 | Springer Nature | [`jcheminformatics`](docs/templates/jcheminformatics.md)、[`nature`](docs/templates/nature.md)、[`nature-communications`](docs/templates/nature-communications.md)、[`nmi`](docs/templates/nmi.md)、[`nature-methods`](docs/templates/nature-methods.md) |
 | Wiley-VCH | [`advanced-science`](docs/templates/advanced-science.md)、[`angew`](docs/templates/angew.md) |
 | 通用 | [`prism`](docs/templates/prism.md) |
@@ -68,6 +69,8 @@ scripts/latex-paper.sh projects/Papers/my-paper
 将创建命令中的 `nature` 换成相应短名称即可。多稿型模板可加 `--article-type`，例如 `--template angew --article-type review`。完整名称、规范 ID 和默认稿型以 `scripts/latex-templates.sh` 输出为准；原有 `scripts/latex-paper.sh --list-templates` 保留平铺输出。
 
 Nature 本刊使用 `--template nature`；Nature Machine Intelligence 使用 `--template nmi`，可选 `article`、`analysis` 和 `review`，两者均可离线创建。
+
+RSC Advances 使用 `--template rsc-advances`；综述加 `--article-type review`，详见[模板说明](docs/templates/rsc-advances.md)。
 
 想看一个模板的引擎、文档和来源，运行 `scripts/latex-templates.sh --show advanced-science`；维护者可用 `--validate` 离线检查全部模板资源。详细规则只需阅读所选模板的说明。
 

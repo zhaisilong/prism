@@ -152,10 +152,9 @@ def main(argv: list[str] | None = None) -> int:
     env["TEXINPUTS"] = search + env.get("TEXINPUTS", "")
     env["BIBINPUTS"] = search + env.get("BIBINPUTS", "")
     env["BSTINPUTS"] = search + env.get("BSTINPUTS", "")
-    # achemso writes an acs-<jobname>.bib control file. BibTeX searches
-    # its working directory before BIBINPUTS, so running from the source
-    # directory can silently select a user's unrelated, same-named file.
-    # Keep the normal working-directory behavior for other templates.
+    # achemso and rsc write per-job BibTeX control files. BibTeX searches
+    # its working directory before BIBINPUTS, so use an isolated directory
+    # to avoid writing or selecting unrelated files from the source project.
     isolate_cwd = template_isolated_build(template)
     workspace = Workspace(prefix="prism-paper-latex.", keep=args.keep_work)
     try:

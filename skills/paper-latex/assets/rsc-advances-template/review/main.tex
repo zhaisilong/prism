@@ -1,0 +1,102 @@
+% Original Prism draft for RSC Advances; examples are synthetic.
+% The optional RSC publisher template is not included in this project.
+\documentclass[a4paper,10pt,twocolumn]{article}
+\usepackage[margin=20mm,columnsep=7mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[usetitle,usedoi,linkdoi,mciteplus=false]{rsc}
+\usepackage[hidelinks]{hyperref}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\raggedbottom
+\title{Manuscript title}
+\author{First Author\textsuperscript{1,*} and Second Author\textsuperscript{1}\\
+\small \textsuperscript{1}Department, Institution, City, Country\\
+\small \textsuperscript{*}Correspondence: \texttt{first.author@example.org}}
+\date{}
+\begin{document}
+\twocolumn[{\maketitle\begin{abstract}
+Replace this single paragraph with the authors' verified account of the
+question, approach, evidence and conclusions. Figures and numerical values
+in this draft demonstrate layout only and are not research findings.
+\end{abstract}\vspace{1em}}]
+\section{Introduction}
+Explain the question, relevant chemistry and contribution using verified
+literature. These public citations demonstrate references only; they are not
+evidence for the examples.\cite{wilkinson2016fair,peng2011reproducible}
+\section{Theme and scope}
+Introduce a topic, define relevant terms, and explain why the synthesis is
+needed. Attribute factual statements to verified publications.
+\section{Critical comparison}
+Compare approaches and interpretations using balanced, verifiable sources.
+Discuss limitations and unresolved disagreements. Do not insert unpublished
+research or imply a literature search was conducted when it was not.
+
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][20mm][c]{0.85\linewidth}{\centering
+\ce{A -> B}\\[4pt]Replace with original chemistry}}
+\caption{Synthetic placeholder for a chemical scheme; letters do not denote
+reported compounds or procedures.}
+\label{sch:example}
+\end{scheme}
+Figure~\ref{fig:example}, Scheme~\ref{sch:example}, Table~\ref{tab:example}
+and Equation~\eqref{eq:example} are layout demonstrations only.
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{a}\par\smallskip
+\fbox{\parbox[c][22mm][c]{0.88\linewidth}{\centering Panel A}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\centering\textbf{b}\par\smallskip
+\fbox{\parbox[c][22mm][c]{0.88\linewidth}{\centering Panel B}}
+\end{minipage}
+\caption{\textbf{Illustrative two-panel figure.} Both panels are empty
+placeholders. Describe actual axes, units, sample conditions and uncertainty
+in the replacement caption; ensure labels remain readable at final size.}
+\label{fig:example}
+\end{figure}
+\begin{table}[htbp]
+\centering\small
+\caption{Invented numbers used only to show alignment}
+\label{tab:example}
+\begin{tabular}{@{}l S[table-format=1.2(2)]@{}}
+\toprule Sample & {Value $\pm$ SD}\\\midrule
+A & 0.28 +- 0.03\\
+B & 0.46 +- 0.05\\\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize Values are invented; no measurements are shown.
+\end{table}
+\begin{equation}\label{eq:example}
+ q_i=\frac{x_i}{x_{\mathrm{ref}}}.
+\end{equation}
+Define each symbol and provide the valid context for any actual equation.
+
+\section{Conclusions and outlook}
+Summarize supported insights, limitations and future directions.
+
+\section*{Data availability}
+Describe the real availability of data and any access conditions.
+\section*{Author contributions}
+State contributions confirmed by all authors.
+\section*{Conflicts of interest}
+Provide the authors' verified declaration.
+\section*{Acknowledgements}
+Include confirmed funding and acknowledgements, or remove this section.
+\section*{Supplementary information}
+Describe the supporting material actually provided; see the independent
+\texttt{supplementary.tex} drafting file.
+\bibliographystyle{rsc}
+\bibliography{references}
+\clearpage
+\onecolumn
+\section*{Table of contents entry}
+% Replace this optional placeholder with actual text and original artwork.
+\noindent\fbox{\parbox[c][37mm][c]{77mm}{\centering
+TOC graphic placeholder\\[6pt]Replace with original artwork}}
+\par\medskip
+Provide one or two sentences describing the actual work, up to 250 characters;
+check current journal requirements before submission.
+\end{document}

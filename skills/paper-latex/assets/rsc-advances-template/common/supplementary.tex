@@ -1,0 +1,63 @@
+% Original Prism supporting information; all values are synthetic.
+% Build with --main supplementary.tex --no-build-script.
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,array,booktabs,tabularx,siunitx,longtable,newfloat}
+\usepackage[version=4]{mhchem}
+\usepackage[usetitle,usedoi,linkdoi,mciteplus=false]{rsc}
+\usepackage[hidelinks]{hyperref}
+\DeclareFloatingEnvironment[fileext=los,name=Scheme,placement=htbp]{scheme}
+\sisetup{uncertainty-mode=separate}
+\setlength{\emergencystretch}{2em}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thescheme}{S\arabic{scheme}}
+\raggedbottom
+\title{Supporting Information: Manuscript title}
+\author{First Author and Second Author\\
+\small Department, Institution, City, Country\\
+\small Correspondence: \texttt{first.author@example.org}}
+\date{}
+\begin{document}
+\maketitle
+This file is an independent draft for either article type. Replace or delete
+all placeholders; they contain no reported experiment, result or search history.
+\tableofcontents
+\clearpage
+\section{Supporting overview}
+Describe the supporting material actually supplied. The reference is used
+only to demonstrate the bibliography.\cite{peng2011reproducible}
+Figure~\ref{fig:si} and Equation~\eqref{eq:si} show independent numbering.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][30mm][c]{0.75\linewidth}{\centering Original figure slot}}
+\caption{Synthetic figure placeholder. Replace it and explain actual content.}
+\label{fig:si}
+\end{figure}
+\begin{equation}\label{eq:si}
+ q_i=\frac{x_i}{x_{\mathrm{ref}}}.
+\end{equation}
+\begin{scheme}[htbp]
+\centering
+\fbox{\parbox[c][20mm][c]{0.75\linewidth}{\centering \ce{A -> B}}}
+\caption{Placeholder for original chemical structures, not a reported reaction.}
+\label{sch:si}
+\end{scheme}
+\begin{table}[htbp]
+\centering
+\caption{Invented values for numerical alignment only}
+\label{tab:si}
+\begin{tabular}{@{}l S[table-format=1.2(2)]@{}}
+\toprule Sample & {Value $\pm$ SD}\\\midrule
+A & 0.28 +- 0.03\\ B & 0.46 +- 0.05\\\bottomrule
+\end{tabular}
+\end{table}
+\section{Additional information}
+Include only supporting information that the authors actually prepared.
+Confirm how references cited in the supplement should be supplied under
+current journal instructions.
+\bibliographystyle{rsc}
+\bibliography{references}
+\end{document}

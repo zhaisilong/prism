@@ -255,6 +255,16 @@ BUILD_PROFILES = MappingProxyType({
         isolate_cwd=True,
         required_common=("supplementary.tex", "references.bib", "NOTICE.md"),
     ),
+    'rsc-advances': BuildProfile(
+        packages=NATURE_COMMUNICATIONS_PACKAGES + (
+            "rsc.sty", "rsc.bst", "kvoptions.sty", "natmove.sty",
+            "newfloat.sty", "mhchem.sty",
+        ),
+        source=None,
+        examples=True,
+        isolate_cwd=True,
+        required_common=("supplementary.tex", "references.bib", "NOTICE.md"),
+    ),
     'elsarticle-numeric': BuildProfile(
         packages=DDT_PACKAGES + ("newfloat.sty", "mhchem.sty"),
         source=None,
@@ -664,6 +674,31 @@ TEMPLATES = MappingProxyType({
             SourceReference('Author guidelines', 'https://www.sciencedirect.com/journal/dyes-and-pigments/publish/guide-for-authors'),
             SourceReference('Elsevier on Overleaf', 'https://www.overleaf.com/latex/templates/elsevier-article-elsarticle-template/vdzfjgjbckgz'),
             SourceReference('Elsevier LaTeX', 'https://www.elsevier.com/researcher/author/policies-and-guidelines/latex-instructions'),
+        ),
+    ),
+    'rsc-advances': TemplateDefinition(
+        alias='rsc-advances',
+        id='journal/rsc-advances',
+        kind='journal',
+        venue='RSC Advances',
+        publisher='Royal Society of Chemistry',
+        article_type='research',
+        article_types=('research', 'review'),
+        backend='rsc-advances',
+        directory='rsc-advances-template',
+        engine='pdflatex',
+        description='RSC Advances research and review drafts; bilingual / English',
+        guide_path='docs/templates/rsc-advances.md',
+        documents=(
+            DocumentRole('main', 'main.tex', True),
+            DocumentRole('supplementary', 'supplementary.tex', True),
+            DocumentRole('examples', 'examples.tex', True),
+            DocumentRole('toc_graphic', 'main.tex', False),
+        ),
+        sources=(
+            SourceReference('Author guidelines', 'https://www.rsc.org/publishing/publish-with-us/publish-a-journal-article/rsc-advances'),
+            SourceReference('RSC article template', 'https://www.overleaf.com/latex/templates/royal-society-of-chemistry-article-template/vffpnxpmxdfz'),
+            SourceReference('RSC BibTeX package', 'https://ctan.org/pkg/rsc'),
         ),
     ),
     'nature-methods': TemplateDefinition(

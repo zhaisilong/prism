@@ -24,6 +24,7 @@ scripts/latex-templates.sh --show advanced-science --json
 | [`bioinformatics`](templates/bioinformatics.md) | Bioinformatics | Oxford University Press | `original` |
 | [`bib`](templates/bib.md) | Briefings in Bioinformatics | Oxford University Press | `manuscript` |
 | [`nar`](templates/nar.md) | Nucleic Acids Research | Oxford University Press | `research`（默认）、`database`、`web-server` |
+| [`rsc-advances`](templates/rsc-advances.md) | RSC Advances | Royal Society of Chemistry | `research`（默认）、`review` |
 | [`jcheminformatics`](templates/jcheminformatics.md) | Journal of Cheminformatics | Springer Nature | `research` |
 | [`nature`](templates/nature.md) | Nature | Springer Nature | `research` |
 | [`nature-communications`](templates/nature-communications.md) | Nature Communications | Springer Nature | `research` |

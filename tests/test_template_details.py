@@ -54,7 +54,7 @@ class TemplateDetailsTests(TemplateSupport, unittest.TestCase):
         before = inventory(self.root)
         result = self.query("--validate")
         self.assert_success(result)
-        self.assertIn("19 templates", result.stdout)
+        self.assertIn("20 templates", result.stdout)
         self.assertEqual(inventory(self.root), before)
 
     def test_invalid_queries_are_rejected_without_mutation(self):

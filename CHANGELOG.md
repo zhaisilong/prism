@@ -4,6 +4,19 @@ Record substantive changes under `Unreleased`; move completed entries into a dat
 
 ## Unreleased
 
+## 2026.11.13
+
+### Added
+
+- Added offline RSC Advances research and review drafts with bilingual and English modes, synthetic examples, supplementary information, and a TOC graphic placeholder.
+- Added a dedicated RSC build profile using the TeX distribution bibliography style with isolated control files, article titles, and DOI links.
+
+### Validation
+
+- Passed all 247 regression tests, including offline initialization, complete template builds and RSC citation control-file isolation.
+- Strictly compiled synthetic bilingual and English manuscripts and supplementary materials; reviewed representative pages and verified bibliography links, old-PDF protection and clean source directories.
+- Validated 20 templates, synchronized documentation and audited the public export boundary.
+
 ## 2026.11.11.1
 
 ### Changed

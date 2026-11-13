@@ -100,7 +100,8 @@ class TemplateTests(unittest.TestCase):
             (nmi / kind / "main.tex").write_text(f"% NMI {kind}\n")
         for alias, kinds in (("jmc", ("research", "perspective")),
                              ("ejmc", ("research", "review")),
-                             ("dyes", ("research", "review"))):
+                             ("dyes", ("research", "review")),
+                             ("rsc-advances", ("research", "review"))):
             medicinal = self.asset_dir / (alias + "-template")
             (medicinal / "common").mkdir(parents=True)
             resources = ["supplementary.tex", "references.bib", "NOTICE.md"]
@@ -589,6 +590,7 @@ class TemplateTests(unittest.TestCase):
             "journal/advanced-science": "advanced-science",
             "journal/dyes-and-pigments": "dyes",
             "journal/nature-methods": "nature-methods",
+            "journal/rsc-advances": "rsc-advances",
         }
         for canonical, alias in names.items():
             with self.subTest(canonical=canonical):

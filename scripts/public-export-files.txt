@@ -30,6 +30,7 @@ docs/templates/nature-methods.md
 docs/templates/nature.md
 docs/templates/nmi.md
 docs/templates/prism.md
+docs/templates/rsc-advances.md
 docs/templates/science-advances.md
 projects/.gitkeep
 scripts/export-public-code.py
@@ -168,6 +169,11 @@ skills/paper-latex/assets/paper-template/supplementary.tex
 skills/paper-latex/assets/prism-cjk.sty
 skills/paper-latex/assets/prism-wiley-article.cls
 skills/paper-latex/assets/prism-wiley-numeric.bst
+skills/paper-latex/assets/rsc-advances-template/common/NOTICE.md
+skills/paper-latex/assets/rsc-advances-template/common/references.bib
+skills/paper-latex/assets/rsc-advances-template/common/supplementary.tex
+skills/paper-latex/assets/rsc-advances-template/research/main.tex
+skills/paper-latex/assets/rsc-advances-template/review/main.tex
 skills/paper-latex/assets/science-advances-template/main.tex
 skills/paper-latex/assets/science-advances-template/references.bib
 skills/paper-latex/assets/upstream/manifest.json
@@ -228,6 +234,7 @@ tests/test_prism_layout.py
 tests/test_public_export.py
 tests/test_refactor_compatibility.py
 tests/test_renderers.py
+tests/test_rsc_advances.py
 tests/test_runtime.py
 tests/test_skill_install.py
 tests/test_template_contracts.py
